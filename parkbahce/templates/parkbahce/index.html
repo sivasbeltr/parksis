@@ -1,0 +1,230 @@
+{% extends "parkbahce/layout.html" %}
+
+{% block title %}
+ParkBahçe Ana Sayfa
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h2>
+    <p class="text-gray-600 dark:text-gray-400">ParkBahçe Yönetim Sistemi'ne hoşgeldiniz</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                    <i class="fas fa-map-marked-alt text-white text-sm"></i>
+                </div>
+            </div>
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Park</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ toplam_park|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <i class="fas fa-tools text-white text-sm"></i>
+                </div>
+            </div>
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Donatı</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ toplam_donati|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                    <i class="fas fa-seedling text-white text-sm"></i>
+                </div>
+            </div>
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Habitat Alanı</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ toplam_habitat|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                </div>
+            </div>
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Bakım Gereken</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ bakim_gereken|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Mahalle Dağılımı</h3>
+        <div class="space-y-3">
+            {% for mahalle in mahalle_dagilimi %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400 truncate" title="{{ mahalle.mahalle__ad|default:'Bilinmeyen' }}">
+                    {{ mahalle.mahalle__ad|default:"Bilinmeyen"|truncatechars:15 }}
+                </span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ mahalle.yuzde }}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white w-8 text-right">{{ mahalle.sayi }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Henüz veri yok</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Park Tipi Dağılımı</h3>
+        <div class="space-y-3">
+            {% for tip in park_tipleri %}
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400 truncate" title="{{ tip.park_tipi__ad|default:'Bilinmeyen' }}">
+                    {{ tip.park_tipi__ad|default:"Bilinmeyen"|truncatechars:15 }}
+                </span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: {{ tip.yuzde }}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white w-8 text-right">{{ tip.sayi }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Henüz veri yok</p>
+            {% endfor %}
+        </div>    </div>
+</div>
+
+<!-- En Büyük Yeşil Alanlar Tablosu -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">En Büyük Yeşil Alanlar</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Alan miktarına göre en büyük 10 park</p>
+    </div>
+    <div class="overflow-x-auto">
+        {% if en_buyuk_parklar %}
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Park Adı</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mahalle</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Park Tipi</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alan (m²)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {% for park in en_buyuk_parklar %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location.href='{% url 'parkbahce:park_detail' park.uuid %}'">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center justify-center w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full">
+                            <span class="text-xs font-medium text-green-800 dark:text-green-200">{{ forloop.counter }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 flex-shrink-0">
+                                <div class="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                    <i class="fas fa-tree text-green-600 dark:text-green-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ park.ad|default:"İsimsiz Park" }}</div>
+                                {% if park.yapan_firma %}
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ park.yapan_firma|truncatechars:20 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {{ park.mahalle.ad|default:"Belirtilmemiş" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {{ park.park_tipi.ad|default:"Belirtilmemiş" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ park.alan|floatformat:0 }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">m²</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="{% url 'parkbahce:park_detail' park.uuid %}" 
+                           class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" 
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-tree text-gray-400 text-3xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Alan bilgisi olan park yok</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Henüz alan bilgisi girilmiş park bulunmamaktadır.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Son Eklenen Parklar</h3>
+    </div>
+    <div class="p-6">
+        <div class="space-y-4">
+            {% for park in son_parklar %}
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                        <i class="fas fa-plus text-green-600 dark:text-green-400 text-sm"></i>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-900 dark:text-white">Yeni park eklendi: {{ park.ad|default:"İsimsiz Park" }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ park.created_at|timesince }} önce • {{ park.mahalle.ad|default:"Mahalle belirtilmemiş" }}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{% url 'parkbahce:park_detail' park.uuid %}" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">
+                        <i class="fas fa-eye text-sm"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <i class="fas fa-tree text-gray-400 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Henüz park eklenmemiş</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- System Info -->
+<div class="mt-6 text-center">
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+        Sistem Versiyonu: 0.0.1-SNAPSHOT
+    </p>
+</div>
+{% endblock %}

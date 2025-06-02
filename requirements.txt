@@ -1,0 +1,6 @@
+django
+django-admin-interface
+django-rest-framework
+djangorestframework-gis
+python-dotenv
+psycopg
