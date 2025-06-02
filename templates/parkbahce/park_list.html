@@ -1,0 +1,424 @@
+{% extends 'layout.html' %}
+
+{% block title %}Park Listesi - {{ block.super }}{% endblock %}
+
+{% block page_title %}Park Listesi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-park-green-500 via-park-green-600 to-park-green-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-tree mr-3"></i>
+                    Park Yönetimi
+                </h1>
+                <p class="text-park-green-100 text-sm">
+                    Toplam {{ total_parks }} park • {{ total_area|floatformat:0 }} m² alan • {{ total_green_area|floatformat:0 }} m² yeşil alan
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-seedling text-4xl text-white/80"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section - Collapsible -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Filter Header -->
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+             onclick="toggleFilters()">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-filter text-park-green-600 mr-3"></i>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Filtreler ve Arama</h2>
+                    {% if search_query or mahalle_filter or park_tipi_filter or sulama_tipi_filter %}
+                        <span class="ml-3 inline-flex items-center px-2.5 py-0.5 bg-park-green-100 text-park-green-800 text-xs font-medium rounded-full">
+                            Aktif Filtre
+                        </span>
+                    {% endif %}
+                </div>
+                <i id="filter-chevron" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+            </div>
+        </div>
+
+        <!-- Filter Content -->
+        <div id="filter-content" class="hidden">
+            <div class="p-6">
+                <form method="get" class="space-y-4">
+                    <!-- Search and Basic Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Search -->
+                        <div class="lg:col-span-2">
+                            <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-search mr-2"></i>Park Ara
+                            </label>
+                            <input type="text" id="search" name="search" value="{{ search_query }}" 
+                                   placeholder="Park adı, mahalle adı..."
+                                   class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent transition-all">
+                        </div>
+
+                        <!-- Per Page -->
+                        <div>
+                            <label for="per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-list mr-2"></i>Sayfa Başına
+                            </label>
+                            <select id="per_page" name="per_page" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort -->
+                        <div>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-sort mr-2"></i>Sıralama
+                            </label>
+                            <div class="flex space-x-2">
+                                <select id="sort" name="sort" 
+                                        class="flex-1 px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                    <option value="ad" {% if sort_by == 'ad' %}selected{% endif %}>Park Adı</option>
+                                    <option value="alan" {% if sort_by == 'alan' %}selected{% endif %}>Alan</option>
+                                    <option value="toplam_yesil_alan" {% if sort_by == 'toplam_yesil_alan' %}selected{% endif %}>Yeşil Alan</option>
+                                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oluşturma Tarihi</option>
+                                    <option value="mahalle__ad" {% if sort_by == 'mahalle__ad' %}selected{% endif %}>Mahalle</option>
+                                </select>
+                                <select name="direction" 
+                                        class="px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                    <option value="asc" {% if sort_direction == 'asc' %}selected{% endif %}>A-Z</option>
+                                    <option value="desc" {% if sort_direction == 'desc' %}selected{% endif %}>Z-A</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Mahalle Filter -->
+                        <div>
+                            <label for="mahalle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-map-marker-alt mr-2"></i>Mahalle
+                            </label>
+                            <select id="mahalle" name="mahalle" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="">Tüm Mahalleler</option>
+                                {% for mahalle in mahalleler %}
+                                    <option value="{{ mahalle.id }}" {% if mahalle_filter == mahalle.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ mahalle.ad }} ({{ mahalle.ilce.ad }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Park Tipi Filter -->
+                        <div>
+                            <label for="park_tipi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-seedling mr-2"></i>Park Tipi
+                            </label>
+                            <select id="park_tipi" name="park_tipi" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="">Tüm Tipler</option>
+                                {% for tip in park_tipleri %}
+                                    <option value="{{ tip.id }}" {% if park_tipi_filter == tip.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ tip.ad }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Sulama Tipi Filter -->
+                        <div>
+                            <label for="sulama_tipi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-tint mr-2"></i>Sulama Tipi
+                            </label>
+                            <select id="sulama_tipi" name="sulama_tipi" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="">Tüm Sulama Tipleri</option>
+                                {% for tip in sulama_tipleri %}
+                                    <option value="{{ tip.id }}" {% if sulama_tipi_filter == tip.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ tip.ad }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-park-green-500 to-park-green-600 text-white text-sm font-medium rounded-lg hover:from-park-green-600 hover:to-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300 hover:scale-105 shadow-lg">
+                            <i class="fas fa-search mr-2"></i>
+                            Filtrele
+                        </button>
+                        <a href="{% url 'parkbahce:park_list' %}" 
+                           class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300">
+                            <i class="fas fa-undo mr-2"></i>
+                            Temizle
+                        </a>
+                        {% if parklar.has_other_pages %}
+                        <div class="sm:ml-auto flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Sayfa {{ parklar.number }} / {{ parklar.paginator.num_pages }} 
+                            ({{ parklar.paginator.count }} sonuç)
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parks Table -->
+    {% if parklar %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Park Bilgileri
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Konum
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Tip & Sulama
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Alan Bilgileri
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Oluşturma Tarihi
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                İşlemler
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for park in parklar %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <!-- Park Bilgileri -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-tree text-white text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ park.ad }}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            UUID: {{ park.uuid|slice:":8" }}...
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Konum -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">
+                                    <i class="fas fa-map-marker-alt text-park-green-600 mr-1"></i>
+                                    {{ park.mahalle.ad }}
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ park.mahalle.ilce.ad }}, {{ park.mahalle.ilce.il.ad }}
+                                </div>
+                            </td>
+
+                            <!-- Tip & Sulama -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="space-y-1">
+                                    {% if park.park_tipi %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                                        <i class="fas fa-seedling mr-1"></i>
+                                        {{ park.park_tipi.ad }}
+                                    </span>
+                                    {% endif %}
+                                    {% if park.sulama_tipi %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300">
+                                        <i class="fas fa-tint mr-1"></i>
+                                        {{ park.sulama_tipi.ad }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Alan Bilgileri -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="space-y-1">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        <i class="fas fa-expand-arrows-alt text-gray-400 mr-1"></i>
+                                        {{ park.alan|default:0|floatformat:0 }} m²
+                                    </div>
+                                    <div class="text-sm text-green-600 dark:text-green-400">
+                                        <i class="fas fa-leaf text-green-500 mr-1"></i>
+                                        {{ park.toplam_yesil_alan|default:0|floatformat:0 }} m²
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Oluşturma Tarihi -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-calendar mr-1"></i>
+                                {{ park.created_at|date:"d.m.Y" }}
+                            </td>
+
+                            <!-- İşlemler -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'parkbahce:park_detail' park.uuid %}" 
+                                   class="inline-flex items-center px-3 py-1.5 bg-park-green-600 text-white text-xs font-medium rounded-lg hover:bg-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    Detay
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if parklar.has_other_pages %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <nav class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if parklar.has_previous %}
+                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.previous_page_number }}" 
+                               class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                                Önceki
+                            </a>
+                        {% endif %}
+                        {% if parklar.has_next %}
+                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.next_page_number }}" 
+                               class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                                Sonraki
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                <span class="font-medium">{{ parklar.start_index }}</span>
+                                -
+                                <span class="font-medium">{{ parklar.end_index }}</span>
+                                arası, toplam
+                                <span class="font-medium">{{ parklar.paginator.count }}</span>
+                                sonuç
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {% if parklar.has_previous %}
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" 
+                                       class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-l-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.previous_page_number }}" 
+                                       class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                {% endif %}
+
+                                {% for num in parklar.paginator.page_range %}
+                                    {% if parklar.number == num %}
+                                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-park-green-600 border border-park-green-600">
+                                            {{ num }}
+                                        </span>
+                                    {% elif num > parklar.number|add:'-3' and num < parklar.number|add:'3' %}
+                                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                                           class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            {{ num }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if parklar.has_next %}
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.next_page_number }}" 
+                                       class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.paginator.num_pages }}" 
+                                       class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-r-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <div class="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-4xl text-gray-400 dark:text-gray-500"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sonuç Bulunamadı</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">
+                {% if search_query or mahalle_filter or park_tipi_filter or sulama_tipi_filter %}
+                    Arama kriterlerinize uygun park bulunamadı. Filtreleri değiştirmeyi deneyin.
+                {% else %}
+                    Henüz hiç park kaydı bulunmuyor.
+                {% endif %}
+            </p>
+            <a href="{% url 'parkbahce:park_list' %}" 
+               class="inline-flex items-center px-6 py-3 bg-park-green-600 text-white text-sm font-medium rounded-lg hover:bg-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300">
+                <i class="fas fa-undo mr-2"></i>
+                Filtreleri Temizle
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+// Filter toggle functionality
+function toggleFilters() {
+    const filterContent = document.getElementById('filter-content');
+    const filterChevron = document.getElementById('filter-chevron');
+    
+    if (filterContent.classList.contains('hidden')) {
+        filterContent.classList.remove('hidden');
+        filterChevron.classList.add('rotate-180');
+    } else {
+        filterContent.classList.add('hidden');
+        filterChevron.classList.remove('rotate-180');
+    }
+}
+
+// Auto-submit form when filters change
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const selects = form.querySelectorAll('select');
+    
+    // Show filters if there are active filters
+    {% if search_query or mahalle_filter or park_tipi_filter or sulama_tipi_filter %}
+        toggleFilters();
+    {% endif %}
+    
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Reset to first page when filters change
+            const pageInput = form.querySelector('input[name="page"]');
+            if (pageInput) {
+                pageInput.remove();
+            }
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

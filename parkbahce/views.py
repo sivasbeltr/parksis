@@ -1,193 +1,324 @@
 from datetime import timedelta
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
-from .models import Habitat, Park, ParkDonati
+from ortak.models import Mahalle
+
+from .models import (
+    ElektrikHat,
+    ElektrikNokta,
+    Habitat,
+    KanalHat,
+    Park,
+    ParkBina,
+    ParkDonati,
+    ParkOyunGrup,
+    ParkTip,
+    SporAlan,
+    SulamaHat,
+    SulamaNokta,
+    SulamaTip,
+    YesilAlan,
+)
 
 
-def index(request):  # İstatistikler
-    toplam_park = Park.objects.count()
-    toplam_donati = ParkDonati.objects.count()
-    toplam_habitat = Habitat.objects.count()
+@cache_page(60 * 5)  # 5 dakika cache
+def index(request):
+    """Dashboard ana sayfa view'i - Park yönetim sistemi istatistikleri"""
 
-    # Son 30 günde eklenen parklar (bakım gereken simülasyonu)
-    son_30_gun = timezone.now() - timedelta(days=30)
-    bakim_gereken = Park.objects.filter(created_at__gte=son_30_gun).count()
+    # Temel istatistikler
+    total_parks = Park.objects.count()
+    total_equipment = ParkDonati.objects.count()
+    total_habitats = Habitat.objects.count()
+    total_users = User.objects.filter(is_active=True).count()
 
-    # Park tiplerine göre dağılım (top 5)
-    park_tipleri_raw = (
+    # Ek istatistikler
+    total_playground_groups = ParkOyunGrup.objects.count()
+    total_sports_areas = SporAlan.objects.count()
+    total_green_areas = YesilAlan.objects.count()
+    total_buildings = ParkBina.objects.count()
+
+    # Altyapı istatistikleri
+    total_irrigation_points = SulamaNokta.objects.count()
+    total_electric_points = (
+        ElektrikNokta.objects.count() if "ElektrikNokta" in globals() else 0
+    )
+    total_irrigation_lines = SulamaHat.objects.count()
+    total_electric_lines = ElektrikHat.objects.count()
+    total_canal_lines = KanalHat.objects.count()
+
+    # Son eklenen parklar (limit 5)
+    recent_parks = Park.objects.select_related("mahalle", "park_tipi").order_by(
+        "-created_at"
+    )[:5]
+
+    # Park tipi dağılımı
+    park_types_distribution = (
         Park.objects.values("park_tipi__ad")
-        .annotate(sayi=Count("id"))
-        .order_by("-sayi")[:5]
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
     )
 
-    # Mahalle dağılımı (top 5)
-    mahalle_dagilimi_raw = (
-        Park.objects.values("mahalle__ad")
-        .annotate(sayi=Count("id"))
-        .order_by("-sayi")[:5]
+    # Mahalle bazında park dağılımı
+    neighborhood_distribution = (
+        Park.objects.values("mahalle__ad", "mahalle__ilce__ad")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
     )
 
-    # Progress bar için yüzde hesaplama
-    max_park_tipi = park_tipleri_raw[0]["sayi"] if park_tipleri_raw else 1
-    max_mahalle = mahalle_dagilimi_raw[0]["sayi"] if mahalle_dagilimi_raw else 1
+    # Alan bazında istatistikler
+    total_park_area = Park.objects.aggregate(total_area=Sum("alan"))["total_area"] or 0
+    total_green_area = (
+        YesilAlan.objects.aggregate(total_area=Sum("alan"))["total_area"] or 0
+    )
+    total_sports_area = (
+        SporAlan.objects.aggregate(total_area=Sum("alan"))["total_area"] or 0
+    )
 
-    park_tipleri = [
-        {
-            "park_tipi__ad": item["park_tipi__ad"],
-            "sayi": item["sayi"],
-            "yuzde": int((item["sayi"] / max_park_tipi) * 100),
-        }
-        for item in park_tipleri_raw
-    ]
+    # Son 30 günde eklenen parklar
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    recent_parks_count = Park.objects.filter(created_at__gte=thirty_days_ago).count()
 
-    mahalle_dagilimi = [
-        {
-            "mahalle__ad": item["mahalle__ad"],
-            "sayi": item["sayi"],
-            "yuzde": int((item["sayi"] / max_mahalle) * 100),
-        }
-        for item in mahalle_dagilimi_raw
-    ]
+    # Bakım gereken parklar (örnek: 6 aydan eski parklar)
+    six_months_ago = timezone.now() - timedelta(days=180)
+    maintenance_needed = Park.objects.filter(created_at__lte=six_months_ago).count()
 
-    # Son aktiviteler (son 5 park)
-    son_parklar = Park.objects.order_by("-created_at")[:5]
+    # En büyük parklar (alan bazında)
+    largest_parks = (
+        Park.objects.filter(alan__isnull=False, alan__gt=0)
+        .select_related("mahalle", "park_tipi")
+        .order_by("-alan")[:10]
+    )
 
-    # En büyük yeşil alana sahip parklar (top 10)
-    en_buyuk_parklar = Park.objects.filter(alan__isnull=False).order_by("-alan")[:10]
-
-    context = {
-        "toplam_park": toplam_park,
-        "toplam_donati": toplam_donati,
-        "toplam_habitat": toplam_habitat,
-        "bakim_gereken": bakim_gereken,
-        "park_tipleri": park_tipleri,
-        "mahalle_dagilimi": mahalle_dagilimi,
-        "son_parklar": son_parklar,
-        "en_buyuk_parklar": en_buyuk_parklar,
+    # Sulama sistemi analizi
+    irrigation_coverage = {
+        "total_points": total_irrigation_points,
+        "total_lines_length": SulamaHat.objects.aggregate(total_length=Sum("uzunluk"))[
+            "total_length"
+        ]
+        or 0,
+        "parks_with_irrigation": Park.objects.filter(sulama_noktalari__isnull=False)
+        .distinct()
+        .count(),
     }
 
-    return render(request, "parkbahce/index.html", context)
+    # Elektrik sistemi analizi
+    electrical_coverage = {
+        "total_points": total_electric_points,
+        "total_lines_length": ElektrikHat.objects.aggregate(
+            total_length=Sum("uzunluk")
+        )["total_length"]
+        or 0,
+        "parks_with_electricity": Park.objects.filter(elektrik_hatlari__isnull=False)
+        .distinct()
+        .count(),
+    }
+
+    # Kullanıcı grupları
+    user_groups = request.user.groups.all() if request.user.is_authenticated else []
+
+    context = {
+        # Ana istatistikler
+        "total_parks": total_parks,
+        "total_equipment": total_equipment,
+        "total_habitats": total_habitats,
+        "total_users": total_users,
+        # Ek istatistikler
+        "total_playground_groups": total_playground_groups,
+        "total_sports_areas": total_sports_areas,
+        "total_green_areas": total_green_areas,
+        "total_buildings": total_buildings,
+        # Altyapı istatistikleri
+        "total_irrigation_points": total_irrigation_points,
+        "total_electric_points": total_electric_points,
+        "total_irrigation_lines": total_irrigation_lines,
+        "total_electric_lines": total_electric_lines,
+        "total_canal_lines": total_canal_lines,
+        # Listeler ve dağılımlar
+        "recent_parks": recent_parks,
+        "park_types_distribution": park_types_distribution,
+        "neighborhood_distribution": neighborhood_distribution,
+        "largest_parks": largest_parks,
+        # Alan istatistikleri
+        "total_park_area": round(total_park_area, 2),
+        "total_green_area": round(total_green_area, 2),
+        "total_sports_area": round(total_sports_area, 2),
+        # Tarih bazlı istatistikler
+        "recent_parks_count": recent_parks_count,
+        "maintenance_needed": maintenance_needed,
+        # Sistem analizleri
+        "irrigation_coverage": irrigation_coverage,
+        "electrical_coverage": electrical_coverage,
+        # Kullanıcı bilgileri
+        "user_groups": user_groups,
+    }
+
+    return render(request, "index.html", context)
 
 
 def park_list(request):
-    # Filtreleme parametreleri
-    search_query = request.GET.get("search", "")
-    mahalle_filter = request.GET.get("mahalle", "")
-    park_tipi_filter = request.GET.get("park_tipi", "")
-    ordering = request.GET.get("ordering", "ad")
+    """Park listesi view'i - Filtreleme, arama, sayfalama ve sıralama özellikleri ile"""
 
-    # Base queryset
-    parklar = Park.objects.select_related("mahalle", "park_tipi").defer("geom")
+    # Temel queryset - optimize edilmiş
+    parks_queryset = (
+        Park.objects.select_related(
+            "mahalle",
+            "mahalle__ilce",
+            "mahalle__ilce__il",
+            "park_tipi",
+            "sulama_tipi",
+            "sulama_kaynagi",
+        )
+        .prefetch_related("yesil_alanlar")
+        .annotate(toplam_yesil_alan=Sum("yesil_alanlar__alan"))
+    )
 
-    # Arama filtresi
+    # Arama
+    search_query = request.GET.get("search", "").strip()
     if search_query:
-        parklar = parklar.filter(
+        parks_queryset = parks_queryset.filter(
             Q(ad__icontains=search_query)
             | Q(mahalle__ad__icontains=search_query)
-            | Q(yapan_firma__icontains=search_query)
+            | Q(mahalle__ilce__ad__icontains=search_query)
         )
 
-    # Mahalle filtresi
-    if mahalle_filter:
-        parklar = parklar.filter(mahalle__id=mahalle_filter)
+    # Filtreleme
+    mahalle_filter = request.GET.get("mahalle", "")
+    park_tipi_filter = request.GET.get("park_tipi", "")
+    sulama_tipi_filter = request.GET.get("sulama_tipi", "")
 
-    # Park tipi filtresi
+    if mahalle_filter:
+        parks_queryset = parks_queryset.filter(mahalle_id=mahalle_filter)
+
     if park_tipi_filter:
-        parklar = parklar.filter(park_tipi__id=park_tipi_filter)
+        parks_queryset = parks_queryset.filter(park_tipi_id=park_tipi_filter)
+
+    if sulama_tipi_filter:
+        parks_queryset = parks_queryset.filter(sulama_tipi_id=sulama_tipi_filter)
 
     # Sıralama
-    if ordering == "alan":
-        parklar = parklar.order_by("-alan")
-    elif ordering == "tarih":
-        parklar = parklar.order_by("-yapim_tarihi")
+    sort_by = request.GET.get("sort", "ad")
+    sort_direction = request.GET.get("direction", "asc")
+
+    if sort_direction == "desc":
+        sort_by = f"-{sort_by}"
+
+    valid_sort_fields = [
+        "ad",
+        "alan",
+        "toplam_yesil_alan",
+        "created_at",
+        "mahalle__ad",
+    ]
+    if sort_by.lstrip("-") in valid_sort_fields:
+        parks_queryset = parks_queryset.order_by(sort_by)
     else:
-        parklar = parklar.order_by("ad")
+        parks_queryset = parks_queryset.order_by("ad")
 
     # Sayfalama
-    paginator = Paginator(parklar, 20)  # Her sayfada 20 park
+    per_page = request.GET.get("per_page", "12")
+    try:
+        per_page = int(per_page)
+        if per_page not in [6, 12, 24, 48]:
+            per_page = 12
+    except (ValueError, TypeError):
+        per_page = 12
+    paginator = Paginator(parks_queryset, per_page)
     page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    parklar = paginator.get_page(page_number)
 
-    # Filtreleme için mahalle ve park tipi listesi
-    from ortak.models import Mahalle
-
-    from .models import ParkTip
-
-    mahalleler = Mahalle.objects.all().order_by("ad")
+    # Filtre seçenekleri
+    mahalleler = Mahalle.objects.select_related("ilce", "ilce__il").order_by(
+        "ilce__il__ad", "ilce__ad", "ad"
+    )
     park_tipleri = ParkTip.objects.all().order_by("ad")
+    sulama_tipleri = SulamaTip.objects.all().order_by("ad")
+
+    # İstatistikler
+    total_parks = parks_queryset.count()
+    total_area = parks_queryset.aggregate(total=Sum("alan"))["total"] or 0
+    total_green_area = (
+        parks_queryset.aggregate(total=Sum("toplam_yesil_alan"))["total"] or 0
+    )
 
     context = {
-        "page_obj": page_obj,
+        "parklar": parklar,
         "search_query": search_query,
         "mahalle_filter": mahalle_filter,
         "park_tipi_filter": park_tipi_filter,
-        "ordering": ordering,
+        "sulama_tipi_filter": sulama_tipi_filter,
+        "sort_by": request.GET.get("sort", "ad"),
+        "sort_direction": sort_direction,
+        "per_page": per_page,
         "mahalleler": mahalleler,
         "park_tipleri": park_tipleri,
+        "sulama_tipleri": sulama_tipleri,
+        "total_parks": total_parks,
+        "total_area": round(total_area, 2),
+        "total_green_area": round(total_green_area, 2),
     }
 
-    return render(request, "parkbahce/parklar/list.html", context)
+    return render(request, "parkbahce/park_list.html", context)
 
 
-# get by uuid
-def park_detail(request, uuid):
-    park = Park.objects.get(uuid=uuid)
+def park_detail(request, park_uuid):
+    """Park detay view'i"""
 
-    # Donatıları tipine göre grupla ve say
-    donati_gruplari = (
-        ParkDonati.objects.filter(park=park)
-        .values("donati_tipi__ad")
-        .annotate(toplam=Sum("extra_data__sayi"))
-        .order_by("donati_tipi__ad")
+    park = get_object_or_404(
+        Park.objects.select_related(
+            "mahalle",
+            "mahalle__ilce",
+            "mahalle__ilce__il",
+            "park_tipi",
+            "sulama_tipi",
+            "sulama_kaynagi",
+            "ada",
+        ).prefetch_related(
+            "yesil_alanlar",
+            "spor_alanlar",
+            "donatilar",
+            "oyun_gruplari",
+            "sulama_noktalari",
+            "elektrik_noktalar",
+            "habitatlar",
+            "binalar",
+        ),
+        uuid=park_uuid,
     )
 
-    # Habitatları tipine göre grupla ve say
-    habitat_gruplari = (
-        Habitat.objects.filter(park=park)
-        .values("habitat_tipi__ad")
-        .annotate(toplam=Count("id"))
-        .order_by("habitat_tipi__ad")
-    )
-
-    # Park geometrisini EPSG:5256'dan EPSG:4326'ya dönüştür
+    # Park istatistikleri
+    yesil_alan_toplam = park.yesil_alanlar.aggregate(total=Sum("alan"))["total"] or 0
+    spor_alan_toplam = park.spor_alanlar.aggregate(total=Sum("alan"))["total"] or 0
+    donati_sayisi = park.donatilar.count()
+    oyun_grup_sayisi = park.oyun_gruplari.count()
+    sulama_nokta_sayisi = park.sulama_noktalari.count()
+    elektrik_nokta_sayisi = park.elektrik_noktalar.count()
+    habitat_sayisi = park.habitatlar.count()
+    bina_sayisi = (
+        park.binalar.count()
+    )  # Park geometrisini SRID 5256'dan 4326'ya dönüştür (harita için)
+    park_geom_4326 = None
     if park.geom:
-        # Geometriyi 5256 (TUREF) olarak ayarla
-        park.geom.srid = 5256
-        # WGS84 (4326) koordinat sistemine dönüştür
-        park.geom.transform(4326)
+        park_geom_4326 = park.geom.transform(4326, clone=True)
 
-    return render(
-        request,
-        "parkbahce/parklar/detail.html",
-        {
-            "park": park,
-            "donati_gruplari": donati_gruplari,
-            "habitat_gruplari": habitat_gruplari,
-        },
-    )
+    context = {
+        "park": park,
+        "park_geom_4326": park_geom_4326,
+        "yesil_alan_toplam": round(yesil_alan_toplam, 2),
+        "spor_alan_toplam": round(spor_alan_toplam, 2),
+        "donati_sayisi": donati_sayisi,
+        "oyun_grup_sayisi": oyun_grup_sayisi,
+        "sulama_nokta_sayisi": sulama_nokta_sayisi,
+        "elektrik_nokta_sayisi": elektrik_nokta_sayisi,
+        "habitat_sayisi": habitat_sayisi,
+        "bina_sayisi": bina_sayisi,
+    }
 
-
-def park_edit(request, uuid):
-    park = Park.objects.get(uuid=uuid)
-    if request.method == "POST":
-        park.name = request.POST.get("name")
-        park.description = request.POST.get("description")
-        park.save()
-        return render(request, "parkbahce/parklar/detail.html", {"park": park})
-    return render(request, "parkbahce/park_edit.html", {"park": park})
-
-
-def park_delete(request, uuid):
-    park = Park.objects.get(uuid=uuid)
-    if request.method == "POST":
-        park.delete()
-        return render(
-            request, "parkbahce/park_list.html", {"parklar": Park.objects.all()}
-        )
-    return render(request, "parkbahce/park_delete.html", {"park": park})
+    return render(request, "parkbahce/park_detail.html", context)

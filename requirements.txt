@@ -4,3 +4,5 @@ django-rest-framework
 djangorestframework-gis
 python-dotenv
 psycopg
+minio
+django-cors-headers

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sivas Belediyesi - Park ve Bahçeler Yönetim Sistemi{% endblock %}</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Sivas Belediyesi Park ve Bahçeler Müdürlüğü Yönetim Sistemi">
+    <meta name="author" content="Sivas Belediyesi">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">    <!-- External Stylesheets -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- OpenLayers -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@8.2.0/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@8.2.0/dist/ol.js"></script>
+      <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'park-green': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        },
+                        'sivas-blue': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a'
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-in': 'slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        'bounce-soft': 'bounceSoft 0.8s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'shimmer': 'shimmer 2s linear infinite',
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+      <!-- Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes bounceSoft {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); }
+            to { box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        /* Modern Glassmorphism Effects */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .glass-card {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Enhanced Hover Effects */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Sidebar Enhanced Styles */
+        .sidebar-tree-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-tree-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .sidebar-tree-item:hover::before {
+            left: 100%;
+        }
+        
+        .sidebar-tree-item:hover {
+            transform: translateX(6px);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.02));
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Modern Button Styles */
+        .btn-modern {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+        
+        /* Card Animations */
+        .animate-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .animate-card:nth-child(2) { animation-delay: 0.1s; }
+        .animate-card:nth-child(3) { animation-delay: 0.2s; }
+        .animate-card:nth-child(4) { animation-delay: 0.3s; }
+        .animate-card:nth-child(5) { animation-delay: 0.4s; }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 197, 94, 0.5);
+        }
+        
+        /* Loading Animation */
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+
+    <!-- Mobile Backdrop -->
+    <div id="mobile-backdrop" class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden hidden"></div>
+
+    <!-- Include Sidebar -->
+    {% include 'partials/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="lg:ml-72 flex flex-col min-h-screen">
+        <!-- Include Navbar -->
+        {% include 'partials/navbar.html' %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+            {% block content %}
+            <!-- Content will be inserted here -->
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700">
+            <div class="px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between">
+                    <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                        <div class="w-8 h-8 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tree text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                Sivas Belediyesi - Park ve Bahçeler Müdürlüğü
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Yönetim Sistemi v1.0.0
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            &copy; {% now "Y" %} Tüm hakları saklıdır.
+                        </p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">
+                            Son güncelleme: {% now "d.m.Y H:i" %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center h-full">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-park-green-600"></div>
+                <span class="text-gray-900 dark:text-white">Yükleniyor...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global JavaScript -->
+    <script>
+        // Loading indicator functions
+        window.showLoading = function() {
+            document.getElementById('loading').classList.remove('hidden');
+        };
+        
+        window.hideLoading = function() {
+            document.getElementById('loading').classList.add('hidden');
+        };
+
+        // API Base URL
+        window.API_BASE_URL = '/api/v1';
+
+        // CSRF Token for AJAX requests
+        window.getCsrfToken = function() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            return token ? token.value : '';
+        };
+
+        // Common API request function
+        window.apiRequest = async function(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            const config = { ...defaultOptions, ...options };
+            
+            if (config.headers['Content-Type'] === 'application/json' && config.body && typeof config.body !== 'string') {
+                config.body = JSON.stringify(config.body);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${url}`, config);
+                return response;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error;
+            }
+        };
+
+        // Notification functions
+        window.showNotification = function(message, type = 'info') {
+            // Toast notification implementation
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 transform transition-all duration-300 translate-x-full`;
+            
+            const colors = {
+                success: 'border-park-green-500 bg-park-green-50 dark:bg-park-green-900',
+                error: 'border-red-500 bg-red-50 dark:bg-red-900',
+                warning: 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900',
+                info: 'border-blue-500 bg-blue-50 dark:bg-blue-900'
+            };
+            
+            toast.className += ` ${colors[type] || colors.info}`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-900 dark:text-white">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        };
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

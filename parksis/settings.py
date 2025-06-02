@@ -60,7 +60,9 @@ ROOT_URLCONF = "parksis.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -146,3 +148,63 @@ CACHES = {
         "TIMEOUT": 60 * 15,  # 15 dakika
     }
 }
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+USE_MINIO = os.getenv("USE_MINIO", "False").lower() == "true"
+
+
+if USE_MINIO:
+    # MinIO Settings
+    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "10.0.0.70:9000")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", os.getenv("AWS_ACCESS_KEY_ID"))
+    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", os.getenv("AWS_SECRET_ACCESS_KEY"))
+    MINIO_BUCKET_NAME = os.getenv(
+        "MINIO_BUCKET_NAME", os.getenv("AWS_STORAGE_BUCKET_NAME", "akillisehir")
+    )
+    MINIO_USE_HTTPS = os.getenv("MINIO_USE_HTTPS", "False").lower() == "true"
+    MINIO_CUSTOM_DOMAIN = os.getenv(
+        "MINIO_CUSTOM_DOMAIN",
+        os.getenv("AWS_S3_CUSTOM_DOMAIN", "akillisehir.sivas.bel.tr"),
+    )
+
+    # Static ve Media klasör ayarları
+    MINIO_STATIC_FILES_BUCKET = MINIO_BUCKET_NAME
+    MINIO_MEDIA_FILES_BUCKET = MINIO_BUCKET_NAME
+    MINIO_STATIC_LOCATION = os.getenv("MINIO_STATIC_LOCATION", "static")
+    MINIO_MEDIA_LOCATION = os.getenv(
+        "MINIO_MEDIA_LOCATION", "media"
+    )  # Django 4.2+ Storage System Configuration
+    STORAGES = {
+        "default": {
+            "BACKEND": "parksis.storage_backends.MinIOMediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "parksis.storage_backends.MinIOStaticStorage",
+        },
+    }
+
+    # Legacy support (Django < 4.2 için)
+    DEFAULT_FILE_STORAGE = "parksis.storage_backends.MinIOMediaStorage"
+    STATICFILES_STORAGE = "parksis.storage_backends.MinIOStaticStorage"
+
+    # Static ve Media URL'leri
+    protocol = "https" if MINIO_USE_HTTPS else "http"
+    STATIC_URL = f"{protocol}://{MINIO_CUSTOM_DOMAIN}/{MINIO_STATIC_LOCATION}/"
+    MEDIA_URL = f"{protocol}://{MINIO_CUSTOM_DOMAIN}/{MINIO_MEDIA_LOCATION}/"
+
+    # STATIC_ROOT collectstatic için gerekli (geçici klasör)
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
+    print(f"✅ MinIO Storage aktif: {protocol}://{MINIO_ENDPOINT}")
+    print(f"   📦 Bucket: {MINIO_BUCKET_NAME}")
+    print(f"   🌐 Domain: {MINIO_CUSTOM_DOMAIN}")
+    print(f"   📁 Static: {STATIC_URL}")
+    print(f"   📷 Media: {MEDIA_URL}")
+else:
+    # Local storage (development)
+    STATIC_URL = "/static/"
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+    print("📁 Local storage aktif")

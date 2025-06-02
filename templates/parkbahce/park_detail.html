@@ -1,0 +1,497 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ park.ad }} - Park Detayı - {{ block.super }}{% endblock %}
+
+{% block page_title %}Park Detayı{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'parkbahce:park_list' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            Parklar
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">{{ park.ad }}</span>
+    </nav>
+
+    <!-- Park Header -->
+    <div class="bg-gradient-to-r from-park-green-500 via-park-green-600 to-park-green-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold mb-2">
+                        <i class="fas fa-tree mr-3"></i>
+                        {{ park.ad }}
+                    </h1>
+                    <div class="flex flex-wrap items-center gap-4 text-park-green-100">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            {{ park.mahalle.ad }}, {{ park.mahalle.ilce.ad }}, {{ park.mahalle.ilce.il.ad }}
+                        </div>
+                        {% if park.park_tipi %}
+                        <div class="flex items-center">
+                            <i class="fas fa-seedling mr-2"></i>
+                            {{ park.park_tipi.ad }}
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar mr-2"></i>
+                            {{ park.created_at|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-seedling text-4xl text-white/80"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                    <div class="text-2xl font-bold">{{ park.alan|default:0|floatformat:0 }}</div>
+                    <div class="text-xs opacity-80">m² Toplam Alan</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                    <div class="text-2xl font-bold">{{ yesil_alan_toplam|floatformat:0 }}</div>
+                    <div class="text-xs opacity-80">m² Yeşil Alan</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                    <div class="text-2xl font-bold">{{ donati_sayisi }}</div>
+                    <div class="text-xs opacity-80">Donatı</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                    <div class="text-2xl font-bold">{{ habitat_sayisi }}</div>
+                    <div class="text-xs opacity-80">Habitat</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Park Information Column -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Park Bilgileri -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-park-green-600 mr-3"></i>
+                    Park Bilgileri
+                </h2>
+                <div class="space-y-4">
+                    {% if park.aciklama %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Açıklama</label>
+                        <p class="text-gray-900 dark:text-white">{{ park.aciklama }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 gap-3">
+                        {% if park.sulama_tipi %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Sulama Tipi:</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ park.sulama_tipi.ad }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if park.sulama_kaynagi %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Sulama Kaynağı:</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ park.sulama_kaynagi.ad }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if park.ada %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Ada:</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ park.ada.ad }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">UUID:</span>
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ park.uuid }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-bar text-park-green-600 mr-3"></i>
+                    İstatistikler
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div class="text-2xl font-bold text-green-700 dark:text-green-400">{{ yesil_alan_toplam|floatformat:0 }}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">m² Yeşil Alan</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-700 dark:text-blue-400">{{ spor_alan_toplam|floatformat:0 }}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">m² Spor Alanı</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <div class="text-2xl font-bold text-purple-700 dark:text-purple-400">{{ oyun_grup_sayisi }}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Oyun Grubu</div>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{{ bina_sayisi }}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Bina</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Altyapı Bilgileri -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-cog text-park-green-600 mr-3"></i>
+                    Altyapı
+                </h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-tint text-cyan-600 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">Sulama Noktası</span>
+                        </div>
+                        <span class="text-lg font-bold text-cyan-700 dark:text-cyan-400">{{ sulama_nokta_sayisi }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-bolt text-orange-600 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">Elektrik Noktası</span>
+                        </div>
+                        <span class="text-lg font-bold text-orange-700 dark:text-orange-400">{{ elektrik_nokta_sayisi }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Column -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-map text-park-green-600 mr-3"></i>
+                    Park Konumu
+                </h2>
+                  <!-- Map Container -->
+                <div id="park-map" class="w-full h-96 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+                    <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 z-10 transition-opacity duration-500">
+                        <div class="text-center text-gray-500 dark:text-gray-400">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-park-green-600 mx-auto mb-2"></div>
+                            <p>Harita yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Controls -->
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button id="zoom-to-park" class="inline-flex items-center px-3 py-2 bg-park-green-600 text-white text-sm font-medium rounded-lg hover:bg-park-green-700 transition-colors">
+                        <i class="fas fa-search-plus mr-2"></i>
+                        Parka Odaklan
+                    </button>
+                    <button id="toggle-satellite" class="inline-flex items-center px-3 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-satellite mr-2"></i>
+                        Uydu Görünümü
+                    </button>
+                </div>
+
+                <!-- Map Legend -->
+                <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Harita Açıklaması</h4>
+                    <div class="flex flex-wrap gap-4 text-xs">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-park-green-500 rounded-full mr-2"></div>
+                            <span class="text-gray-600 dark:text-gray-400">Park Alanı</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-cyan-500 rounded-full mr-2"></div>
+                            <span class="text-gray-600 dark:text-gray-400">Sulama Noktası</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
+                            <span class="text-gray-600 dark:text-gray-400">Elektrik Noktası</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-3">
+        <a href="{% url 'parkbahce:park_list' %}" 
+           class="inline-flex items-center px-6 py-3 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Park Listesine Dön
+        </a>
+        <button id="print-park" 
+                class="inline-flex items-center px-6 py-3 bg-park-green-600 text-white text-sm font-medium rounded-lg hover:bg-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300">
+            <i class="fas fa-print mr-2"></i>
+            Yazdır
+        </button>
+        <button id="export-park" 
+                class="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300">
+            <i class="fas fa-download mr-2"></i>
+            PDF Olarak İndir
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Park geometrisi (SRID 4326'ya dönüştürülmüş)
+    const parkGeometry = {{ park_geom_4326.geojson|safe }};
+    
+    // Default coordinates (Sivas center if no geometry)
+    const defaultCenter = [39.7477, 37.0179];
+    let mapCenter = defaultCenter;
+    let mapZoom = 13;
+    let parkBounds = null;    // Parse park coordinates if geometry exists
+    if (parkGeometry && parkGeometry.coordinates) {
+        try {
+            if (parkGeometry.type === 'Point') {
+                mapCenter = [parkGeometry.coordinates[1], parkGeometry.coordinates[0]];
+                mapZoom = 18;
+                // For point geometry, create a small bounds around the point
+                const buffer = 0.001; // ~100 meters buffer
+                parkBounds = [
+                    parkGeometry.coordinates[0] - buffer,
+                    parkGeometry.coordinates[1] - buffer,
+                    parkGeometry.coordinates[0] + buffer,
+                    parkGeometry.coordinates[1] + buffer
+                ];
+            } else if (parkGeometry.type === 'Polygon' && parkGeometry.coordinates[0]) {
+                // Calculate bounds for polygon
+                const coords = parkGeometry.coordinates[0];
+                let minLat = Infinity, maxLat = -Infinity;
+                let minLon = Infinity, maxLon = -Infinity;
+                
+                coords.forEach(coord => {
+                    minLat = Math.min(minLat, coord[1]);
+                    maxLat = Math.max(maxLat, coord[1]);
+                    minLon = Math.min(minLon, coord[0]);
+                    maxLon = Math.max(maxLon, coord[0]);
+                });
+                
+                // Calculate centroid
+                let lat = 0, lon = 0;
+                coords.forEach(coord => {
+                    lat += coord[1];
+                    lon += coord[0];
+                });
+                mapCenter = [lat / coords.length, lon / coords.length];
+                
+                // Store bounds for fitting
+                parkBounds = [minLon, minLat, maxLon, maxLat];
+            } else if (parkGeometry.type === 'MultiPolygon' && parkGeometry.coordinates[0]) {
+                // Handle MultiPolygon
+                let minLat = Infinity, maxLat = -Infinity;
+                let minLon = Infinity, maxLon = -Infinity;
+                let totalLat = 0, totalLon = 0, totalPoints = 0;
+                
+                parkGeometry.coordinates.forEach(polygon => {
+                    polygon[0].forEach(coord => {
+                        minLat = Math.min(minLat, coord[1]);
+                        maxLat = Math.max(maxLat, coord[1]);
+                        minLon = Math.min(minLon, coord[0]);
+                        maxLon = Math.max(maxLon, coord[0]);
+                        totalLat += coord[1];
+                        totalLon += coord[0];
+                        totalPoints++;
+                    });
+                });
+                
+                mapCenter = [totalLat / totalPoints, totalLon / totalPoints];
+                parkBounds = [minLon, minLat, maxLon, maxLat];
+            }
+        } catch (e) {
+            console.error('Park geometrisi parse edilemedi:', e);
+        }
+    }    // OpenLayers harita oluşturma
+    const map = new ol.Map({
+        target: 'park-map',
+        layers: [
+            // OpenStreetMap base layer
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: parkBounds ? ol.proj.fromLonLat([(parkBounds[0] + parkBounds[2]) / 2, (parkBounds[1] + parkBounds[3]) / 2]) : ol.proj.fromLonLat([mapCenter[1], mapCenter[0]]),
+            zoom: 10 // Initial zoom, will be adjusted by fit()
+        })
+    });
+
+    // Park geometry layer
+    let parkLayer = null;
+    if (parkGeometry) {
+        const parkFeature = new ol.Feature({
+            geometry: new ol.format.GeoJSON().readGeometry(parkGeometry, {
+                dataProjection: 'EPSG:4326',
+                featureProjection: 'EPSG:3857'
+            }),
+            name: '{{ park.ad }}'
+        });
+
+        const parkStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(34, 197, 94, 0.3)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(34, 197, 94, 0.8)',
+                width: 3
+            }),
+            image: new ol.style.Circle({
+                radius: 10,
+                fill: new ol.style.Fill({
+                    color: 'rgba(34, 197, 94, 0.9)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'white',
+                    width: 3
+                })
+            })
+        });
+
+        parkLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [parkFeature]
+            }),
+            style: parkStyle
+        });
+
+        map.addLayer(parkLayer);        // Fit the map to the park bounds immediately after adding the layer
+        if (parkBounds) {
+            const extent = ol.proj.transformExtent(parkBounds, 'EPSG:4326', 'EPSG:3857');
+            map.getView().fit(extent, {
+                padding: [20, 20, 20, 20], // Minimal padding for maximum fill
+                maxZoom: 19, // Allow high zoom for small parks
+                duration: 0 // Immediate fit, no animation
+            });
+        } else {
+            // Fallback for when no bounds are calculated
+            map.getView().setCenter(ol.proj.fromLonLat([mapCenter[1], mapCenter[0]]));
+            map.getView().setZoom(18);
+        }
+    }
+
+    // Satellite layer (initially hidden)
+    const satelliteLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+            attributions: 'Satellite imagery'
+        }),
+        visible: false
+    });
+    map.addLayer(satelliteLayer);
+
+    // Hide loading indicator when map is loaded
+    map.once('postrender', function() {
+        setTimeout(() => {
+            const loadingEl = document.getElementById('map-loading');
+            if (loadingEl) {
+                loadingEl.style.opacity = '0';
+                setTimeout(() => {
+                    loadingEl.style.display = 'none';
+                }, 500);
+            }
+        }, 500);
+    });    // Map controls
+    document.getElementById('zoom-to-park').addEventListener('click', function() {
+        if (parkGeometry && parkBounds) {
+            const extent = ol.proj.transformExtent(parkBounds, 'EPSG:4326', 'EPSG:3857');
+            map.getView().fit(extent, {
+                padding: [20, 20, 20, 20], // Minimal padding for maximum fill
+                maxZoom: 19,
+                duration: 1000
+            });
+        } else if (parkGeometry) {
+            map.getView().animate({
+                center: ol.proj.fromLonLat([mapCenter[1], mapCenter[0]]),
+                zoom: 18,
+                duration: 1000
+            });
+        }
+    });
+
+    let satelliteVisible = false;
+    document.getElementById('toggle-satellite').addEventListener('click', function() {
+        satelliteVisible = !satelliteVisible;
+        satelliteLayer.setVisible(satelliteVisible);
+        map.getLayers().item(0).setVisible(!satelliteVisible); // Toggle OSM layer
+        
+        this.innerHTML = satelliteVisible 
+            ? '<i class="fas fa-map mr-2"></i>Standart Harita'
+            : '<i class="fas fa-satellite mr-2"></i>Uydu Görünümü';
+    });
+
+    // Print functionality
+    document.getElementById('print-park').addEventListener('click', function() {
+        window.print();
+    });
+
+    // Export functionality (placeholder)
+    document.getElementById('export-park').addEventListener('click', function() {
+        showNotification('PDF export özelliği yakında eklenecek!', 'info');
+    });
+
+    // Map popup for park info
+    const popup = new ol.Overlay({
+        element: document.createElement('div'),
+        positioning: 'bottom-center',
+        stopEvent: false,
+        offset: [0, -10]
+    });
+    map.addOverlay(popup);
+
+    map.on('click', function(evt) {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+        });
+
+        if (feature) {
+            const coordinates = evt.coordinate;
+            popup.getElement().innerHTML = `
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg text-sm">
+                    <div class="font-semibold text-gray-900 dark:text-white">{{ park.ad }}</div>
+                    <div class="text-gray-600 dark:text-gray-400">{{ park.mahalle.ad }}</div>
+                    <div class="text-park-green-600 dark:text-park-green-400 text-xs mt-1">
+                        {{ park.alan|floatformat:0 }} m² • {{ yesil_alan_toplam|floatformat:0 }} m² yeşil alan
+                    </div>
+                </div>
+            `;
+            popup.setPosition(coordinates);
+        } else {
+            popup.setPosition(undefined);
+        }
+    });
+
+    // Map resize handler
+    window.addEventListener('resize', function() {
+        setTimeout(() => {
+            map.updateSize();
+        }, 200);
+    });
+});
+</script>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    #park-map {
+        height: 400px !important;
+    }
+}
+</style>
+{% endblock %}

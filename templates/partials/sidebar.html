@@ -1,0 +1,221 @@
+<!-- Sidebar -->
+<div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-r border-gray-200/50 dark:border-gray-700/50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl">
+    <div class="flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                    <i class="fas fa-tree text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-gray-900 dark:text-white gradient-text">Park Yönetimi</h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Sivas Belediyesi</p>
+                </div>
+            </div>
+            <button id="sidebar-close" class="lg:hidden p-2 rounded-lg hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200">
+                <i class="fas fa-times text-gray-500 dark:text-gray-400"></i>
+            </button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div class="relative">
+                <input type="text" id="sidebar-search" placeholder="Menü ara..." 
+                       class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-600/60 rounded-xl focus:ring-2 focus:ring-park-green-500 focus:border-transparent transition-all backdrop-blur-sm">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 p-4 overflow-y-auto">
+            <ul class="space-y-2">
+                <!-- Ana Sayfa -->
+                <li>
+                    <a href="{% url 'index' %}" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
+                        <i class="fas fa-home w-5 h-5 mr-3"></i>
+                        Ana Sayfa
+                    </a>
+                </li>
+
+                <!-- Park Yönetimi -->
+                <li>
+                    <div class="tree-parent">
+                        <button class="tree-toggle w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">
+                            <div class="flex items-center">
+                                <i class="fas fa-seedling w-5 h-5 mr-3"></i>
+                                Park Yönetimi
+                            </div>
+                            <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
+                        </button>                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="{% url 'parkbahce:park_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Parklar</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Donatılar</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Habitatlar</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Bakım Yönetimi -->
+                <li>
+                    <div class="tree-parent">
+                        <button class="tree-toggle w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">
+                            <div class="flex items-center">
+                                <i class="fas fa-tools w-5 h-5 mr-3"></i>
+                                Bakım Yönetimi
+                            </div>
+                            <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
+                        </button>
+                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Bakım Planları</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Bakım Takibi</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Sorun Yönetimi -->
+                <li>
+                    <div class="tree-parent">
+                        <button class="tree-toggle w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle w-5 h-5 mr-3"></i>
+                                Sorun Yönetimi
+                            </div>
+                            <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
+                        </button>
+                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Bildirimler</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Çözüm Takibi</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Altyapı -->
+                <li>
+                    <div class="tree-parent">
+                        <button class="tree-toggle w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">
+                            <div class="flex items-center">
+                                <i class="fas fa-cog w-5 h-5 mr-3"></i>
+                                Altyapı
+                            </div>
+                            <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
+                        </button>
+                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Sulama Sistemi</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Elektrik</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Yollar</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Raporlar -->
+                <li>
+                    <a href="#" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
+                        <i class="fas fa-chart-bar w-5 h-5 mr-3"></i>
+                        Raporlar
+                    </a>
+                </li>
+
+                {% if user.is_superuser %}
+                <!-- Yönetim (Sadece süper kullanıcılar için) -->
+                <li class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="tree-parent">
+                        <button class="tree-toggle w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">
+                            <div class="flex items-center">
+                                <i class="fas fa-users-cog w-5 h-5 mr-3"></i>
+                                Sistem Yönetimi
+                            </div>
+                            <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
+                        </button>
+                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Kullanıcı Yönetimi</a></li>
+                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Sistem Ayarları</a></li>
+                        </ul>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Sidebar JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tree toggle functionality
+    document.querySelectorAll('.tree-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            const children = this.parentElement.querySelector('.tree-children');
+            const arrow = this.querySelector('.tree-arrow');
+            
+            if (children.classList.contains('hidden')) {
+                children.classList.remove('hidden');
+                arrow.style.transform = 'rotate(90deg)';
+            } else {
+                children.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('sidebar-search');
+    const menuItems = document.querySelectorAll('.sidebar-tree-item');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        menuItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            const parent = item.closest('li');
+            
+            if (text.includes(searchTerm)) {
+                parent.style.display = 'block';
+                // Expand parent tree if item matches
+                const treeParent = item.closest('.tree-parent');
+                if (treeParent) {
+                    const children = treeParent.querySelector('.tree-children');
+                    const arrow = treeParent.querySelector('.tree-arrow');
+                    children.classList.remove('hidden');
+                    arrow.style.transform = 'rotate(90deg)';
+                }
+            } else {
+                parent.style.display = 'none';
+            }
+        });
+        
+        // If search is empty, show all items
+        if (searchTerm === '') {
+            menuItems.forEach(item => {
+                item.closest('li').style.display = 'block';
+            });
+        }
+    });
+
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarClose = document.getElementById('sidebar-close');
+    const mobileBackdrop = document.getElementById('mobile-backdrop');
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        mobileBackdrop.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        mobileBackdrop.classList.add('hidden');
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', openSidebar);
+    }
+
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', closeSidebar);
+    }
+
+    if (mobileBackdrop) {
+        mobileBackdrop.addEventListener('click', closeSidebar);
+    }
+});
+</script>
