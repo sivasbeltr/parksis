@@ -72,13 +72,124 @@
             <i class="fas fa-map text-park-green-600 mr-3"></i>
             Park Konumu
         </h2>
-        
-        <!-- Map Container -->
-        <div id="park-map" class="w-full h-96 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
-            <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 z-10 transition-opacity duration-500">
-                <div class="text-center text-gray-500 dark:text-gray-400">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-park-green-500 mx-auto mb-2"></div>
-                    <div class="text-sm">Harita yükleniyor...</div>
+          <!-- Map Container with Layer Panel -->
+        <div class="relative w-full h-96 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+            <!-- Layer Control Panel -->
+            <div id="layer-panel" class="absolute left-4 top-4 z-20 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-lg min-w-[250px] max-h-[320px] overflow-y-auto">
+                <div class="p-3 border-b border-gray-200 dark:border-gray-600">
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-layer-group text-park-green-600 mr-2"></i>
+                        Harita Katmanları
+                    </h4>
+                    <button id="toggle-layer-panel" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                </div>
+                <div class="p-3 space-y-2">
+                    <!-- Nokta Geometrili Katmanlar -->
+                    <div class="space-y-2">
+                        <h5 class="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">Nokta Katmanları</h5>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="habitatlar" data-color="#10B981" data-icon="seedling">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Habitatlar</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="donatilar" data-color="#3B82F6" data-icon="chair">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Donatılar</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="oyun_gruplari" data-color="#8B5CF6" data-icon="gamepad">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Oyun Grupları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="sulama_noktalari" data-color="#06B6D4" data-icon="tint">
+                            <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Sulama Noktaları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="elektrik_noktalari" data-color="#F59E0B" data-icon="bolt">
+                            <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Elektrik Noktaları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="aboneler" data-color="#EC4899" data-icon="plug">
+                            <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Aboneler</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Alan Geometrili Katmanlar -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <h5 class="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">Alan Katmanları</h5>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="yesil_alanlar" data-color="#16A34A" data-icon="leaf">
+                            <div class="w-3 h-3 bg-green-600 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Yeşil Alanlar</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="spor_alanlar" data-color="#DC2626" data-icon="running">
+                            <div class="w-3 h-3 bg-red-600 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Spor Alanları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="binalar" data-color="#6B7280" data-icon="building">
+                            <div class="w-3 h-3 bg-gray-500 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Binalar</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="oyun_alanlar" data-color="#7C3AED" data-icon="child">
+                            <div class="w-3 h-3 bg-violet-600 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Oyun Alanları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="havuzlar" data-color="#0EA5E9" data-icon="swimmer">
+                            <div class="w-3 h-3 bg-sky-500 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Havuzlar</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="yollar" data-color="#374151" data-icon="road">
+                            <div class="w-3 h-3 bg-gray-700 rounded"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Yollar</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Çizgi Geometrili Katmanlar -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <h5 class="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">Çizgi Katmanları</h5>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="sulama_hatlari" data-color="#0891B2" data-icon="water">
+                            <div class="w-3 h-1 bg-cyan-600 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Sulama Hatları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="elektrik_hatlari" data-color="#D97706" data-icon="zap">
+                            <div class="w-3 h-1 bg-amber-600 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Elektrik Hatları</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+                            <input type="checkbox" class="layer-toggle" data-layer="kanal_hatlari" data-color="#059669" data-icon="stream">
+                            <div class="w-3 h-1 bg-emerald-600 rounded-full"></div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Kanal Hatları</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Minimized Layer Toggle Button -->
+            <button id="show-layer-panel" class="absolute left-4 top-4 z-20 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-lg p-2 hidden">
+                <i class="fas fa-layer-group text-park-green-600"></i>
+            </button>
+            
+            <!-- Map -->
+            <div id="park-map" class="w-full h-full">
+                <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 z-10 transition-opacity duration-500">
+                    <div class="text-center text-gray-500 dark:text-gray-400">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-park-green-500 mx-auto mb-2"></div>
+                        <div class="text-sm">Harita yükleniyor...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -326,6 +437,220 @@ document.addEventListener('DOMContentLoaded', function() {
             center: parkBounds ? ol.proj.fromLonLat([(parkBounds[0] + parkBounds[2]) / 2, (parkBounds[1] + parkBounds[3]) / 2]) : ol.proj.fromLonLat([mapCenter[1], mapCenter[0]]),
             zoom: 10 // Initial zoom, will be adjusted by fit()
         })
+    });
+
+    // Katman yönetimi için storage
+    const mapLayers = new Map();
+    
+    // Layer configurations
+    const layerConfigs = {
+        habitatlar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/habitatlar/`,
+            color: '#10B981',
+            icon: 'seedling',
+            type: 'point'
+        },
+        donatilar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/donatilar/`,
+            color: '#3B82F6',
+            icon: 'chair',
+            type: 'point'
+        },
+        oyun_gruplari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/oyun_gruplari/`,
+            color: '#8B5CF6',
+            icon: 'gamepad',
+            type: 'point'
+        },
+        sulama_noktalari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/sulama_noktalari/`,
+            color: '#06B6D4',
+            icon: 'tint',
+            type: 'point'
+        },
+        elektrik_noktalari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/elektrik_noktalari/`,
+            color: '#F59E0B',
+            icon: 'bolt',
+            type: 'point'
+        },
+        aboneler: {
+            url: `/api/v1/parklar/{{ park.uuid }}/aboneler/`,
+            color: '#EC4899',
+            icon: 'plug',
+            type: 'point'
+        },
+        yesil_alanlar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/yesil_alanlar/`,
+            color: '#16A34A',
+            icon: 'leaf',
+            type: 'polygon'
+        },
+        spor_alanlar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/spor_alanlar/`,
+            color: '#DC2626',
+            icon: 'running',
+            type: 'polygon'
+        },
+        binalar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/binalar/`,
+            color: '#6B7280',
+            icon: 'building',
+            type: 'polygon'
+        },
+        oyun_alanlar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/oyun_alanlar/`,
+            color: '#7C3AED',
+            icon: 'child',
+            type: 'polygon'
+        },
+        havuzlar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/havuzlar/`,
+            color: '#0EA5E9',
+            icon: 'swimmer',
+            type: 'polygon'
+        },
+        yollar: {
+            url: `/api/v1/parklar/{{ park.uuid }}/yollar/`,
+            color: '#374151',
+            icon: 'road',
+            type: 'polygon'
+        },
+        sulama_hatlari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/sulama_hatlari/`,
+            color: '#0891B2',
+            icon: 'water',
+            type: 'linestring'
+        },
+        elektrik_hatlari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/elektrik_hatlari/`,
+            color: '#D97706',
+            icon: 'zap',
+            type: 'linestring'
+        },
+        kanal_hatlari: {
+            url: `/api/v1/parklar/{{ park.uuid }}/kanal_hatlari/`,
+            color: '#059669',
+            icon: 'stream',
+            type: 'linestring'
+        }
+    };
+    
+    // Katman stili oluşturma fonksiyonu
+    function createLayerStyle(config, feature) {
+        const color = config.color;
+        const alpha = config.type === 'polygon' ? 0.3 : 0.8;
+        
+        if (config.type === 'point') {
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 8,
+                    fill: new ol.style.Fill({
+                        color: color
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'white',
+                        width: 2
+                    })
+                })
+            });
+        } else if (config.type === 'polygon') {
+            return new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: color + Math.floor(alpha * 255).toString(16).padStart(2, '0')
+                }),
+                stroke: new ol.style.Stroke({
+                    color: color,
+                    width: 2
+                })
+            });
+        } else if (config.type === 'linestring') {
+            return new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: color,
+                    width: 3
+                })
+            });
+        }
+    }
+    
+    // API'den katman verisi yükleme
+    async function loadLayer(layerName, config) {
+        try {
+            const response = await fetch(config.url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const geojsonData = await response.json();
+            
+            // GeoJSON verisi varsa katmanı oluştur
+            if (geojsonData.features && geojsonData.features.length > 0) {
+                const vectorSource = new ol.source.Vector({
+                    features: new ol.format.GeoJSON().readFeatures(geojsonData, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    })
+                });
+                
+                const vectorLayer = new ol.layer.Vector({
+                    source: vectorSource,
+                    style: function(feature) {
+                        return createLayerStyle(config, feature);
+                    }
+                });
+                
+                // Katmanı haritaya ekle ve kaydet
+                map.addLayer(vectorLayer);
+                mapLayers.set(layerName, vectorLayer);
+                
+                console.log(`${layerName} katmanı yüklendi: ${geojsonData.features.length} öğe`);
+            } else {
+                console.log(`${layerName} katmanında veri bulunamadı`);
+            }
+        } catch (error) {
+            console.error(`${layerName} katmanı yüklenirken hata:`, error);
+        }
+    }
+    
+    // Katman kontrolcüleri
+    document.querySelectorAll('.layer-toggle').forEach(checkbox => {
+        checkbox.addEventListener('change', async function() {
+            const layerName = this.dataset.layer;
+            const config = layerConfigs[layerName];
+            
+            if (!config) return;
+            
+            if (this.checked) {
+                // Katman zaten yüklenmişse görünür yap
+                if (mapLayers.has(layerName)) {
+                    mapLayers.get(layerName).setVisible(true);
+                } else {
+                    // Katmanı yükle
+                    await loadLayer(layerName, config);
+                }
+            } else {
+                // Katmanı gizle
+                if (mapLayers.has(layerName)) {
+                    mapLayers.get(layerName).setVisible(false);
+                }
+            }
+        });
+    });
+    
+    // Katman paneli toggle işlevselliği
+    const layerPanel = document.getElementById('layer-panel');
+    const showLayerPanelBtn = document.getElementById('show-layer-panel');
+    const toggleLayerPanelBtn = document.getElementById('toggle-layer-panel');
+    
+    toggleLayerPanelBtn.addEventListener('click', function() {
+        layerPanel.classList.add('hidden');
+        showLayerPanelBtn.classList.remove('hidden');
+    });
+    
+    showLayerPanelBtn.addEventListener('click', function() {
+        layerPanel.classList.remove('hidden');
+        showLayerPanelBtn.classList.add('hidden');
     });
 
     // Park geometry layer
