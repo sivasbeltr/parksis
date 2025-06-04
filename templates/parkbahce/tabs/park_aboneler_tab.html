@@ -1,110 +1,175 @@
-<div class="space-y-6">    <!-- Aboneler Başlığı -->
-    <div class="flex items-center">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-            <i class="fas fa-plug text-purple-600 mr-3"></i>
-            Aboneler ({{ aboneler.count }})
-        </h3>
-    </div>
-
-    <!-- Aboneler Listesi -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {% for abone in aboneler %}        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
-            <div class="flex items-start mb-3">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
-                        {% if abone.abone_tipi == 'ELEKTRIK' %}
-                            <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
-                        {% elif abone.abone_tipi == 'SU' %}
-                            <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
-                        {% elif abone.abone_tipi == 'DOGALGAZ' %}
-                            <i class="fas fa-fire text-orange-600 dark:text-orange-400"></i>
-                        {% elif abone.abone_tipi == 'TELEFON' %}
-                            <i class="fas fa-phone text-green-600 dark:text-green-400"></i>
-                        {% elif abone.abone_tipi == 'INTERNET' %}
-                            <i class="fas fa-wifi text-purple-600 dark:text-purple-400"></i>
-                        {% else %}
-                            <i class="fas fa-plug text-purple-600 dark:text-purple-400"></i>
-                        {% endif %}
+<div class="space-y-8 animate-fade-in">
+    <!-- Modern Başlık -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-2xl"></div>
+        <div class="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-purple-200/50 dark:border-purple-700/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-plug text-white text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ abone.get_abone_tipi_display|default:abone.abone_tipi }}</h4>
-                        {% if abone.abone_no %}
-                        <p class="text-xs text-gray-600 dark:text-gray-400">No: {{ abone.abone_no }}</p>
-                        {% endif %}
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                            Aboneler
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Bu parka ait abone bilgileri</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="space-y-2 text-xs">
-                {% if abone.abone_tarihi %}
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Abone Tarihi:</span>
-                    <span class="text-gray-900 dark:text-white">{{ abone.abone_tarihi|date:"d.m.Y" }}</span>
-                </div>
-                {% endif %}
-                
-                {% if abone.kapasite %}
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Kapasite:</span>
-                    <span class="text-gray-900 dark:text-white">{{ abone.kapasite }}</span>
-                </div>
-                {% endif %}
-                
-                {% if abone.firma %}
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Firma:</span>
-                    <span class="text-gray-900 dark:text-white">{{ abone.firma }}</span>
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Durum ve Endeks -->
-            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-gray-600 dark:text-gray-400">Son Endeks:</span>
-                    <span class="text-xs text-gray-900 dark:text-white">-</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-600 dark:text-gray-400">Durum:</span>
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        Aktif
-                    </span>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Toplam Abone</div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Modern Abone Kartları -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for abone in aboneler %}
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-2">
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-indigo-50/50 dark:from-purple-900/20 dark:to-indigo-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <!-- Floating Status Badge -->
+            <div class="absolute top-4 right-4 z-10">
+                <div class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                    Aktif
+                </div>
+            </div>
+            
+            <div class="relative p-6">
+                <div class="flex items-start space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
+                        {% if abone.abone_tipi == 'ELEKTRIK' %}
+                            <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+                        {% elif abone.abone_tipi == 'SU' %}
+                            <i class="fas fa-tint text-blue-600 dark:text-blue-400 text-2xl"></i>
+                        {% elif abone.abone_tipi == 'DOGALGAZ' %}
+                            <i class="fas fa-fire text-orange-600 dark:text-orange-400 text-2xl"></i>
+                        {% elif abone.abone_tipi == 'TELEFON' %}
+                            <i class="fas fa-phone text-green-600 dark:text-green-400 text-2xl"></i>
+                        {% elif abone.abone_tipi == 'INTERNET' %}
+                            <i class="fas fa-wifi text-purple-600 dark:text-purple-400 text-2xl"></i>
+                        {% else %}
+                            <i class="fas fa-plug text-purple-600 dark:text-purple-400 text-2xl"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                            {{ abone.get_abone_tipi_display|default:abone.abone_tipi }}
+                        </h4>
+                        
+                        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            {% if abone.abone_no %}
+                            <div class="flex items-center">
+                                <i class="fas fa-hashtag text-xs mr-2"></i>
+                                <span>{{ abone.abone_no }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if abone.firma %}
+                            <div class="flex items-center">
+                                <i class="fas fa-building text-xs mr-2"></i>
+                                <span>{{ abone.firma }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if abone.abone_tarihi %}
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar text-xs mr-2"></i>
+                                <span>{{ abone.abone_tarihi|date:"d.m.Y" }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if abone.kapasite %}
+                            <div class="flex items-center">
+                                <i class="fas fa-gauge-high text-xs mr-2"></i>
+                                <span>{{ abone.kapasite }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Status Info -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Son Endeks:</span>
+                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shimmer Effect -->
+            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
+        </div>
         {% empty %}
-        <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
-            <i class="fas fa-plug text-4xl mb-4"></i>
-            <h4 class="text-lg font-medium mb-2">Henüz abone bulunmuyor</h4>
-            <p class="text-sm">Bu parka ait abone bilgileri henüz eklenmemiş.</p>
+        <div class="col-span-full">
+            <div class="text-center py-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-plug text-gray-400 text-3xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-500 dark:text-gray-400 mb-2">Henüz abone bulunmuyor</h4>
+                <p class="text-gray-400 dark:text-gray-500">Bu parka ait abone bilgileri henüz eklenmemiş.</p>
+            </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Abone İstatistikleri -->
+    <!-- Modern İstatistik Kartı -->
     {% if aboneler %}
-    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4">Abone İstatistikleri</h4>
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="text-center">
-                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Toplam Abone</div>
+    <div class="relative overflow-hidden bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-900/20 dark:via-indigo-900/20 dark:to-blue-900/20 rounded-2xl border border-purple-200/50 dark:border-purple-700/50">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full translate-y-12 -translate-x-12"></div>
+        
+        <div class="relative p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-white"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Abone Özet Raporu</h4>
+                </div>
             </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">-</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">-</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Su</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">-</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Doğalgaz</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Telekomünikasyon</div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-plug text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Toplam Abone</div>
+                </div>
+                
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Elektrik</div>
+                </div>
+                
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Su</div>
+                </div>
+                
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-fire text-orange-600 dark:text-orange-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Doğalgaz</div>
+                </div>
+                  <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-wifi text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">İnternet</div>
+                </div>
             </div>
         </div>
     </div>

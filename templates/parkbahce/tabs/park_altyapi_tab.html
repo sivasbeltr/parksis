@@ -1,140 +1,236 @@
-<div class="space-y-6">    <!-- Altyapı Başlığı -->
-    <div class="flex items-center">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-            <i class="fas fa-cog text-gray-600 mr-3"></i>
-            Altyapı Durumu
-        </h3>
+<div class="space-y-8 animate-fade-in">
+    <!-- Modern Başlık -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl"></div>
+        <div class="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-blue-200/50 dark:border-blue-700/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-cogs text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            Altyapı Sistemi
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Bu parka ait altyapı durumu ve bileşenleri</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                        {{ altyapi_stats.sulama_noktalari|add:altyapi_stats.elektrik_noktalari|add:altyapi_stats.sulama_hatlari|add:altyapi_stats.elektrik_hatlari|add:altyapi_stats.kanal_hatlari }}
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Toplam Altyapı</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Altyapı İstatistik Kartları -->
+    <!-- Modern Altyapı İstatistik Kartları -->
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative p-4 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ altyapi_stats.sulama_noktalari }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Sulama Noktası</div>
             </div>
-            <div class="text-2xl font-bold text-blue-700 dark:text-blue-400">{{ altyapi_stats.sulama_noktalari }}</div>
-            <div class="text-xs text-gray-600 dark:text-gray-400">Sulama Noktası</div>
         </div>
         
-        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-yellow-300 dark:hover:border-yellow-600 transition-all duration-500 hover:shadow-xl hover:shadow-yellow-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-900/20 dark:to-amber-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative p-4 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ altyapi_stats.elektrik_noktalari }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik Noktası</div>
             </div>
-            <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{{ altyapi_stats.elektrik_noktalari }}</div>
-            <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik Noktası</div>
         </div>
         
-        <div class="text-center p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
-            <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-water text-cyan-600 dark:text-cyan-400"></i>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-cyan-300 dark:hover:border-cyan-600 transition-all duration-500 hover:shadow-xl hover:shadow-cyan-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-50/50 to-blue-50/50 dark:from-cyan-900/20 dark:to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative p-4 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-water text-cyan-600 dark:text-cyan-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{{ altyapi_stats.sulama_hatlari }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Sulama Hattı</div>
             </div>
-            <div class="text-2xl font-bold text-cyan-700 dark:text-cyan-400">{{ altyapi_stats.sulama_hatlari }}</div>
-            <div class="text-xs text-gray-600 dark:text-gray-400">Sulama Hattı</div>
         </div>
         
-        <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-            <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-plug text-red-600 dark:text-red-400"></i>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-red-300 dark:hover:border-red-600 transition-all duration-500 hover:shadow-xl hover:shadow-red-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-red-50/50 to-orange-50/50 dark:from-red-900/20 dark:to-orange-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative p-4 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-plug text-red-600 dark:text-red-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ altyapi_stats.elektrik_hatlari }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik Hattı</div>
             </div>
-            <div class="text-2xl font-bold text-red-700 dark:text-red-400">{{ altyapi_stats.elektrik_hatlari }}</div>
-            <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik Hattı</div>
         </div>
         
-        <div class="text-center p-4 bg-brown-50 dark:bg-gray-700 rounded-lg border border-brown-200 dark:border-gray-600">
-            <div class="w-12 h-12 bg-brown-100 dark:bg-gray-600 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-stream text-brown-600 dark:text-gray-400"></i>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-500 hover:shadow-xl hover:shadow-gray-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-slate-50/50 dark:from-gray-900/20 dark:to-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative p-4 text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-700 dark:to-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-stream text-gray-600 dark:text-gray-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ altyapi_stats.kanal_hatlari }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Kanal Hattı</div>
             </div>
-            <div class="text-2xl font-bold text-brown-700 dark:text-gray-400">{{ altyapi_stats.kanal_hatlari }}</div>
-            <div class="text-xs text-gray-600 dark:text-gray-400">Kanal Hattı</div>
         </div>
-    </div>
-
-    <!-- Altyapı Kategorileri -->
+    </div>    <!-- Modern Altyapı Kategorileri -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Sulama Altyapısı -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <i class="fas fa-tint text-blue-600 mr-2"></i>
-                Sulama Altyapısı
-            </h4>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-dot-circle text-blue-600 mr-2"></i>
-                        <span class="text-sm text-gray-900 dark:text-white">Sulama Noktaları</span>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div class="relative p-6">
+                <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
                     </div>
-                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ altyapi_stats.sulama_noktalari }}</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-minus text-cyan-600 mr-2"></i>
-                        <span class="text-sm text-gray-900 dark:text-white">Sulama Hatları</span>
+                    Sulama Altyapısı
+                </h4>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-200/50 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-dot-circle text-blue-600 dark:text-blue-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm font-medium text-blue-900 dark:text-blue-100">Sulama Noktaları</span>
+                        </div>
+                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ altyapi_stats.sulama_noktalari }}</span>
                     </div>
-                    <span class="text-sm font-medium text-cyan-600 dark:text-cyan-400">{{ altyapi_stats.sulama_hatlari }}</span>
+                    
+                    <div class="flex items-center justify-between p-3 bg-cyan-50/50 dark:bg-cyan-900/10 rounded-xl border border-cyan-200/50 dark:border-cyan-800/50 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-minus text-cyan-600 dark:text-cyan-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm font-medium text-cyan-900 dark:text-cyan-100">Sulama Hatları</span>
+                        </div>
+                        <span class="text-sm font-bold text-cyan-600 dark:text-cyan-400">{{ altyapi_stats.sulama_hatlari }}</span>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Shimmer Effect -->
+            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
 
         <!-- Elektrik Altyapısı -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <i class="fas fa-bolt text-yellow-600 mr-2"></i>
-                Elektrik Altyapısı
-            </h4>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-dot-circle text-yellow-600 mr-2"></i>
-                        <span class="text-sm text-gray-900 dark:text-white">Elektrik Noktaları</span>
+        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-yellow-300 dark:hover:border-yellow-600 transition-all duration-500 hover:shadow-xl hover:shadow-yellow-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 dark:from-yellow-900/20 dark:to-orange-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div class="relative p-6">
+                <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                    <div class="w-10 h-10 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
                     </div>
-                    <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ altyapi_stats.elektrik_noktalari }}</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <div class="flex items-center">
-                        <i class="fas fa-minus text-red-600 mr-2"></i>
-                        <span class="text-sm text-gray-900 dark:text-white">Elektrik Hatları</span>
+                    Elektrik Altyapısı
+                </h4>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-yellow-50/50 dark:bg-yellow-900/10 rounded-xl border border-yellow-200/50 dark:border-yellow-800/50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-dot-circle text-yellow-600 dark:text-yellow-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm font-medium text-yellow-900 dark:text-yellow-100">Elektrik Noktaları</span>
+                        </div>
+                        <span class="text-sm font-bold text-yellow-600 dark:text-yellow-400">{{ altyapi_stats.elektrik_noktalari }}</span>
                     </div>
-                    <span class="text-sm font-medium text-red-600 dark:text-red-400">{{ altyapi_stats.elektrik_hatlari }}</span>
+                    
+                    <div class="flex items-center justify-between p-3 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-200/50 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-minus text-red-600 dark:text-red-400 text-xs"></i>
+                            </div>
+                            <span class="text-sm font-medium text-red-900 dark:text-red-100">Elektrik Hatları</span>
+                        </div>
+                        <span class="text-sm font-bold text-red-600 dark:text-red-400">{{ altyapi_stats.elektrik_hatlari }}</span>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Shimmer Effect -->
+            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
     </div>
 
     <!-- Diğer Altyapı -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-        <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <i class="fas fa-stream text-gray-600 mr-2"></i>
-            Diğer Altyapı
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-minus text-gray-600 mr-2"></i>
-                    <span class="text-sm text-gray-900 dark:text-white">Kanal Hatları</span>
+    <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-500 hover:shadow-xl hover:shadow-gray-500/10">
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-slate-50/50 dark:from-gray-900/20 dark:to-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        <div class="relative p-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-700 dark:to-slate-700 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-stream text-gray-600 dark:text-gray-400"></i>
                 </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ altyapi_stats.kanal_hatlari }}</span>
+                Diğer Altyapı
+            </h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-gray-700/50 rounded-xl border border-gray-200/50 dark:border-gray-600/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-minus text-gray-600 dark:text-gray-400 text-xs"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Kanal Hatları</span>
+                    </div>
+                    <span class="text-sm font-bold text-gray-600 dark:text-gray-400">{{ altyapi_stats.kanal_hatlari }}</span>
+                </div>
             </div>
         </div>
+        
+        <!-- Shimmer Effect -->
+        <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
     </div>
 
-    <!-- Altyapı Durum Özeti -->
-    <div class="bg-park-green-50 dark:bg-park-green-900/20 rounded-lg p-4 border border-park-green-200 dark:border-park-green-800">
-        <h4 class="text-md font-medium text-park-green-900 dark:text-park-green-100 mb-4 flex items-center">
-            <i class="fas fa-chart-pie mr-2"></i>
-            Altyapı Durum Özeti
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="text-center">
-                <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
-                <div class="text-xs text-park-green-700 dark:text-park-green-300">Çalışır Durumda</div>
+    <!-- Modern Altyapı Durum Özeti -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-teal-900/20 rounded-2xl border border-blue-200/50 dark:border-blue-700/50">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-cyan-500/10 rounded-full translate-y-12 -translate-x-12"></div>
+        
+        <div class="relative p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chart-pie text-white"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Altyapı Durum Özeti</h4>
+                </div>
             </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">-</div>
-                <div class="text-xs text-park-green-700 dark:text-park-green-300">Bakım Gerekli</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-red-600 dark:text-red-400">-</div>
-                <div class="text-xs text-park-green-700 dark:text-park-green-300">Arızalı</div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Çalışır Durumda</div>
+                </div>
+                
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-wrench text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Bakım Gerekli</div>
+                </div>
+                
+                <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <i class="fas fa-times-circle text-red-600 dark:text-red-400"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-red-600 dark:text-red-400">-</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Arızalı</div>
+                </div>
             </div>
         </div>
     </div>
