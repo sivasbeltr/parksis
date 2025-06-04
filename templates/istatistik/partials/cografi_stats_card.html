@@ -1,0 +1,156 @@
+<!-- Coğrafi Dağılım İstatistikleri Kartı -->
+<div class="glass-card rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 hover-lift animate-card">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-map-marked-alt text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Coğrafi Dağılım</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Mahalle ve ilçe bazında dağılım</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button class="p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Coğrafi İstatistikler -->
+    <div class="space-y-4 mb-6">
+        <!-- Toplam Mahalle -->
+        <div class="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-map-pin text-indigo-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Parkı Olan Mahalle</span>
+                    <div class="text-xs text-gray-500">En az 1 park içeren mahalleler</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-indigo-600">{{ cografi_stats.mahalle_sayisi }}</span>
+                <span class="text-xs text-gray-500 ml-1">mahalle</span>
+            </div>
+        </div>
+
+        <!-- Toplam İlçe -->
+        <div class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-purple-100 dark:bg-purple-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-location-dot text-purple-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Parkı Olan İlçe</span>
+                    <div class="text-xs text-gray-500">En az 1 park içeren ilçeler</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-purple-600">{{ cografi_stats.ilce_sayisi }}</span>
+                <span class="text-xs text-gray-500 ml-1">ilçe</span>
+            </div>
+        </div>
+
+        <!-- En Fazla Parkı Olan Mahalle -->
+        {% if cografi_stats.en_fazla_parkli_mahalle %}
+        <div class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-amber-100 dark:bg-amber-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-crown text-amber-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">En Fazla Parkı Olan</span>
+                    <div class="text-xs text-gray-500">{{ cografi_stats.en_fazla_parkli_mahalle.ad }}</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-amber-600">{{ cografi_stats.en_fazla_parkli_mahalle.park_sayisi }}</span>
+                <span class="text-xs text-gray-500 ml-1">park</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Park Yoğunluğu -->
+        <div class="flex items-center justify-between p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-cyan-100 dark:bg-cyan-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-area text-cyan-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Ortalama Park/Mahalle</span>
+                    <div class="text-xs text-gray-500">Mahalle başına düşen park sayısı</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-cyan-600">
+                    {% if cografi_stats.mahalle_sayisi > 0 %}
+                        {% widthratio park_stats.toplam_park cografi_stats.mahalle_sayisi 1 %}
+                    {% else %}
+                        0
+                    {% endif %}
+                </span>
+                <span class="text-xs text-gray-500 ml-1">park</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coğrafi Dağılım Haritası Placeholder -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Dağılım Haritası</h4>
+        <div class="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg flex items-center justify-center border border-indigo-200 dark:border-indigo-700">
+            <div class="text-center">
+                <i class="fas fa-map text-indigo-400 text-4xl mb-2"></i>
+                <p class="text-sm text-gray-500 dark:text-gray-400">İnteraktif harita yükleniyor...</p>
+                <button class="text-xs text-indigo-600 hover:text-indigo-700 mt-1">Haritayı Aç</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mahalle Bazında Top 5 -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">En Çok Park Olan Mahalleler</h4>
+        <div class="space-y-2">
+            <!-- Bu veri dinamik olarak güncellenecek -->
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aksiyon Butonları -->
+    <div class="flex space-x-2">
+        <a href="#" class="flex-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:shadow-lg transition-all btn-modern">
+            <i class="fas fa-map mr-2"></i>
+            Harita Analizi
+        </a>
+        <a href="#" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+            <i class="fas fa-download mr-2"></i>
+            Rapor İndir
+        </a>
+    </div>
+</div>

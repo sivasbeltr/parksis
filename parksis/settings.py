@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("APP_DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 INTERNAL_IPS = os.environ.get("INTERNAL_IPS", "").split(",")
 
@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "rest_framework",
     "rest_framework_gis",
+    "django_htmx",
+    "django_filters",
     "ortak.apps.OrtakConfig",
     "parkbahce.apps.ParkbahceConfig",
     "istakip.apps.IstakipConfig",
@@ -46,6 +48,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 
 MIDDLEWARE = [
+    "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

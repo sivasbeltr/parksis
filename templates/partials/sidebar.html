@@ -104,11 +104,15 @@
                             <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Yollar</a></li>
                         </ul>
                     </div>
-                </li>
-
-                <!-- Raporlar -->
+                </li>                <!-- İstatistikler -->
                 <li>
-                    <a href="#" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
+                    <a href="{% url 'parkbahce:istatistik_index' %}" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
+                        <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
+                        İstatistikler
+                    </a>
+                </li>                <!-- Raporlar -->
+                <li>
+                    <a href="{% url 'parkbahce:rapor_index' %}" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
                         <i class="fas fa-chart-bar w-5 h-5 mr-3"></i>
                         Raporlar
                     </a>

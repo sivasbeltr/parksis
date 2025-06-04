@@ -1,0 +1,188 @@
+<!-- Bakım & Sorun İstatistikleri Kartı -->
+<div class="glass-card rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50 hover-lift animate-card">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-tools text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Bakım & Sorun</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">İş takibi ve sorun yönetimi</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bakım & Sorun İstatistikleri -->
+    <div class="space-y-4 mb-6">
+        <!-- Bakım Bekleyen -->
+        <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-yellow-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Bakım Bekleyen</span>
+                    <div class="text-xs text-gray-500">Planlanan bakım işleri</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-yellow-600">{{ bakim_stats.bakim_bekleyen }}</span>
+                <span class="text-xs text-gray-500 ml-1">iş</span>
+            </div>
+        </div>
+
+        <!-- Aktif Sorunlar -->
+        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-red-100 dark:bg-red-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Aktif Sorunlar</span>
+                    <div class="text-xs text-gray-500">Çözüm bekleyen sorunlar</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-red-600">{{ bakim_stats.aktif_sorun }}</span>
+                <span class="text-xs text-gray-500 ml-1">sorun</span>
+            </div>
+        </div>
+
+        <!-- Tamamlanan İşler -->
+        <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tamamlanan İşler</span>
+                    <div class="text-xs text-gray-500">Bu ay tamamlanan</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-green-600">{{ bakim_stats.tamamlanan_is }}</span>
+                <span class="text-xs text-gray-500 ml-1">iş</span>
+            </div>
+        </div>
+
+        <!-- Geciken İşler -->
+        <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-orange-100 dark:bg-orange-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-hourglass-half text-orange-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Geciken İşler</span>
+                    <div class="text-xs text-gray-500">Zamanında tamamlanmayan</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-orange-600">{{ bakim_stats.geciken_is }}</span>
+                <span class="text-xs text-gray-500 ml-1">iş</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performans Göstergeleri -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Performans Göstergeleri</h4>
+        <div class="space-y-3">
+            <!-- Çözüm Oranı -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Çözüm Oranı</span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">85%</span>
+                </div>
+            </div>
+
+            <!-- Zamanında Teslim -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Zamanında Teslim</span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 72%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">72%</span>
+                </div>
+            </div>
+
+            <!-- Memnuniyet Oranı -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Memnuniyet Oranı</span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-purple-500 h-2 rounded-full" style="width: 90%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">90%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acil Durum Bildirimleri -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Acil Durumlar</h4>
+        <div class="space-y-2">
+            <div class="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-fire text-red-500"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Yüksek Öncelik</span>
+                </div>
+                <span class="text-sm font-bold text-red-600">0</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border-l-4 border-orange-500">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-exclamation text-orange-500"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Orta Öncelik</span>
+                </div>
+                <span class="text-sm font-bold text-orange-600">0</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-info text-blue-500"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Düşük Öncelik</span>
+                </div>
+                <span class="text-sm font-bold text-blue-600">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistem Durumu -->
+    <div class="mb-6 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Sistem Durumu</span>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-green-600 font-medium">Çevrimiçi</span>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+            Tüm sistemler normal çalışıyor. Son güncelleme: {% now "H:i" %}
+        </p>
+    </div>
+
+    <!-- Aksiyon Butonları -->
+    <div class="flex space-x-2">
+        <a href="#" class="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:shadow-lg transition-all btn-modern">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Sorun Takibi
+        </a>
+        <a href="#" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+            <i class="fas fa-calendar-check mr-2"></i>
+            Bakım Planı
+        </a>
+    </div>
+</div>

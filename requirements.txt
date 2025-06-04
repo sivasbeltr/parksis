@@ -6,3 +6,5 @@ python-dotenv
 psycopg
 minio
 django-cors-headers
+django-htmx
+django-filter

@@ -104,8 +104,8 @@ class MinIOStorage(Storage):
 
     def url(self, name):
         """Dosya URL'ini al"""
-        protocol = "https" if self.use_https else "http"
-        return f"{protocol}://{self.custom_domain}/{name}"
+        # protocol = "https" if self.use_https else "http"
+        return f"https://{self.custom_domain}/{name}"
 
     def listdir(self, path):
         """Dizin içeriğini listele"""

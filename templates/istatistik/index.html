@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}İstatistikler - {{ block.super }}{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+{% endblock %}
+
+{% block content %}
+<!-- İstatistikler Ana Sayfa -->
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="glass-card rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-chart-line text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white gradient-text">İstatistikler</h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">Park ve Bahçeler Müdürlüğü - Analitik Gösterge Paneli</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Son güncelleme</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{% now "d.m.Y H:i" %}</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gradient-to-r from-park-green-500 to-park-green-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ park_stats.toplam_park }}</div>
+                <div class="text-sm opacity-90">Toplam Park</div>
+            </div>
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ alan_stats.yesil_alan_sayisi }}</div>
+                <div class="text-sm opacity-90">Yeşil Alan</div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ alan_stats.spor_alan_sayisi }}</div>
+                <div class="text-sm opacity-90">Spor Alanı</div>
+            </div>
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ cografi_stats.mahalle_sayisi }}</div>
+                <div class="text-sm opacity-90">Mahalle</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kategorileri -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Park Yönetimi İstatistikleri -->
+        {% include 'istatistik/partials/park_stats_card.html' %}
+        
+        <!-- Alan İstatistikleri -->
+        {% include 'istatistik/partials/alan_stats_card.html' %}
+        
+        <!-- Altyapı İstatistikleri -->
+        {% include 'istatistik/partials/altyapi_stats_card.html' %}
+        
+        <!-- Donatı & Habitat İstatistikleri -->
+        {% include 'istatistik/partials/donati_stats_card.html' %}
+        
+        <!-- Coğrafi Dağılım İstatistikleri -->
+        {% include 'istatistik/partials/cografi_stats_card.html' %}
+        
+        <!-- Bakım & Sorun İstatistikleri -->
+        {% include 'istatistik/partials/bakim_stats_card.html' %}
+    </div>
+
+    <!-- Detaylı Raporlar Bölümü -->
+    <div class="glass-card rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="fas fa-file-chart-column mr-3 text-park-green-600"></i>
+            Detaylı Raporlar
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="#" class="bg-gradient-to-r from-park-green-50 to-park-green-100 dark:from-park-green-900/20 dark:to-park-green-800/20 p-4 rounded-lg border border-park-green-200 dark:border-park-green-700 hover:shadow-lg transition-all group">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-chart-bar text-park-green-600 mr-2"></i>
+                    <span class="font-semibold text-gray-900 dark:text-white">Park Analiz Raporu</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Parkların detaylı istatistiksel analizi</p>
+            </a>
+            
+            <a href="#" class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all group">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-map-marked-alt text-blue-600 mr-2"></i>
+                    <span class="font-semibold text-gray-900 dark:text-white">Coğrafi Dağılım</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Parkların mahalle bazında dağılımı</p>
+            </a>
+            
+            <a href="#" class="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700 hover:shadow-lg transition-all group">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-tools text-purple-600 mr-2"></i>
+                    <span class="font-semibold text-gray-900 dark:text-white">Bakım Raporu</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Bakım işlemleri ve durum raporu</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sayaç animasyonları
+    function animateCounters() {
+        const counters = document.querySelectorAll('[data-counter]');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-counter'));
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    counter.textContent = target.toLocaleString('tr-TR');
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = Math.floor(current).toLocaleString('tr-TR');
+                }
+            }, 16);
+        });
+    }
+    
+    // Sayfa yüklendiğinde animasyonları başlat
+    setTimeout(animateCounters, 500);
+    
+    // Kartlara hover efektleri
+    const cards = document.querySelectorAll('.hover-lift');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

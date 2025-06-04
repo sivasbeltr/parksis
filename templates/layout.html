@@ -1,3 +1,5 @@
+ {% load django_htmx %}
+
 <!DOCTYPE html>
 <html lang="tr" class="h-full">
 <head>
@@ -237,9 +239,10 @@
     </style>
     
     {% block extra_head %}{% endblock %}
+    {% htmx_script %}
 </head>
 
-<body class="h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+<body  hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' class="h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
 
     <!-- Mobile Backdrop -->
     <div id="mobile-backdrop" class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden hidden"></div>
