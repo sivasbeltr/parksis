@@ -330,129 +330,130 @@ def park_harita(request):
     return render(request, "parkbahce/park_harita.html")
 
 
-# HTMX Tab Views
-def park_is_takip_tab_htmx(request, park_uuid):
-    """Park İş Takip sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # İş takip verilerini simüle ediyoruz (gerçek modeller eklendikten sonra güncellenecek)
-    is_takip_data = {
-        "aktif_isler": 5,
-        "bekleyen_isler": 3,
-        "tamamlanan_isler": 12,
-        "son_isler": [
-            {
-                "ad": "Çim Biçme İşi",
-                "tarih": "15.11.2024",
-                "durum": "Devam Ediyor",
-            },
-            {"ad": "Ağaç Budama", "tarih": "14.11.2024", "durum": "Tamamlandı"},
-            {
-                "ad": "Sulama Sistemi Kontrolü",
-                "tarih": "13.11.2024",
-                "durum": "Bekliyor",
-            },
-        ],
-    }
-
-    context = {"park": park, "is_takip_data": is_takip_data}
-    return render(request, "parkbahce/tabs/park_is_takip_tab.html", context)
-
-
-def park_habitatlar_tab_htmx(request, park_uuid):
-    """Park Habitatlar sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # Parka ait habitatları getir
-    habitatlar = park.habitatlar.select_related("habitat_tipi").all()
-
-    context = {"park": park, "habitatlar": habitatlar}
-    return render(request, "parkbahce/tabs/park_habitatlar_tab.html", context)
-
-
-def park_donatilar_tab_htmx(request, park_uuid):
-    """Park Donatılar sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # Parka ait donatıları getir
-    donatilar = park.donatilar.select_related("donati_tipi").all()
-
-    context = {"park": park, "donatilar": donatilar}
-    return render(request, "parkbahce/tabs/park_donatilar_tab.html", context)
-
-
-def park_oyun_gruplari_tab_htmx(request, park_uuid):
-    """Park Oyun Grupları sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # Parka ait oyun gruplarını getir
-    oyun_gruplari = park.oyun_gruplari.select_related(
-        "oyun_grup_tipi", "oyun_grup_model"
-    ).all()
-
-    context = {"park": park, "oyun_gruplari": oyun_gruplari}
-    return render(request, "parkbahce/tabs/park_oyun_gruplari_tab.html", context)
-
-
-def park_alanlar_tab_htmx(request, park_uuid):
-    """Park Alanlar sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # Parka ait alanları getir
-    yesil_alanlar = park.yesil_alanlar.all()
-    spor_alanlar = park.spor_alanlar.select_related(
-        "spor_alan_tipi", "spor_aleti_grup"
-    ).all()
-    oyun_alanlar = (
-        park.oyun_alanlar.select_related("oyun_alan_kaplama_tipi").all()
-        if hasattr(park, "oyun_alanlar")
-        else []
+def mahalle_detail(request, mahalle_uuid):
+    """Mahalle detay sayfası"""
+    mahalle = get_object_or_404(
+        Mahalle.objects.select_related("ilce", "ilce__il"),
+        uuid=mahalle_uuid,
     )
-    binalar = park.binalar.select_related("bina_kullanim_tipi").all()
+
+    # Mahalle parkları
+    parklar = (
+        Park.objects.filter(mahalle=mahalle)
+        .select_related("park_tipi", "sulama_tipi", "sulama_kaynagi")
+        .order_by("ad")
+    )
+
+    # İstatistikler
+    total_parks = parklar.count()
+    total_area = parklar.aggregate(total=Sum("alan"))["total"] or 0
+
+    # Park tiplerine göre istatistikler
+    park_stats = (
+        parklar.values("park_tipi__ad")
+        .annotate(count=Count("id"), total_area=Sum("alan"))
+        .order_by("-count")
+    )
+
+    # Son eklenen parklar
+    recent_parks = parklar.order_by("-created_at")[:6]
+
+    # Günlük/haftalık/aylık istatistikler için tarih filtreleri
+    from datetime import datetime, timedelta
+
+    today = datetime.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
+    stats = {
+        "total_parks": total_parks,
+        "total_area": total_area,
+        "nufus": mahalle.nufus,
+        "park_per_person": round(total_area / mahalle.nufus, 2) if mahalle.nufus else 0,
+        "recent_count": parklar.filter(created_at__gte=month_ago).count(),
+    }
 
     context = {
-        "park": park,
-        "yesil_alanlar": yesil_alanlar,
-        "spor_alanlar": spor_alanlar,
-        "oyun_alanlar": oyun_alanlar,
-        "binalar": binalar,
-    }
-    return render(request, "parkbahce/tabs/park_alanlar_tab.html", context)
-
-
-def park_altyapi_tab_htmx(request, park_uuid):
-    """Park Altyapı sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
-
-    # Altyapı istatistiklerini hesapla
-    altyapi_stats = {
-        "sulama_noktalari": park.sulama_noktalari.count(),
-        "elektrik_noktalari": (
-            park.elektrik_noktalar.count() if hasattr(park, "elektrik_noktalar") else 0
-        ),
-        "sulama_hatlari": (
-            park.sulama_hatlari.count() if hasattr(park, "sulama_hatlari") else 0
-        ),
-        "elektrik_hatlari": (
-            park.elektrik_hatlari.count() if hasattr(park, "elektrik_hatlari") else 0
-        ),
-        "kanal_hatlari": (
-            park.kanal_hatlari.count() if hasattr(park, "kanal_hatlari") else 0
-        ),
+        "mahalle": mahalle,
+        "parklar": parklar,
+        "stats": stats,
+        "park_stats": park_stats,
+        "recent_parks": recent_parks,
     }
 
-    context = {"park": park, "altyapi_stats": altyapi_stats}
-    return render(request, "parkbahce/tabs/park_altyapi_tab.html", context)
+    return render(request, "parkbahce/mahalle_detail.html", context)
 
 
-def park_aboneler_tab_htmx(request, park_uuid):
-    """Park Aboneler sekmesi HTMX view'i"""
-    park = get_object_or_404(Park, uuid=park_uuid)
+def mahalle_list(request):
+    """Mahalle listesi sayfası"""
+    from django.core.paginator import Paginator
+    from django.db.models import Count, Q, Sum
 
-    # Parka ait aboneleri getir
-    aboneler = []
-    if hasattr(park, "aboneler"):
-        aboneler = park.aboneler.all()
+    from ortak.models import Il, Ilce, Mahalle
 
-    context = {"park": park, "aboneler": aboneler}
-    return render(request, "parkbahce/tabs/park_aboneler_tab.html", context)
+    # Filtreleme parametreleri
+    search_query = request.GET.get("search", "").strip()
+    il_filter = request.GET.get("il", "")
+    ilce_filter = request.GET.get("ilce", "")
+    sort_by = request.GET.get("sort", "ad")
+    sort_direction = request.GET.get("direction", "asc")
+    per_page = int(request.GET.get("per_page", 25))
+
+    # Ana sorgu
+    mahalleler = Mahalle.objects.select_related("ilce", "ilce__il").annotate(
+        park_sayisi=Count("parklar"), toplam_park_alani=Sum("parklar__alan")
+    )
+
+    # Arama filtresi
+    if search_query:
+        mahalleler = mahalleler.filter(
+            Q(ad__icontains=search_query)
+            | Q(ilce__ad__icontains=search_query)
+            | Q(ilce__il__ad__icontains=search_query)
+            | Q(muhtar__icontains=search_query)
+        )
+
+    # İl filtresi
+    if il_filter:
+        mahalleler = mahalleler.filter(ilce__il_id=il_filter)
+
+    # İlçe filtresi
+    if ilce_filter:
+        mahalleler = mahalleler.filter(ilce_id=ilce_filter)
+
+    # Sıralama
+    if sort_direction == "desc":
+        sort_by = f"-{sort_by}"
+
+    mahalleler = mahalleler.order_by(sort_by)
+
+    # Sayfalama
+    paginator = Paginator(mahalleler, per_page)
+    page_number = request.GET.get("page")
+    mahalleler_page = paginator.get_page(page_number)
+
+    # Filtre seçenekleri
+    iller = Il.objects.all().order_by("ad")
+    ilceler = Ilce.objects.select_related("il").order_by("il__ad", "ad")
+
+    # İstatistikler
+    total_mahalleler = mahalleler.count()
+    total_nufus = mahalleler.aggregate(total=Sum("nufus"))["total"] or 0
+    total_parks = mahalleler.aggregate(total=Sum("park_sayisi"))["total"] or 0
+
+    context = {
+        "mahalleler": mahalleler_page,
+        "search_query": search_query,
+        "il_filter": il_filter,
+        "ilce_filter": ilce_filter,
+        "sort_by": sort_by.lstrip("-"),
+        "sort_direction": sort_direction,
+        "per_page": per_page,
+        "iller": iller,
+        "ilceler": ilceler,
+        "total_mahalleler": total_mahalleler,
+        "total_nufus": total_nufus,
+        "total_parks": total_parks,
+    }
+
+    return render(request, "parkbahce/mahalle_list.html", context)

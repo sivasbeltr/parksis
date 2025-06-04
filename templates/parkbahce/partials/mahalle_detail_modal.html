@@ -89,33 +89,77 @@
             <p><strong>Posta Kodu:</strong> {{ mahalle.posta_kodu }}</p>
             {% endif %}
         </div>
-    </div>
-
-    <!-- Son Parklar -->
+    </div>    <!-- Son Parklar -->
     {% if recent_parks %}
-    <div class="bg-green-50 rounded-lg p-4">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-            </svg>
-            Mahalle Parkları
-        </h3>
-        <div class="space-y-2">
-            {% for park in recent_parks %}
-            <div class="flex items-center justify-between p-2 bg-white rounded-lg">
-                <div>
-                    <p class="font-medium text-gray-900">{{ park.ad }}</p>
-                    <p class="text-xs text-gray-500">{{ park.alan|floatformat:0 }} m² - {{ park.park_tipi.ad|default:"Tip belirtilmemiş" }}</p>
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-5 border border-green-200/50 dark:border-green-700/50">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+                    <i class="fas fa-tree text-white text-sm"></i>
                 </div>
-                <button onclick="showParkDetails('{{ park.uuid }}')" 
-                        class="text-green-600 hover:text-green-700 text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </button>
+                Mahalle Parkları
+                <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 text-xs rounded-full">
+                    {{ recent_parks|length }}
+                </span>
+            </h3>
+            <a href="{% url 'parkbahce:mahalle_detail' mahalle.uuid %}" 
+               class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium flex items-center transition-colors">
+                Tüm Parklar
+                <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+        </div>
+        
+        <div class="space-y-3">
+            {% for park in recent_parks %}
+            <div class="group bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-lg p-3 border border-white/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                 onclick="showParkDetails('{{ park.uuid }}')">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <h4 class="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                {{ park.ad }}
+                            </h4>
+                        </div>
+                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="flex items-center">
+                                <i class="fas fa-expand-arrows-alt mr-1"></i>
+                                {{ park.alan|floatformat:0 }} m²
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ park.park_tipi.ad|default:"Genel Park" }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-700 transition-colors">
+                            <i class="fas fa-info text-green-600 dark:text-green-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
+        
+        {% if recent_parks|length >= 5 %}
+        <div class="mt-4 pt-3 border-t border-green-200/50 dark:border-green-700/50">
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                İlk {{ recent_parks|length }} park gösteriliyor. 
+                <a href="{% url 'parkbahce:mahalle_detail' mahalle.uuid %}" class="text-green-600 hover:text-green-700 dark:text-green-400 font-medium">
+                    Tümünü görüntüle
+                </a>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 text-center border border-gray-200 dark:border-gray-700">
+        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-tree text-gray-400 dark:text-gray-500"></i>
+        </div>
+        <h4 class="font-medium text-gray-900 dark:text-white mb-1">Henüz Park Bulunmuyor</h4>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Bu mahallede kayıtlı park bulunmamaktadır.</p>
     </div>
     {% endif %}
 

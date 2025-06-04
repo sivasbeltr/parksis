@@ -9,6 +9,8 @@ app_name = "parkbahce"
 urlpatterns = [
     path("parklar/", views.park_list, name="park_list"),
     path("parklar/<uuid:park_uuid>/", views.park_detail, name="park_detail"),
+    path("mahalleler/", views.mahalle_list, name="mahalle_list"),
+    path("mahalle/<uuid:mahalle_uuid>/", views.mahalle_detail, name="mahalle_detail"),
     path("park-harita/", views.park_harita, name="park_harita"),
     path("istatistikler/", istatistik_views.istatistik_index, name="istatistik_index"),
     path(

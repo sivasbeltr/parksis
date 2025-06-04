@@ -1,0 +1,305 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ mahalle.ad }} - Mahalle Detayı - {{ block.super }}{% endblock %}
+
+{% block page_title %}Mahalle Detayı{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'parkbahce:park_harita' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            Park Haritası
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">{{ mahalle.ad }} Mahallesi</span>
+    </nav>
+
+    <!-- Mahalle Header -->
+    <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1 mb-4 lg:mb-0">
+                    <h1 class="text-2xl lg:text-3xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-map-marker-alt mr-3"></i>
+                        {{ mahalle.ad }}
+                    </h1>
+                    <div class="flex flex-wrap items-center gap-3 text-blue-100 text-sm">
+                        <span class="flex items-center">
+                            <i class="fas fa-building mr-1"></i>
+                            {{ mahalle.ilce.ad }} / {{ mahalle.ilce.il.ad }}
+                        </span>
+                        {% if mahalle.nufus %}
+                        <span class="flex items-center">
+                            <i class="fas fa-users mr-1"></i>
+                            {{ mahalle.nufus|floatformat:0 }} kişi
+                        </span>
+                        {% endif %}
+                        {% if mahalle.alan %}
+                        <span class="flex items-center">
+                            <i class="fas fa-expand-arrows-alt mr-1"></i>
+                            {{ mahalle.alan|floatformat:0 }} m²
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Özet İstatistikler -->
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm hover:bg-white/20 transition-all min-w-[85px]">
+                        <div class="text-2xl font-bold text-white">{{ stats.total_parks }}</div>
+                        <div class="text-xs text-blue-100">Park</div>
+                    </div>
+                    <div class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm hover:bg-white/20 transition-all min-w-[85px]">
+                        <div class="text-2xl font-bold text-white">{{ stats.total_area|floatformat:0 }}</div>
+                        <div class="text-xs text-blue-100">m² Alan</div>
+                    </div>
+                    <div class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm hover:bg-white/20 transition-all min-w-[85px]">
+                        <div class="text-2xl font-bold text-white">{{ stats.park_per_person|floatformat:1 }}</div>
+                        <div class="text-xs text-blue-100">m²/Kişi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Toplam Park Sayısı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tree text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Park</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_parks }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam Alan -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-expand-arrows-alt text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Alan</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_area|floatformat:0 }}</p>
+                    <p class="text-xs text-gray-400">m²</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nüfus -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-purple-600 dark:text-purple-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Nüfus</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.nufus|default:"-" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kişi Başına Alan -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-orange-600 dark:text-orange-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Kişi Başına</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.park_per_person|floatformat:1 }}</p>
+                    <p class="text-xs text-gray-400">m²/kişi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Park Listesi ve İstatistikler -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Park Listesi -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-tree text-park-green-600 mr-3"></i>
+                        Mahalle Parkları
+                        <span class="ml-2 px-2 py-1 bg-park-green-100 dark:bg-park-green-800 text-park-green-700 dark:text-park-green-200 text-sm rounded-full">
+                            {{ parklar.count }}
+                        </span>
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    {% if parklar %}
+                    <div class="space-y-4">
+                        {% for park in parklar %}
+                        <div class="group bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-3 h-3 bg-park-green-500 rounded-full"></div>
+                                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-park-green-600 dark:group-hover:text-park-green-400 transition-colors">
+                                            {{ park.ad }}
+                                        </h3>
+                                        {% if park.park_tipi %}
+                                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs rounded-full">
+                                            {{ park.park_tipi.ad }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-expand-arrows-alt mr-1 text-xs"></i>
+                                            <span>{{ park.alan|floatformat:0 }} m²</span>
+                                        </div>
+                                        {% if park.yapim_tarihi %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar mr-1 text-xs"></i>
+                                            <span>{{ park.yapim_tarihi.year }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if park.sulama_tipi %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-tint mr-1 text-xs"></i>
+                                            <span>{{ park.sulama_tipi.ad }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if park.ekap_no %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-hashtag mr-1 text-xs"></i>
+                                            <span>{{ park.ekap_no }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2">
+                                    <a href="{% url 'parkbahce:park_detail' park.uuid %}" 
+                                       class="inline-flex items-center px-3 py-2 bg-park-green-600 text-white text-sm font-medium rounded-lg hover:bg-park-green-700 transition-colors">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Detay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-tree text-gray-400 dark:text-gray-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-2">Henüz Park Bulunmuyor</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Bu mahallede kayıtlı park bulunmamaktadır.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Sidebar - İstatistikler -->
+        <div class="space-y-6">
+            <!-- Park Tipleri Dağılımı -->
+            {% if park_stats %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                    Park Tipleri
+                </h3>
+                <div class="space-y-3">
+                    {% for stat in park_stats %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ stat.park_tipi__ad|default:"Tip Belirtilmemiş" }}
+                                </span>
+                                <span class="text-sm text-gray-500">{{ stat.count }}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div class="bg-park-green-500 h-2 rounded-full" style="width: {% widthratio stat.count stats.total_parks 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Son Eklenen Parklar -->
+            {% if recent_parks %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-clock text-orange-600 mr-2"></i>
+                    Son Eklenen
+                </h3>
+                <div class="space-y-3">
+                    {% for park in recent_parks %}
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white text-sm">{{ park.ad }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ park.created_at|date:"d.m.Y" }}</p>
+                        </div>
+                        <a href="{% url 'parkbahce:park_detail' park.uuid %}" 
+                           class="text-park-green-600 hover:text-park-green-700 text-sm">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Hızlı Eylemler -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-bolt text-yellow-600 mr-2"></i>
+                    Hızlı Eylemler
+                </h3>
+                <div class="space-y-3">
+                    <button onclick="zoomToMahalle('{{ mahalle.uuid }}')" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i class="fas fa-search-plus mr-2"></i>
+                        Haritada Göster
+                    </button>
+                    
+                    <a href="{% url 'parkbahce:park_harita' %}" 
+                       class="w-full bg-park-green-600 hover:bg-park-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i class="fas fa-map mr-2"></i>
+                        Park Haritası
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geri Dönüş Butonu -->
+    <div class="flex justify-center">
+        <a href="{% url 'parkbahce:park_harita' %}" 
+           class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-lg hover:shadow-xl">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Park Haritasına Dön
+        </a>
+    </div>
+</div>
+
+<script>
+// Haritada mahalle gösterme fonksiyonu
+function zoomToMahalle(mahalleUuid) {
+    // Park haritasına yönlendir ve mahalle odaklı olarak aç
+    window.location.href = `{% url 'parkbahce:park_harita' %}?mahalle=${mahalleUuid}`;
+}
+</script>
+{% endblock %}

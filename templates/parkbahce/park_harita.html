@@ -704,12 +704,16 @@
             } catch (error) {
                 console.error('Park detayları yüklenirken hata:', error);
             }
-        }
-          // Mahalle detaylarını göster
+        }          // Mahalle detaylarını göster
         async function showMahalleDetails(feature) {
             try {
-                const mahalleData = encodeURIComponent(JSON.stringify(feature.getProperties()));
-                const response = await fetch(`/parkbahce/htmx/mahalle-detail/${feature.get('uuid') || 'dummy'}/?mahalle_data=${mahalleData}`, {
+                const mahalleUuid = feature.get('uuid');
+                if (!mahalleUuid) {
+                    console.error('Mahalle UUID bulunamadı');
+                    return;
+                }
+
+                const response = await fetch(`/parkbahce/htmx/mahalle-detail/${mahalleUuid}/`, {
                     headers: {
                         'HX-Request': 'true'
                     }

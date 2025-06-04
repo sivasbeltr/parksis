@@ -153,82 +153,51 @@ def park_detail_htmx(request, park_uuid):
 
 @require_http_methods(["GET"])
 def mahalle_detail_htmx(request, mahalle_uuid):
-    """Mahalle detay bilgilerini HTMX ile getir - JSON verisi üzerinden"""
+    """Mahalle detay bilgilerini HTMX ile getir - UUID ile"""
     if not request.htmx:
         return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
 
-    # URL'den gelen mahalle_data parametresini al
-    mahalle_data_str = request.GET.get("mahalle_data")
+    from ortak.models import Mahalle
 
-    if mahalle_data_str:
+    try:
+        # Gerçek mahalle objesini UUID ile al
+        mahalle = get_object_or_404(
+            Mahalle.objects.select_related("ilce", "ilce__il"), uuid=mahalle_uuid
+        )
+
+        # Mahalle istatistiklerini hesapla
         try:
-            # JSON string'i decode et
-            mahalle_data = json.loads(mahalle_data_str)
+            # Mahalle sınırları içindeki parkları bul
+            parklar_count = Park.objects.filter(mahalle=mahalle).count()
 
-            # Mahalle verisini simüle et (gerçek mahalle objesi yerine)
-            mahalle = type(
-                "Mahalle",
-                (),
-                {
-                    "uuid": mahalle_data.get("uuid", ""),
-                    "ad": mahalle_data.get("ad", "Bilinmeyen Mahalle"),
-                    "kod": mahalle_data.get("kod", ""),
-                    "osm_id": mahalle_data.get("osm_id", ""),
-                    "posta_kodu": mahalle_data.get("posta_kodu", ""),
-                    "ilce": type(
-                        "Ilce",
-                        (),
-                        {
-                            "ad": mahalle_data.get("ilce_ad", "Merkez"),
-                            "il": type("Il", (), {"ad": "Sivas"})(),
-                        },
-                    )(),
-                },
-            )()
+            total_area = (
+                Park.objects.filter(mahalle=mahalle).aggregate(total=Sum("alan"))[
+                    "total"
+                ]
+                or 0
+            )
 
-            # Mahalle istatistiklerini hesapla
-            mahalle_stats = {}
+            # Son eklenen parkları al
+            recent_parks = (
+                Park.objects.filter(mahalle=mahalle)
+                .select_related("park_tipi")
+                .order_by("-created_at")[:5]
+            )
+
+            mahalle_stats = {
+                "park_sayisi": parklar_count,
+                "toplam_alan": total_area,
+                "nufus": mahalle.nufus,
+            }
+
+        except Exception as e:
+            print(f"Mahalle istatistikleri hesaplanırken hata: {e}")
+            mahalle_stats = {"park_sayisi": 0, "toplam_alan": 0, "nufus": mahalle.nufus}
             recent_parks = []
 
-            # Eğer mahalle UUID'si varsa gerçek istatistikleri al
-            if mahalle.uuid:
-                try:
-                    # Mahalle sınırları içindeki parkları bul
-                    parklar_count = Park.objects.filter(
-                        mahalle__uuid=mahalle.uuid
-                    ).count()
-
-                    total_area = (
-                        Park.objects.filter(mahalle__uuid=mahalle.uuid).aggregate(
-                            total=Sum("alan")
-                        )["total"]
-                        or 0
-                    )
-
-                    # Son eklenen parkları al
-                    recent_parks = (
-                        Park.objects.filter(mahalle__uuid=mahalle.uuid)
-                        .select_related("park_tipi")
-                        .order_by("-created_at")[:5]
-                    )
-
-                    mahalle_stats = {
-                        "park_sayisi": parklar_count,
-                        "toplam_alan": total_area,
-                        "nufus": None,  # Nüfus bilgisi şu an mevcut değil
-                    }
-
-                except Exception as e:
-                    print(f"Mahalle istatistikleri hesaplanırken hata: {e}")
-                    mahalle_stats = {"park_sayisi": 0, "toplam_alan": 0, "nufus": None}
-                    recent_parks = []
-            else:
-                mahalle_stats = {"park_sayisi": 0, "toplam_alan": 0, "nufus": None}
-
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest("Geçersiz mahalle verisi.")
-    else:
-        return HttpResponseBadRequest("Mahalle verisi bulunamadı.")
+    except Exception as e:
+        print(f"Mahalle bulunamadı: {e}")
+        return HttpResponseBadRequest("Mahalle bulunamadı.")
 
     context = {
         "mahalle": mahalle,
