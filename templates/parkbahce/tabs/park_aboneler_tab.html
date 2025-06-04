@@ -1,0 +1,112 @@
+<div class="space-y-6">    <!-- Aboneler Başlığı -->
+    <div class="flex items-center">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="fas fa-plug text-purple-600 mr-3"></i>
+            Aboneler ({{ aboneler.count }})
+        </h3>
+    </div>
+
+    <!-- Aboneler Listesi -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {% for abone in aboneler %}        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+            <div class="flex items-start mb-3">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
+                        {% if abone.abone_tipi == 'ELEKTRIK' %}
+                            <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+                        {% elif abone.abone_tipi == 'SU' %}
+                            <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+                        {% elif abone.abone_tipi == 'DOGALGAZ' %}
+                            <i class="fas fa-fire text-orange-600 dark:text-orange-400"></i>
+                        {% elif abone.abone_tipi == 'TELEFON' %}
+                            <i class="fas fa-phone text-green-600 dark:text-green-400"></i>
+                        {% elif abone.abone_tipi == 'INTERNET' %}
+                            <i class="fas fa-wifi text-purple-600 dark:text-purple-400"></i>
+                        {% else %}
+                            <i class="fas fa-plug text-purple-600 dark:text-purple-400"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ abone.get_abone_tipi_display|default:abone.abone_tipi }}</h4>
+                        {% if abone.abone_no %}
+                        <p class="text-xs text-gray-600 dark:text-gray-400">No: {{ abone.abone_no }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-2 text-xs">
+                {% if abone.abone_tarihi %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Abone Tarihi:</span>
+                    <span class="text-gray-900 dark:text-white">{{ abone.abone_tarihi|date:"d.m.Y" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if abone.kapasite %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Kapasite:</span>
+                    <span class="text-gray-900 dark:text-white">{{ abone.kapasite }}</span>
+                </div>
+                {% endif %}
+                
+                {% if abone.firma %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Firma:</span>
+                    <span class="text-gray-900 dark:text-white">{{ abone.firma }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Durum ve Endeks -->
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Son Endeks:</span>
+                    <span class="text-xs text-gray-900 dark:text-white">-</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Durum:</span>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Aktif
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-plug text-4xl mb-4"></i>
+            <h4 class="text-lg font-medium mb-2">Henüz abone bulunmuyor</h4>
+            <p class="text-sm">Bu parka ait abone bilgileri henüz eklenmemiş.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Abone İstatistikleri -->
+    {% if aboneler %}
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4">Abone İstatistikleri</h4>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Toplam Abone</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Su</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Doğalgaz</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Telekomünikasyon</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

@@ -1,0 +1,149 @@
+<div class="space-y-6">    <!-- Park Alanları Başlığı -->
+    <div class="flex items-center">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="fas fa-map text-green-600 mr-3"></i>
+            Park Alanları
+        </h3>
+    </div>
+
+    <!-- Alan Kategorileri Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Yeşil Alanlar -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-leaf text-green-600 mr-2"></i>
+                Yeşil Alanlar ({{ yesil_alanlar.count }})
+            </h4>
+            {% for alan in yesil_alanlar %}            <div class="mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-green-900 dark:text-green-100">
+                            Yeşil Alan {{ forloop.counter }}
+                        </h5>
+                        <div class="flex space-x-4 text-xs text-green-700 dark:text-green-300 mt-1">
+                            {% if alan.alan %}
+                            <span>Alan: {{ alan.alan|floatformat:0 }} m²</span>
+                            {% endif %}
+                            {% if alan.cevre %}
+                            <span>Çevre: {{ alan.cevre|floatformat:0 }} m</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 py-4">Henüz yeşil alan bulunmuyor</p>
+            {% endfor %}
+        </div>
+
+        <!-- Spor Alanları -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-running text-orange-600 mr-2"></i>
+                Spor Alanları ({{ spor_alanlar.count }})
+            </h4>
+            {% for alan in spor_alanlar %}            <div class="mb-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-orange-900 dark:text-orange-100">
+                            {{ alan.spor_alan_tipi.ad|default:"Spor Alanı" }}
+                        </h5>
+                        <div class="flex space-x-4 text-xs text-orange-700 dark:text-orange-300 mt-1">
+                            {% if alan.alan %}
+                            <span>Alan: {{ alan.alan|floatformat:0 }} m²</span>
+                            {% endif %}
+                            {% if alan.spor_aleti_grup %}
+                            <span>{{ alan.spor_aleti_grup.ad }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 py-4">Henüz spor alanı bulunmuyor</p>
+            {% endfor %}
+        </div>
+
+        <!-- Oyun Alanları -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-playground text-purple-600 mr-2"></i>
+                Oyun Alanları ({{ oyun_alanlar.count }})
+            </h4>
+            {% for alan in oyun_alanlar %}            <div class="mb-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-purple-900 dark:text-purple-100">
+                            Oyun Alanı {{ forloop.counter }}
+                        </h5>
+                        <div class="flex space-x-4 text-xs text-purple-700 dark:text-purple-300 mt-1">
+                            {% if alan.alan %}
+                            <span>Alan: {{ alan.alan|floatformat:0 }} m²</span>
+                            {% endif %}
+                            {% if alan.oyun_alan_kaplama_tipi %}
+                            <span>{{ alan.oyun_alan_kaplama_tipi.ad }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 py-4">Henüz oyun alanı bulunmuyor</p>
+            {% endfor %}
+        </div>
+
+        <!-- Binalar -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-building text-gray-600 mr-2"></i>
+                Binalar ({{ binalar.count }})
+            </h4>
+            {% for bina in binalar %}            <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {{ bina.ad|default:"Bina" }}
+                        </h5>
+                        <div class="flex space-x-4 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            {% if bina.alan %}
+                            <span>Alan: {{ bina.alan|floatformat:0 }} m²</span>
+                            {% endif %}
+                            {% if bina.bina_kullanim_tipi %}
+                            <span>{{ bina.bina_kullanim_tipi.ad }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 py-4">Henüz bina bulunmuyor</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Alan İstatistikleri Özeti -->
+    <div class="bg-park-green-50 dark:bg-park-green-900/20 rounded-lg p-4 border border-park-green-200 dark:border-park-green-800">
+        <h4 class="text-md font-medium text-park-green-900 dark:text-park-green-100 mb-4 flex items-center">
+            <i class="fas fa-chart-bar mr-2"></i>
+            Alan İstatistikleri
+        </h4>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ yesil_alanlar.count }}</div>
+                <div class="text-xs text-park-green-700 dark:text-park-green-300">Yeşil Alan</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ spor_alanlar.count }}</div>
+                <div class="text-xs text-park-green-700 dark:text-park-green-300">Spor Alanı</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ oyun_alanlar.count }}</div>
+                <div class="text-xs text-park-green-700 dark:text-park-green-300">Oyun Alanı</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ binalar.count }}</div>
+                <div class="text-xs text-park-green-700 dark:text-park-green-300">Bina</div>
+            </div>
+        </div>
+    </div>
+</div>

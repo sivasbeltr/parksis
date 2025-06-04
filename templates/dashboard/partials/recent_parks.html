@@ -1,0 +1,37 @@
+<!-- Recent Parks Component -->
+<div class="p-6">
+    {% if recent_parks %}
+        <div class="space-y-4">
+            {% for park in recent_parks %}
+                <a href="{% url 'parkbahce:park_detail' park_uuid=park.uuid %}" class="block">
+                    <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-park-green-100 to-park-green-200 dark:from-park-green-900/20 dark:to-park-green-800/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-park-green-600 dark:text-park-green-400 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ park.ad }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ park.mahalle.ad|default:"Mahalle belirtilmemiş" }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                {{ park.created_at|date:"d.m.Y" }}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-tree text-4xl text-gray-300 dark:text-gray-600"></i>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz park eklenmemiş</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">İlk parkınızı ekleyerek başlayın</p>
+        </div>
+    {% endif %}
+</div>

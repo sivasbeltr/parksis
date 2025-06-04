@@ -2,13 +2,76 @@
 
 from django.urls import path
 
-from . import istatistik_views, rapor_views, views
+from . import htmx_views, istatistik_views, rapor_views, views
 
 app_name = "parkbahce"
 
 urlpatterns = [
     path("parklar/", views.park_list, name="park_list"),
     path("parklar/<uuid:park_uuid>/", views.park_detail, name="park_detail"),
+    path("park-harita/", views.park_harita, name="park_harita"),
     path("istatistikler/", istatistik_views.istatistik_index, name="istatistik_index"),
-    path("raporlar/", rapor_views.rapor_index, name="rapor_index"),
+    path(
+        "raporlar/", rapor_views.rapor_index, name="rapor_index"
+    ),  # Park ve Mahalle detay HTMX endpoints
+    path(
+        "htmx/park-detail/<uuid:park_uuid>/",
+        htmx_views.park_detail_htmx,
+        name="park_detail_htmx",
+    ),
+    path(
+        "htmx/mahalle-detail/<uuid:mahalle_uuid>/",
+        htmx_views.mahalle_detail_htmx,
+        name="mahalle_detail_htmx",
+    ),  # Park Detay Sekmeleri HTMX
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/habitatlar/",
+        htmx_views.park_habitatlar_tab_htmx,
+        name="park_habitatlar_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/donatilar/",
+        htmx_views.park_donatilar_tab_htmx,
+        name="park_donatilar_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/oyun-gruplari/",
+        htmx_views.park_oyun_gruplari_tab_htmx,
+        name="park_oyun_gruplari_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/aboneler/",
+        htmx_views.park_aboneler_tab_htmx,
+        name="park_aboneler_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/altyapi/",
+        htmx_views.park_altyapi_tab_htmx,
+        name="park_altyapi_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/alanlar/",
+        htmx_views.park_alanlar_tab_htmx,
+        name="park_alanlar_tab_htmx",
+    ),
+    # HTMX endpoints
+    path("htmx/recent-parks/", htmx_views.recent_parks_htmx, name="recent_parks_htmx"),
+    path(
+        "htmx/quick-actions/", htmx_views.quick_actions_htmx, name="quick_actions_htmx"
+    ),
+    path(
+        "htmx/park-types-distribution/",
+        htmx_views.park_types_distribution_htmx,
+        name="park_types_distribution_htmx",
+    ),
+    path(
+        "htmx/neighborhood-distribution/",
+        htmx_views.neighborhood_distribution_htmx,
+        name="neighborhood_distribution_htmx",
+    ),
+    path(
+        "htmx/infrastructure-status/",
+        htmx_views.infrastructure_status_htmx,
+        name="infrastructure_status_htmx",
+    ),
 ]

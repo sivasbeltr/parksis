@@ -101,4 +101,117 @@ Bu proje, Sivas Belediyesi Park ve Bahçeler Müdürlüğü'ne ait bir park yön
 - **Versiyon Kontrolü:** Git kullanılarak proje sürümleri takip edilecek, her özellik için ayrı branch oluşturulacaktır.
 - **Pull Request:** Her yeni özellik veya düzeltme için PR oluşturulacak, kod incelemesi yapılacaktır.
 - **CBS srid 4326:** Coğrafi veriler için SRID 4326 kullanılacaktır. Biz Veritabanına 5256 ile kaydedip, frontend'de 4326 olarak göstereceğiz.
+
+## 🌐 API Yapısı ve Endpointler
+
+### 📊 Ana API Endpointleri
+
+#### **🌳 Park ve Ana Modeller:**
+```
+GET /api/v1/parklar/                           # Park listesi
+GET /api/v1/parklar/{uuid}/                    # Park detayı
+GET /api/v1/mahalleler/                        # Mahalle listesi
+GET /api/v1/parklar-detay/                     # Park detay görünümü
+```
+
+#### **📍 Park Alt Modelleri (Park UUID üzerinden):**
+```
+GET /api/v1/parklar/{uuid}/habitatlar/         # Parka ait habitatlar
+GET /api/v1/parklar/{uuid}/donatilar/          # Parka ait donatılar
+GET /api/v1/parklar/{uuid}/oyun_gruplari/      # Parka ait oyun grupları
+GET /api/v1/parklar/{uuid}/sulama_noktalari/   # Parka ait sulama noktaları
+GET /api/v1/parklar/{uuid}/elektrik_noktalari/ # Parka ait elektrik noktaları
+GET /api/v1/parklar/{uuid}/yesil_alanlar/      # Parka ait yeşil alanlar
+GET /api/v1/parklar/{uuid}/spor_alanlar/       # Parka ait spor alanları
+GET /api/v1/parklar/{uuid}/binalar/            # Parka ait binalar
+GET /api/v1/parklar/{uuid}/havuzlar/           # Parka ait havuzlar
+GET /api/v1/parklar/{uuid}/yollar/             # Parka ait yollar
+GET /api/v1/parklar/{uuid}/oyun_alanlar/       # Parka ait oyun alanları
+GET /api/v1/parklar/{uuid}/sulama_hatlari/     # Parka ait sulama hatları
+GET /api/v1/parklar/{uuid}/elektrik_hatlari/   # Parka ait elektrik hatları
+GET /api/v1/parklar/{uuid}/kanal_hatlari/      # Parka ait kanal hatları
+GET /api/v1/parklar/{uuid}/aboneler/           # Parka ait aboneler
+```
+
+#### **🔍 Bağımsız Model Endpointleri:**
+
+**Nokta Geometrili Modeller:**
+```
+GET /api/v1/habitatlar/                        # Tüm habitatlar
+GET /api/v1/habitatlar/{uuid}/                 # Habitat detayı
+GET /api/v1/park-donatilar/                    # Tüm park donatıları
+GET /api/v1/park-donatilar/{uuid}/             # Donatı detayı
+GET /api/v1/oyun-gruplari/                     # Tüm oyun grupları
+GET /api/v1/oyun-gruplari/{uuid}/              # Oyun grubu detayı
+GET /api/v1/sulama-noktalari/                  # Tüm sulama noktaları
+GET /api/v1/sulama-noktalari/{uuid}/           # Sulama noktası detayı
+GET /api/v1/elektrik-noktalari/                # Tüm elektrik noktaları
+GET /api/v1/elektrik-noktalari/{uuid}/         # Elektrik noktası detayı
+GET /api/v1/park-aboneler/                     # Tüm park aboneleri
+GET /api/v1/park-aboneler/{uuid}/              # Abone detayı
+```
+
+**Alan Geometrili Modeller:**
+```
+GET /api/v1/yesil-alanlar/                     # Tüm yeşil alanlar
+GET /api/v1/yesil-alanlar/{uuid}/              # Yeşil alan detayı
+GET /api/v1/spor-alanlar/                      # Tüm spor alanları
+GET /api/v1/spor-alanlar/{uuid}/               # Spor alanı detayı
+GET /api/v1/park-binalar/                      # Tüm park binaları
+GET /api/v1/park-binalar/{uuid}/               # Bina detayı
+GET /api/v1/park-havuzlar/                     # Tüm park havuzları
+GET /api/v1/park-havuzlar/{uuid}/              # Havuz detayı
+GET /api/v1/park-yollar/                       # Tüm park yolları
+GET /api/v1/park-yollar/{uuid}/                # Yol detayı
+GET /api/v1/oyun-alanlar/                      # Tüm oyun alanları
+GET /api/v1/oyun-alanlar/{uuid}/               # Oyun alanı detayı
+```
+
+**Çizgi Geometrili Modeller:**
+```
+GET /api/v1/sulama-hatlari/                    # Tüm sulama hatları
+GET /api/v1/sulama-hatlari/{uuid}/             # Sulama hattı detayı
+GET /api/v1/elektrik-hatlari/                  # Tüm elektrik hatları
+GET /api/v1/elektrik-hatlari/{uuid}/           # Elektrik hattı detayı
+GET /api/v1/kanal-hatlari/                     # Tüm kanal hatları
+GET /api/v1/kanal-hatlari/{uuid}/              # Kanal hattı detayı
+```
+
+### 🌐 Filtreleme Parametreleri
+```
+?bbox=min_lng,min_lat,max_lng,max_lat          # Coğrafi sınır filtresi
+?zoom=14                                       # Zoom seviyesi kontrolü
+?park__uuid={park_uuid}                        # Belirli parka ait veriler
+?mahalle=merkez                                # Mahalle filtresi
+?ilce=merkez                                   # İlçe filtresi
+?park_tipi=mahalle                             # Park tipi filtresi
+?min_alan=100&max_alan=5000                    # Alan aralığı filtresi
+```
+
+### 🎯 API Kullanım Örnekleri
+```javascript
+// Belirli bir parka ait habitatları getir
+fetch('/api/v1/parklar/7cebfebd-16f3-40cf-a413-9361d13f6f6c/habitatlar/')
+
+// BBOX ile filtrelenmiş donatıları getir
+fetch('/api/v1/park-donatilar/?bbox=36.9,39.7,37.1,39.8')
+
+// Zoom seviyesine göre sınırlı veri getir
+fetch('/api/v1/yesil-alanlar/?zoom=13&bbox=36.9,39.7,37.1,39.8')
+```
+
+### 📋 API Serializer Yapısı
+- **Liste Serializers:** Minimal alanlar (id, uuid, ad, alan, cevre vb.)
+- **Detay Serializers:** Tüm alanlar (created_at, updated_at, osm_id, extra_data hariç)
+- **GeoJSON Format:** SRID 4326 formatında coğrafi veri çıkışı
+- **Performance Optimization:** BBOX ve zoom seviyesi ile filtreleme
+
+### 🗺️ Harita Entegrasyonu
+- **GeoJSON:** OpenLayers ile uyumlu veri formatı
+- **Dynamic Loading:** Zoom seviyesi ve bbox'a göre veri yükleme
+- **Layer Management:** Park ve alt modelleri için ayrı katmanlar
+- **Interactive Features:** Tıklama ve hover özellikleri
+
 > **Not:** Bu yönergeler, Copilot ve geliştirici ekip için rehber niteliğindedir. Tüm kod önerileri bu prensipler çerçevesinde geliştirilmelidir.
+
+

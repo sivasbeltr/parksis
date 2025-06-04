@@ -1,0 +1,46 @@
+<!-- Infrastructure Status Component -->
+<div class="p-6">
+    <div class="space-y-6">
+        <!-- Irrigation System -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/20 dark:to-cyan-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tint text-cyan-600 dark:text-cyan-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Sulama Sistemi</p>
+                    <p class="text-xs text-cyan-600 dark:text-cyan-400">{{ total_irrigation_lines }} hat</p>
+                </div>
+            </div>
+            <span class="text-lg font-bold text-cyan-600 dark:text-cyan-400">{{ total_irrigation_points }}</span>
+        </div>
+
+        <!-- Electrical System -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/20 dark:to-yellow-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Elektrik Sistemi</p>
+                    <p class="text-xs text-yellow-600 dark:text-yellow-400">{{ total_electric_lines }} hat</p>
+                </div>
+            </div>
+            <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">{{ total_electric_points }}</span>
+        </div>
+
+        <!-- Sewage System -->
+        <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/20 dark:to-gray-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-water text-gray-600 dark:text-gray-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Kanalizasyon</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ total_canal_lines }} hat</p>
+                </div>
+            </div>
+            <span class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ total_canal_lines }}</span>
+        </div>
+    </div>
+</div>

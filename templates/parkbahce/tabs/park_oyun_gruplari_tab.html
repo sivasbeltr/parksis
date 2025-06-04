@@ -1,0 +1,105 @@
+<div class="space-y-6">    <!-- Oyun Grupları Başlığı -->
+    <div class="flex items-center">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="fas fa-gamepad text-yellow-600 mr-3"></i>
+            Oyun Grupları ({{ oyun_gruplari.count }})
+        </h3>
+    </div>
+
+    <!-- Oyun Grupları Listesi -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {% for oyun_grup in oyun_gruplari %}        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+            <div class="flex items-start mb-3">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-playground text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ oyun_grup.ad|default:"Oyun Grubu" }}</h4>
+                        {% if oyun_grup.oyun_grup_tipi %}
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ oyun_grup.oyun_grup_tipi.ad }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-2 text-xs">
+                {% if oyun_grup.oyun_grup_model %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Model:</span>
+                    <span class="text-gray-900 dark:text-white">{{ oyun_grup.oyun_grup_model.ad }}</span>
+                </div>
+                {% endif %}
+                
+                {% if oyun_grup.sayi %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Adet:</span>
+                    <span class="text-gray-900 dark:text-white">{{ oyun_grup.sayi }}</span>
+                </div>
+                {% endif %}
+                
+                {% if oyun_grup.kurulum_tarihi %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Kurulum:</span>
+                    <span class="text-gray-900 dark:text-white">{{ oyun_grup.kurulum_tarihi|date:"d.m.Y" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if oyun_grup.marka %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Marka:</span>
+                    <span class="text-gray-900 dark:text-white">{{ oyun_grup.marka }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Yaş Grubu ve Durum -->
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Yaş Grubu:</span>
+                    <span class="text-xs text-gray-900 dark:text-white">
+                        {% if oyun_grup.yas_grubu %}{{ oyun_grup.yas_grubu }}{% else %}Belirtilmemiş{% endif %}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Durum:</span>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Kullanımda
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-gamepad text-4xl mb-4"></i>
+            <h4 class="text-lg font-medium mb-2">Henüz oyun grubu bulunmuyor</h4>
+            <p class="text-sm">Bu parka ait oyun grubu bilgileri henüz eklenmemiş.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Oyun Grubu İstatistikleri -->
+    {% if oyun_gruplari %}
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <h4 class="text-md font-medium text-gray-900 dark:text-white mb-4">Oyun Grubu İstatistikleri</h4>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ oyun_gruplari.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Toplam Oyun Grubu</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">0-3 Yaş</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">4-8 Yaş</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">-</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">9-14 Yaş</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

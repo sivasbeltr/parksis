@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
@@ -322,3 +323,136 @@ def park_detail(request, park_uuid):
     }
 
     return render(request, "parkbahce/park_detail.html", context)
+
+
+def park_harita(request):
+    """Park harita sayfası"""
+    return render(request, "parkbahce/park_harita.html")
+
+
+# HTMX Tab Views
+def park_is_takip_tab_htmx(request, park_uuid):
+    """Park İş Takip sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # İş takip verilerini simüle ediyoruz (gerçek modeller eklendikten sonra güncellenecek)
+    is_takip_data = {
+        "aktif_isler": 5,
+        "bekleyen_isler": 3,
+        "tamamlanan_isler": 12,
+        "son_isler": [
+            {
+                "ad": "Çim Biçme İşi",
+                "tarih": "15.11.2024",
+                "durum": "Devam Ediyor",
+            },
+            {"ad": "Ağaç Budama", "tarih": "14.11.2024", "durum": "Tamamlandı"},
+            {
+                "ad": "Sulama Sistemi Kontrolü",
+                "tarih": "13.11.2024",
+                "durum": "Bekliyor",
+            },
+        ],
+    }
+
+    context = {"park": park, "is_takip_data": is_takip_data}
+    return render(request, "parkbahce/tabs/park_is_takip_tab.html", context)
+
+
+def park_habitatlar_tab_htmx(request, park_uuid):
+    """Park Habitatlar sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Parka ait habitatları getir
+    habitatlar = park.habitatlar.select_related("habitat_tipi").all()
+
+    context = {"park": park, "habitatlar": habitatlar}
+    return render(request, "parkbahce/tabs/park_habitatlar_tab.html", context)
+
+
+def park_donatilar_tab_htmx(request, park_uuid):
+    """Park Donatılar sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Parka ait donatıları getir
+    donatilar = park.donatilar.select_related("donati_tipi").all()
+
+    context = {"park": park, "donatilar": donatilar}
+    return render(request, "parkbahce/tabs/park_donatilar_tab.html", context)
+
+
+def park_oyun_gruplari_tab_htmx(request, park_uuid):
+    """Park Oyun Grupları sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Parka ait oyun gruplarını getir
+    oyun_gruplari = park.oyun_gruplari.select_related(
+        "oyun_grup_tipi", "oyun_grup_model"
+    ).all()
+
+    context = {"park": park, "oyun_gruplari": oyun_gruplari}
+    return render(request, "parkbahce/tabs/park_oyun_gruplari_tab.html", context)
+
+
+def park_alanlar_tab_htmx(request, park_uuid):
+    """Park Alanlar sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Parka ait alanları getir
+    yesil_alanlar = park.yesil_alanlar.all()
+    spor_alanlar = park.spor_alanlar.select_related(
+        "spor_alan_tipi", "spor_aleti_grup"
+    ).all()
+    oyun_alanlar = (
+        park.oyun_alanlar.select_related("oyun_alan_kaplama_tipi").all()
+        if hasattr(park, "oyun_alanlar")
+        else []
+    )
+    binalar = park.binalar.select_related("bina_kullanim_tipi").all()
+
+    context = {
+        "park": park,
+        "yesil_alanlar": yesil_alanlar,
+        "spor_alanlar": spor_alanlar,
+        "oyun_alanlar": oyun_alanlar,
+        "binalar": binalar,
+    }
+    return render(request, "parkbahce/tabs/park_alanlar_tab.html", context)
+
+
+def park_altyapi_tab_htmx(request, park_uuid):
+    """Park Altyapı sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Altyapı istatistiklerini hesapla
+    altyapi_stats = {
+        "sulama_noktalari": park.sulama_noktalari.count(),
+        "elektrik_noktalari": (
+            park.elektrik_noktalar.count() if hasattr(park, "elektrik_noktalar") else 0
+        ),
+        "sulama_hatlari": (
+            park.sulama_hatlari.count() if hasattr(park, "sulama_hatlari") else 0
+        ),
+        "elektrik_hatlari": (
+            park.elektrik_hatlari.count() if hasattr(park, "elektrik_hatlari") else 0
+        ),
+        "kanal_hatlari": (
+            park.kanal_hatlari.count() if hasattr(park, "kanal_hatlari") else 0
+        ),
+    }
+
+    context = {"park": park, "altyapi_stats": altyapi_stats}
+    return render(request, "parkbahce/tabs/park_altyapi_tab.html", context)
+
+
+def park_aboneler_tab_htmx(request, park_uuid):
+    """Park Aboneler sekmesi HTMX view'i"""
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Parka ait aboneleri getir
+    aboneler = []
+    if hasattr(park, "aboneler"):
+        aboneler = park.aboneler.all()
+
+    context = {"park": park, "aboneler": aboneler}
+    return render(request, "parkbahce/tabs/park_aboneler_tab.html", context)

@@ -28,12 +28,19 @@
 
         <!-- Navigation Menu -->
         <nav class="flex-1 p-4 overflow-y-auto">
-            <ul class="space-y-2">
-                <!-- Ana Sayfa -->
+            <ul class="space-y-2">                <!-- Ana Sayfa -->
                 <li>
                     <a href="{% url 'index' %}" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
                         <i class="fas fa-home w-5 h-5 mr-3"></i>
                         Ana Sayfa
+                    </a>
+                </li>
+
+                <!-- Park Haritası -->
+                <li>
+                    <a href="{% url 'parkbahce:park_harita' %}" class="sidebar-tree-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20 hover:text-park-green-700 dark:hover:text-park-green-300">
+                        <i class="fas fa-map w-5 h-5 mr-3"></i>
+                        Park Haritası
                     </a>
                 </li>
 
