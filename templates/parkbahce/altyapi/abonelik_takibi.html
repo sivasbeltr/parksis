@@ -1,0 +1,307 @@
+{% extends 'layout.html' %}
+
+{% block title %}Abonelik Takibi - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-clipboard-list mr-3"></i>
+                    Abonelik Takibi
+                </h1>
+                <p class="text-emerald-100 text-sm">
+                    {{ total_abone }} aktif abonelik • Su, elektrik ve diğer hizmetler
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-receipt text-4xl text-white/80"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Toplam Abonelik -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-list text-emerald-600 dark:text-emerald-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Abonelik</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_abone }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abone Tipi İstatistikleri -->
+        {% for stat in abone_tipi_stats|slice:":3" %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 {% if stat.abone_tipi == 'elektrik' %}bg-yellow-100 dark:bg-yellow-800/30{% elif stat.abone_tipi == 'su' %}bg-blue-100 dark:bg-blue-800/30{% else %}bg-gray-100 dark:bg-gray-700/30{% endif %} rounded-lg flex items-center justify-center">
+                    {% if stat.abone_tipi == 'elektrik' %}
+                        <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                    {% elif stat.abone_tipi == 'su' %}
+                        <i class="fas fa-tint text-blue-600 dark:text-blue-400 text-xl"></i>
+                    {% elif stat.abone_tipi == 'dogalgaz' %}
+                        <i class="fas fa-fire text-orange-600 dark:text-orange-400 text-xl"></i>
+                    {% else %}
+                        <i class="fas fa-plug text-gray-600 dark:text-gray-400 text-xl"></i>
+                    {% endif %}
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ stat.abone_tipi|title }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.count }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Filtreleme -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Arama -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-search mr-2"></i>Arama
+                    </label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" 
+                           placeholder="Park adı veya abone no..."
+                           class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+                </div>
+
+                <!-- Park -->
+                <div>
+                    <label for="park" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tree mr-2"></i>Park
+                    </label>
+                    <select id="park" name="park" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="">Tüm Parklar</option>
+                        {% for park in parklar %}
+                            <option value="{{ park.id }}" {% if park_filter == park.id|stringformat:"s" %}selected{% endif %}>
+                                {{ park.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Abone Tipi -->
+                <div>
+                    <label for="abone_tipi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tag mr-2"></i>Abone Tipi
+                    </label>
+                    <select id="abone_tipi" name="abone_tipi" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="">Tüm Tipler</option>
+                        <option value="elektrik" {% if abone_tipi_filter == "elektrik" %}selected{% endif %}>Elektrik</option>
+                        <option value="su" {% if abone_tipi_filter == "su" %}selected{% endif %}>Su</option>
+                        <option value="dogalgaz" {% if abone_tipi_filter == "dogalgaz" %}selected{% endif %}>Doğalgaz</option>
+                        <option value="telefon" {% if abone_tipi_filter == "telefon" %}selected{% endif %}>Telefon</option>
+                        <option value="internet" {% if abone_tipi_filter == "internet" %}selected{% endif %}>İnternet</option>
+                    </select>
+                </div>
+
+                <!-- Sayfa Boyutu -->
+                <div>
+                    <label for="per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-list mr-2"></i>Sayfa Boyutu
+                    </label>
+                    <select id="per_page" name="per_page" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 transition-all">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrele
+                </button>
+                <a href="{% url 'parkbahce:abonelik_takibi' %}" 
+                   class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all">
+                    <i class="fas fa-undo mr-2"></i>
+                    Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Abonelik Listesi -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-clipboard-list text-emerald-600 mr-3"></i>
+                Park Abonelikleri ({{ park_aboneleri.paginator.count }} kayıt)
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Park</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Abone Tipi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Abone No</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Durum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for abone in park_aboneleri %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-tree text-emerald-600 dark:text-emerald-400"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ abone.park.ad }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ abone.park.mahalle.ad }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if abone.abone_tipi == 'elektrik' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300
+                                {% elif abone.abone_tipi == 'su' %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
+                                {% elif abone.abone_tipi == 'dogalgaz' %}bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300
+                                {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200{% endif %}">
+                                {% if abone.abone_tipi == 'elektrik' %}
+                                    <i class="fas fa-bolt mr-1"></i>
+                                {% elif abone.abone_tipi == 'su' %}
+                                    <i class="fas fa-tint mr-1"></i>
+                                {% elif abone.abone_tipi == 'dogalgaz' %}
+                                    <i class="fas fa-fire mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-plug mr-1"></i>
+                                {% endif %}
+                                {{ abone.get_abone_tipi_display }}
+                            </span>
+                        </td>                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            <div class="flex items-center">
+                                <i class="fas fa-hashtag mr-2 text-gray-400"></i>
+                                <a href="{% url 'parkbahce:abone_detail' abone.uuid %}" 
+                                   class="text-green-600 hover:text-green-900 font-medium">
+                                    {{ abone.abone_no }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                <i class="fas fa-check mr-1"></i>
+                                Aktif
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'parkbahce:abone_detail' abone.uuid %}" 
+                                   class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300"
+                                   title="Abone Detayı">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'parkbahce:endeks_ekle' abone.uuid %}" 
+                                   class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                                   title="Endeks Ekle">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                                <a href="{% url 'parkbahce:park_detail' abone.park.uuid %}" 
+                                   class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                   title="Park Detayı">
+                                    <i class="fas fa-tree"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center">
+                                <i class="fas fa-clipboard-list text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                                <p class="text-gray-500 dark:text-gray-400 text-lg">Henüz abone kaydı bulunmuyor</p>
+                                <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Filtreleri değiştirerek tekrar deneyin</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sayfalama -->
+        {% if park_aboneleri.has_other_pages %}
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <nav class="flex items-center justify-between">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>Toplam {{ park_aboneleri.paginator.count }} kayıt</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if park_aboneleri.has_previous %}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ park_aboneleri.previous_page_number }}" 
+                           class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+                        {{ park_aboneleri.number }} / {{ park_aboneleri.paginator.num_pages }}
+                    </span>
+                    
+                    {% if park_aboneleri.has_next %}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ park_aboneleri.next_page_number }}" 
+                           class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Abone Tipi İstatistikleri Detay -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <i class="fas fa-chart-bar text-emerald-600 mr-3"></i>
+            Abone Tipi Dağılımı
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for stat in abone_tipi_stats %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    {% if stat.abone_tipi == 'elektrik' %}
+                        <i class="fas fa-bolt text-yellow-600"></i>
+                    {% elif stat.abone_tipi == 'su' %}
+                        <i class="fas fa-tint text-blue-600"></i>
+                    {% elif stat.abone_tipi == 'dogalgaz' %}
+                        <i class="fas fa-fire text-orange-600"></i>
+                    {% else %}
+                        <i class="fas fa-plug text-gray-600"></i>
+                    {% endif %}
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ stat.abone_tipi|title }}</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-full">
+                    {{ stat.count }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

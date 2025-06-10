@@ -286,7 +286,7 @@ def park_aboneler_tab_htmx(request, park_uuid):
         return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
 
     park = get_object_or_404(Park, uuid=park_uuid)
-    aboneler = park.aboneler.order_by("-created_at")
+    aboneler = park.aboneler.order_by("abone_tipi", "abone_no")
 
     context = {
         "park": park,

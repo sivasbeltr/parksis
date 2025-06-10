@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "rest_framework_gis",
     "django_htmx",
     "django_filters",
+    "mathfilters",
     "ortak.apps.OrtakConfig",
     "parkbahce.apps.ParkbahceConfig",
     "istakip.apps.IstakipConfig",

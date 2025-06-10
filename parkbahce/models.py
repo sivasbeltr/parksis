@@ -852,12 +852,12 @@ class ParkAbone(models.Model):
     )
 
     def __str__(self):
-        return f"{self.park.ad} - {self.abone_tipi} - {self.abone_no}"
+        return f"{self.park.ad} - {self.get_abone_tipi_display()} ({self.abone_no})"
 
     class Meta:
         verbose_name = _("Park Abone")
         verbose_name_plural = _("Park Aboneleri")
-
+        ordering = ["park__ad", "abone_tipi", "abone_no"]
         db_table = '"parkbahce"."park_aboneleri"'
 
 

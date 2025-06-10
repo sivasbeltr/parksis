@@ -11,11 +11,30 @@ urlpatterns = [
     path("parklar/<uuid:park_uuid>/", views.park_detail, name="park_detail"),
     path("mahalleler/", views.mahalle_list, name="mahalle_list"),
     path("mahalle/<uuid:mahalle_uuid>/", views.mahalle_detail, name="mahalle_detail"),
+    path("donatilar/", views.donatilar_list, name="donatilar_list"),
+    path("habitatlar/", views.habitatlar_list, name="habitatlar_list"),
+    path(
+        "park-donati-habitat-listesi/",
+        views.park_donati_habitat_list,
+        name="park_donati_habitat_list",
+    ),
     path("park-harita/", views.park_harita, name="park_harita"),
     path("istatistikler/", istatistik_views.istatistik_index, name="istatistik_index"),
+    path("raporlar/", rapor_views.rapor_index, name="rapor_index"),  # Altyapı yönetimi
+    path("altyapi/sulama-sistemi/", views.sulama_sistemi, name="sulama_sistemi"),
     path(
-        "raporlar/", rapor_views.rapor_index, name="rapor_index"
-    ),  # Park ve Mahalle detay HTMX endpoints
+        "altyapi/elektrik-altyapisi/",
+        views.elektrik_altyapisi,
+        name="elektrik_altyapisi",
+    ),
+    path("altyapi/kanal-hatlari/", views.kanal_hatlari, name="kanal_hatlari"),
+    path("altyapi/yol-agi/", views.yol_agi, name="yol_agi"),
+    path(
+        "altyapi/abonelik-takibi/", views.abonelik_takibi, name="abonelik_takibi"
+    ),  # Abone yönetimi
+    path("abone/<uuid:abone_uuid>/", views.abone_detail, name="abone_detail"),
+    path("abone/<uuid:abone_uuid>/endeks-ekle/", views.endeks_ekle, name="endeks_ekle"),
+    # Park ve Mahalle detay HTMX endpoints
     path(
         "htmx/park-detail/<uuid:park_uuid>/",
         htmx_views.park_detail_htmx,

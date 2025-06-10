@@ -56,8 +56,9 @@
                         </button>                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
                             <li><a href="{% url 'parkbahce:park_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Parklar</a></li>
                             <li><a href="{% url 'parkbahce:mahalle_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Mahalleler</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Donatılar</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Habitatlar</a></li>
+                            <li><a href="{% url 'parkbahce:donatilar_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Donatılar</a></li>
+                            <li><a href="{% url 'parkbahce:habitatlar_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Habitatlar</a></li>
+                            <li><a href="{% url 'parkbahce:park_donati_habitat_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Donatı ve Habitat Listesi</a></li>
                         </ul>
                     </div>
                 </li>
@@ -105,11 +106,12 @@
                                 Altyapı
                             </div>
                             <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
-                        </button>
-                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Sulama Sistemi</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Elektrik</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Yollar</a></li>
+                        </button>                          <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="{% url 'parkbahce:sulama_sistemi' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Sulama Sistemi</a></li>
+                            <li><a href="{% url 'parkbahce:elektrik_altyapisi' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Elektrik Altyapısı</a></li>
+                            <li><a href="{% url 'parkbahce:kanal_hatlari' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Kanal Hatları</a></li>
+                            <li><a href="{% url 'parkbahce:yol_agi' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Yol Ağı</a></li>
+                            <li><a href="{% url 'parkbahce:abonelik_takibi' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Abonelik Takibi</a></li>
                         </ul>
                     </div>
                 </li>                <!-- İstatistikler -->

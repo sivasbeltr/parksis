@@ -40,15 +40,15 @@
             <div class="relative p-6">
                 <div class="flex items-start space-x-4">
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
-                        {% if abone.abone_tipi == 'ELEKTRIK' %}
+                        {% if abone.abone_tipi == 'elektrik' %}
                             <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400 text-2xl"></i>
-                        {% elif abone.abone_tipi == 'SU' %}
+                        {% elif abone.abone_tipi == 'su' %}
                             <i class="fas fa-tint text-blue-600 dark:text-blue-400 text-2xl"></i>
-                        {% elif abone.abone_tipi == 'DOGALGAZ' %}
+                        {% elif abone.abone_tipi == 'dogalgaz' %}
                             <i class="fas fa-fire text-orange-600 dark:text-orange-400 text-2xl"></i>
-                        {% elif abone.abone_tipi == 'TELEFON' %}
+                        {% elif abone.abone_tipi == 'telefon' %}
                             <i class="fas fa-phone text-green-600 dark:text-green-400 text-2xl"></i>
-                        {% elif abone.abone_tipi == 'INTERNET' %}
+                        {% elif abone.abone_tipi == 'internet' %}
                             <i class="fas fa-wifi text-purple-600 dark:text-purple-400 text-2xl"></i>
                         {% else %}
                             <i class="fas fa-plug text-purple-600 dark:text-purple-400 text-2xl"></i>
@@ -88,11 +88,25 @@
                             </div>
                             {% endif %}
                         </div>
-                        
-                        <!-- Status Info -->
+                          <!-- Status Info -->
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-gray-500 dark:text-gray-400">Son Endeks:</span>
-                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">-</span>
+                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                {% if abone.endeksler.first %}
+                                    {{ abone.endeksler.first.endeks_degeri|floatformat:2 }}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- Abone Detay Linki -->
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                            <a href="{% url 'parkbahce:abone_detail' abone.uuid %}" 
+                               class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Detay & Endeks
+                            </a>
                         </div>
                     </div>
                 </div>

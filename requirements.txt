@@ -8,3 +8,4 @@ minio
 django-cors-headers
 django-htmx
 django-filter
+django-mathfilters

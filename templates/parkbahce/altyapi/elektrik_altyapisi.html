@@ -1,0 +1,273 @@
+{% extends 'layout.html' %}
+
+{% block title %}Elektrik Altyapısı - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-yellow-500 via-orange-600 to-red-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-bolt mr-3"></i>
+                    Elektrik Altyapısı Yönetimi
+                </h1>
+                <p class="text-yellow-100 text-sm">
+                    {{ total_nokta }} elektrik noktası • {{ total_hat }} hat • {{ total_uzunluk|floatformat:0 }}m toplam uzunluk
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-plug text-4xl text-white/80"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Elektrik Noktaları -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-lightbulb text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Elektrik Noktası</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_nokta }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elektrik Hatları -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-bolt text-orange-600 dark:text-orange-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Elektrik Hattı</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_hat }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam Uzunluk -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-ruler text-red-600 dark:text-red-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Uzunluk</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_uzunluk|floatformat:0 }}m</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Arama -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-search mr-2"></i>Arama
+                    </label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" 
+                           placeholder="Park adı ara..."
+                           class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all">
+                </div>
+
+                <!-- Park -->
+                <div>
+                    <label for="park" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tree mr-2"></i>Park
+                    </label>
+                    <select id="park" name="park" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                        <option value="">Tüm Parklar</option>
+                        {% for park in parklar %}
+                            <option value="{{ park.id }}" {% if park_filter == park.id|stringformat:"s" %}selected{% endif %}>
+                                {{ park.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sayfa Boyutu -->
+                <div>
+                    <label for="per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-list mr-2"></i>Sayfa Boyutu
+                    </label>
+                    <select id="per_page" name="per_page" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-2.5 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 focus:ring-2 focus:ring-yellow-500 transition-all">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrele
+                </button>
+                <a href="{% url 'parkbahce:elektrik_altyapisi' %}" 
+                   class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all">
+                    <i class="fas fa-undo mr-2"></i>
+                    Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Elektrik Noktaları ve Hatları Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Elektrik Noktaları -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-600 mr-3"></i>
+                    Elektrik Noktaları
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                {% if elektrik_noktalari %}
+                    <div class="space-y-4">
+                        {% for nokta in elektrik_noktalari %}
+                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ nokta.park.ad }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Tip: {{ nokta.elektrik_nokta_tipi.ad|default:"Belirtilmemiş" }}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 rounded-full">
+                                        Energili
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Sayfalama -->
+                    {% if elektrik_noktalari.has_other_pages %}
+                        <div class="mt-6 flex justify-center">
+                            <nav class="flex space-x-2">
+                                {% if elektrik_noktalari.has_previous %}
+                                    <a href="?page={{ elektrik_noktalari.previous_page_number }}" 
+                                       class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        Önceki
+                                    </a>
+                                {% endif %}
+                                
+                                <span class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg">
+                                    {{ elektrik_noktalari.number }} / {{ elektrik_noktalari.paginator.num_pages }}
+                                </span>
+                                
+                                {% if elektrik_noktalari.has_next %}
+                                    <a href="?page={{ elektrik_noktalari.next_page_number }}" 
+                                       class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        Sonraki
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lightbulb text-gray-400 dark:text-gray-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-2">Elektrik Noktası Bulunamadı</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Henüz elektrik noktası eklenmemiş.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Elektrik Hatları -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-bolt text-orange-600 mr-3"></i>
+                    Elektrik Hatları
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                {% if elektrik_hatlari %}
+                    <div class="space-y-4">
+                        {% for hat in elektrik_hatlari %}
+                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ hat.park.ad }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Kablo: {{ hat.elektrik_kablo_tipi.ad|default:"Belirtilmemiş" }}
+                                    </p>
+                                    <p class="text-xs text-orange-600 dark:text-orange-400">
+                                        {{ hat.uzunluk|floatformat:0 }}m uzunluk
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-100 dark:bg-orange-800 text-orange-800 dark:text-orange-200 rounded-full">
+                                        Aktif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Sayfalama -->
+                    {% if elektrik_hatlari.has_other_pages %}
+                        <div class="mt-6 flex justify-center">
+                            <nav class="flex space-x-2">
+                                {% if elektrik_hatlari.has_previous %}
+                                    <a href="?page={{ elektrik_hatlari.previous_page_number }}" 
+                                       class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        Önceki
+                                    </a>
+                                {% endif %}
+                                
+                                <span class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg">
+                                    {{ elektrik_hatlari.number }} / {{ elektrik_hatlari.paginator.num_pages }}
+                                </span>
+                                
+                                {% if elektrik_hatlari.has_next %}
+                                    <a href="?page={{ elektrik_hatlari.next_page_number }}" 
+                                       class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        Sonraki
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-bolt text-gray-400 dark:text-gray-500 text-xl"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 dark:text-white mb-2">Elektrik Hattı Bulunamadı</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Henüz elektrik hattı eklenmemiş.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

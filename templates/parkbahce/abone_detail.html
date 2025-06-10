@@ -1,0 +1,201 @@
+{% extends 'layout.html' %}
+{% load mathfilters %}
+
+{% block title %}{{ abone.park.ad }} - {{ abone.get_abone_tipi_display }} Abone - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+        <a href="{% url 'parkbahce:abonelik_takibi' %}" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+            <i class="fas fa-list mr-1"></i>Abonelik Takibi
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'parkbahce:park_detail' abone.park.uuid %}" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+            {{ abone.park.ad }}
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">{{ abone.get_abone_tipi_display }}</span>
+    </nav>
+
+    <!-- Kompakt Header Card -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl shadow-lg">
+        <div class="relative p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center border border-white/20">
+                        {% if abone.abone_tipi == 'elektrik' %}
+                            <i class="fas fa-bolt text-yellow-300 text-lg"></i>
+                        {% elif abone.abone_tipi == 'su' %}
+                            <i class="fas fa-tint text-blue-300 text-lg"></i>
+                        {% elif abone.abone_tipi == 'dogalgaz' %}
+                            <i class="fas fa-fire text-orange-300 text-lg"></i>
+                        {% elif abone.abone_tipi == 'telefon' %}
+                            <i class="fas fa-phone text-green-300 text-lg"></i>
+                        {% elif abone.abone_tipi == 'internet' %}
+                            <i class="fas fa-wifi text-purple-300 text-lg"></i>
+                        {% else %}
+                            <i class="fas fa-plug text-white text-lg"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">{{ abone.get_abone_tipi_display }}</h1>
+                        <p class="text-purple-100 text-sm">{{ abone.park.ad }} - {{ abone.abone_no }}</p>
+                    </div>
+                </div>
+                <a href="{% url 'parkbahce:endeks_ekle' abone.uuid %}" 
+                   class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 transition-all text-sm">
+                    <i class="fas fa-plus mr-1"></i>Endeks Ekle
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kompakt Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-purple-600 dark:text-purple-400 text-sm"></i>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">TOPLAM</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ endeks_stats.toplam_kayit|default:0 }}</div>
+            <div class="text-xs text-gray-600 dark:text-gray-400">Endeks Kaydı</div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-arrow-up text-green-600 dark:text-green-400 text-sm"></i>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">SON</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ son_endeks.endeks_degeri|default:"--"|floatformat:2 }}</div>
+            <div class="text-xs text-gray-600 dark:text-gray-400">
+                {% if son_endeks %}{{ son_endeks.endeks_tarihi|date:"d.m.Y" }}{% else %}Endeks{% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-blue-600 dark:text-blue-400 text-sm"></i>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">AYLIK</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ aylik_tuketim|default:"--"|floatformat:2 }}</div>
+            <div class="text-xs text-gray-600 dark:text-gray-400">Ort. Tüketim</div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-orange-600 dark:text-orange-400 text-sm"></i>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">YILLIK</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ yillik_tuketim|default:"--"|floatformat:2 }}</div>
+            <div class="text-xs text-gray-600 dark:text-gray-400">Toplam Tüketim</div>
+        </div>
+
+        {% if yesil_alan_stats.toplam_yesil_alan %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-leaf text-emerald-600 dark:text-emerald-400 text-sm"></i>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">M²/AYLIK</span>
+            </div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ yesil_alan_stats.aylik_m2_tuketim|default:"--"|floatformat:3 }}</div>
+            <div class="text-xs text-gray-600 dark:text-gray-400">Su/m² Yeşil</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Kompakt Endeks Geçmişi -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                    <i class="fas fa-history text-purple-600 mr-2"></i>Endeks Geçmişi
+                </h3>
+                <a href="{% url 'parkbahce:endeks_ekle' abone.uuid %}" 
+                   class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-1"></i>Yeni
+                </a>
+            </div>
+        </div>
+        
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for endeks_item in endeks_listesi %}
+            <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar text-purple-600 dark:text-purple-400 text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ endeks_item.endeks.endeks_tarihi|date:"d.m.Y" }}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ endeks_item.endeks.endeks_tarihi|date:"l" }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-sm font-bold text-gray-900 dark:text-white">
+                                {{ endeks_item.endeks.endeks_degeri|floatformat:2 }}
+                            </div>
+                            <div class="text-xs text-gray-500">Endeks</div>
+                        </div>
+                        
+                        <div class="text-right min-w-[60px]">
+                            {% if endeks_item.tuketim is not None %}
+                                {% if endeks_item.tuketim > 0 %}
+                                    <div class="text-sm font-medium text-green-600">
+                                        +{{ endeks_item.tuketim|floatformat:2 }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">Tüketim</div>
+                                {% else %}
+                                    <div class="text-sm text-red-500">
+                                        {{ endeks_item.tuketim|floatformat:2 }}
+                                    </div>
+                                    <div class="text-xs text-red-400">Hata</div>
+                                {% endif %}
+                            {% elif endeks_item.is_last %}
+                                <div class="text-xs text-amber-600">
+                                    <i class="fas fa-star"></i> İlk
+                                </div>
+                            {% else %}
+                                <div class="text-xs text-gray-400">--</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if forloop.first %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                Son
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center">
+                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-chart-line text-gray-400 text-lg"></i>
+                </div>
+                <h4 class="text-base font-medium text-gray-900 dark:text-white mb-2">Henüz endeks kaydı yok</h4>
+                <a href="{% url 'parkbahce:endeks_ekle' abone.uuid %}" 
+                   class="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-1"></i>İlk Endeksi Ekle
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

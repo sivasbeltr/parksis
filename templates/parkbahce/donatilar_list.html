@@ -1,0 +1,384 @@
+{% extends 'layout.html' %}
+
+{% block title %}Donatılar - {{ block.super }}{% endblock %}
+
+{% block page_title %}Park Donatıları{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-tools mr-3"></i>
+                    Park Donatıları Yönetimi
+                </h1>
+                <p class="text-blue-100 text-sm">
+                    Toplam {{ total_donatilar }} donatı • Parklar genelinde envanter takibi
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-cogs text-4xl text-white/80"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Toplam Donatı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tools text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Donatı</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_donatilar }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donatı Tipi Sayısı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-list text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Donatı Tipi</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ donati_tipi_stats|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- En Fazla Donatılı Park -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-800/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-crown text-purple-600 dark:text-purple-400 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">En Fazla Donatı İçeren Park</p>
+                {% if park_donati_stats %}
+                <p class="text-lg font-bold text-gray-900 dark:text-white">{{ park_donati_stats.0.donati_count }}</p>
+                <p class="text-xs text-gray-400">
+                <a href="{% url 'parkbahce:park_detail' park_donati_stats.0.park__uuid %}" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                    {{ park_donati_stats.0.park__ad|truncatechars:50 }}
+                </a>
+                </p>
+                {% else %}
+                <p class="text-lg font-bold text-gray-900 dark:text-white">-</p>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+
+        <!-- En Donatılı Mahalle -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
+            <div class="flex items-center">
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-800/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-map-marker-alt text-orange-600 dark:text-orange-400 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">En Fazla Donatı İçeren Mahalle</p>
+                {% if mahalle_donati_stats %}
+                <p class="text-lg font-bold text-gray-900 dark:text-white">{{ mahalle_donati_stats.0.donati_count }}</p>
+                <p class="text-xs text-gray-400">
+                <a href="{% url 'parkbahce:mahalle_detail' mahalle_donati_stats.0.park__mahalle__uuid %}" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                    {{ mahalle_donati_stats.0.park__mahalle__ad|truncatechars:50 }}
+                </a>
+                </p>
+                {% else %}
+                <p class="text-lg font-bold text-gray-900 dark:text-white">-</p>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafikler ve Filtreler -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Donatı Tipi Dağılımı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-pie text-blue-600 mr-3"></i>
+                Donatı Tipi Dağılımı
+            </h3>
+            <div class="relative h-64">
+                <canvas id="donatiTipiChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Mahalle Bazında Donatı Dağılımı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-green-600 mr-3"></i>
+                Mahalle Bazında Dağılım
+            </h3>
+            <div class="relative h-64">
+                <canvas id="mahalleChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- En Fazla Donatılı Parklar -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <i class="fas fa-trophy text-yellow-600 mr-3"></i>
+            En Fazla Donatılı Parklar
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">            {% for park in park_donati_stats|slice:":6" %}
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">                        <h4 class="font-medium text-gray-900 dark:text-white">
+                            <a href="{% url 'parkbahce:park_detail' park.park__uuid %}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                {{ park.park__ad }}
+                            </a>
+                        </h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Park Detayında Mahalle Bilgisi</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400">{{ park.donati_count }} Donatı</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ park.donati_count }} donatı
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Filtreler ve Donatı Listesi -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+        <!-- Filtre Bölümü -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Arama -->
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-search mr-2"></i>Arama
+                        </label>
+                        <input type="text" id="search" name="search" value="{{ search_query }}" 
+                               placeholder="Park adı, donatı tipi..."
+                               class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+
+                    <!-- Donatı Tipi -->
+                    <div>
+                        <label for="donati_tipi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-tag mr-2"></i>Donatı Tipi
+                        </label>
+                        <select id="donati_tipi" name="donati_tipi" 
+                                class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Tüm Tipler</option>
+                            {% for tip in donati_tipleri %}
+                                <option value="{{ tip.id }}" {% if donati_tipi_filter == tip.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ tip.ad }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Mahalle -->
+                    <div>
+                        <label for="mahalle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Mahalle
+                        </label>
+                        <select id="mahalle" name="mahalle" 
+                                class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Tüm Mahalleler</option>
+                            {% for mahalle in mahalleler %}
+                                <option value="{{ mahalle.id }}" {% if mahalle_filter == mahalle.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ mahalle.ilce.ad }} - {{ mahalle.ad }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-all">
+                        <i class="fas fa-search mr-2"></i>
+                        Filtrele
+                    </button>
+                    <a href="{% url 'parkbahce:donatilar_list' %}" 
+                       class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all">
+                        <i class="fas fa-undo mr-2"></i>
+                        Temizle
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Liste -->
+        <div class="p-6">            {% if donatilar %}
+                <div class="space-y-4">
+                    {% for donati in donatilar %}
+                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        <a href="{% url 'parkbahce:park_detail' donati.park.uuid %}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                            {{ donati.park.ad }}
+                                        </a>
+                                    </h4>
+                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs rounded-full">
+                                        {{ donati.donati_tipi.ad }}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    {{ donati.park.mahalle.ad }} - {{ donati.park.mahalle.ilce.ad }}
+                                    {% if donati.sayi %}
+                                        <span class="ml-2">
+                                            <i class="fas fa-hashtag mr-1"></i>{{ donati.sayi }} adet
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{% url 'parkbahce:park_detail' donati.park.uuid %}" 
+                                   class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    Park Detay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Sayfalama -->
+                {% if donatilar.has_other_pages %}
+                    <div class="mt-6 flex justify-center">
+                        <nav class="flex space-x-2">
+                            {% if donatilar.has_previous %}
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ donatilar.previous_page_number }}" 
+                                   class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                    Önceki
+                                </a>
+                            {% endif %}
+                            
+                            <span class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
+                                {{ donatilar.number }} / {{ donatilar.paginator.num_pages }}
+                            </span>
+                            
+                            {% if donatilar.has_next %}
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ donatilar.next_page_number }}" 
+                                   class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                    Sonraki
+                                </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl"></i>
+                    </div>
+                    <h3 class="font-medium text-gray-900 dark:text-white mb-2">Donatı Bulunamadı</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Arama kriterlerinize uygun donatı bulunmamaktadır.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Donatı Tipi Pasta Grafiği
+    const donatiTipiCtx = document.getElementById('donatiTipiChart').getContext('2d');
+    new Chart(donatiTipiCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for stat in donati_tipi_stats %}
+                    '{{ stat.donati_tipi__ad|default:"Belirtilmemiş" }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for stat in donati_tipi_stats %}
+                        {{ stat.count }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                    '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+
+    // Mahalle Çubuk Grafiği
+    const mahalleCtx = document.getElementById('mahalleChart').getContext('2d');
+    new Chart(mahalleCtx, {
+        type: 'bar',
+        data: {            labels: [
+                {% for stat in mahalle_donati_stats|slice:":8" %}
+                    '{{ stat.park__mahalle__ad|truncatechars:15 }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Donatı Sayısı',
+                data: [
+                    {% for stat in mahalle_donati_stats|slice:":8" %}
+                        {{ stat.donati_count }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

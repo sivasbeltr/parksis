@@ -1,0 +1,290 @@
+{% extends 'layout.html' %}
+
+{% block title %}Donatı ve Habitat Listesi - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-green-500 via-blue-600 to-purple-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-list mr-3"></i>
+                    Donatı ve Habitat Listesi
+                </h1>
+                <p class="text-green-100 text-sm">
+                    {{ total_parks }} park • {{ total_donatilar }} donatı • {{ total_habitatlar }} habitat
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-chart-line text-4xl text-white/80"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Toplam Park -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tree text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Park</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_parks }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam Donatı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tools text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Donatı</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_donatilar }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam Habitat -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-seedling text-purple-600 dark:text-purple-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Habitat</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_habitatlar }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Arama -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-search mr-2"></i>Park Ara
+                    </label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" 
+                           placeholder="Park adı..."
+                           class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+                </div>
+
+                <!-- Filtre Tipi -->
+                <div>
+                    <label for="filter_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-filter mr-2"></i>Gösterim
+                    </label>
+                    <select id="filter_type" name="filter_type" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="all" {% if filter_type == "all" %}selected{% endif %}>Tümü</option>
+                        <option value="donati" {% if filter_type == "donati" %}selected{% endif %}>Sadece Donatılar</option>
+                        <option value="habitat" {% if filter_type == "habitat" %}selected{% endif %}>Sadece Habitatlar</option>
+                    </select>
+                </div>
+
+                <!-- Sayfa Boyutu -->
+                <div>
+                    <label for="per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-list mr-2"></i>Sayfa Boyutu
+                    </label>
+                    <select id="per_page" name="per_page" 
+                            class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 transition-all">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrele
+                </button>
+                <a href="{% url 'parkbahce:park_donati_habitat_list' %}" 
+                   class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all">
+                    <i class="fas fa-undo mr-2"></i>
+                    Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Park Listesi -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-tree text-green-600 mr-3"></i>
+                Parklar ve İçerikleri
+            </h3>
+        </div>
+        
+        <div class="p-6">
+            {% if parklar %}
+                <div class="space-y-6">
+                    {% for park in parklar %}
+                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <!-- Park Başlığı -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                <h4 class="text-lg font-medium text-gray-900 dark:text-white">
+                                    <a href="{% url 'parkbahce:park_detail' park.uuid %}" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">
+                                        {{ park.ad }}
+                                    </a>
+                                </h4>
+                            </div>
+                            <a href="{% url 'parkbahce:park_detail' park.uuid %}" 
+                               class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fas fa-eye mr-1"></i>
+                                Park Detay
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Donatılar -->
+                            {% if park.donatilar and filter_type != "habitat" %}
+                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                                <h5 class="font-medium text-blue-900 dark:text-blue-300 mb-3 flex items-center">
+                                    <i class="fas fa-tools mr-2"></i>
+                                    Donatılar ({{ park.donatilar|length }})
+                                </h5>
+                                <div class="space-y-2">
+                                    {% for donati in park.donatilar %}
+                                    <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ donati.donati_tipi }}</span>
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                                            {{ donati.sayi }} adet
+                                        </span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Habitatlar -->
+                            {% if park.habitatlar and filter_type != "donati" %}
+                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                                <h5 class="font-medium text-green-900 dark:text-green-300 mb-3 flex items-center">
+                                    <i class="fas fa-seedling mr-2"></i>
+                                    Habitatlar ({{ park.habitatlar|length }})
+                                </h5>
+                                <div class="space-y-2">
+                                    {% for habitat in park.habitatlar %}
+                                    <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ habitat.habitat_tipi }}</span>
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-full">
+                                            {{ habitat.sayi }} adet
+                                        </span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Boş durum -->
+                            {% if not park.donatilar and not park.habitatlar %}
+                            <div class="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-info-circle text-xl mb-2"></i>
+                                <p>Bu park için donatı veya habitat bilgisi bulunmamaktadır.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Sayfalama -->
+                {% if parklar.has_other_pages %}
+                    <div class="mt-6 flex justify-center">
+                        <nav class="flex space-x-2">
+                            {% if parklar.has_previous %}
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.previous_page_number }}" 
+                                   class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    Önceki
+                                </a>
+                            {% endif %}
+                            
+                            <span class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg">
+                                {{ parklar.number }} / {{ parklar.paginator.num_pages }}
+                            </span>
+                            
+                            {% if parklar.has_next %}
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ parklar.next_page_number }}" 
+                                   class="px-4 py-2 text-sm font-medium text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    Sonraki
+                                </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl"></i>
+                    </div>
+                    <h3 class="font-medium text-gray-900 dark:text-white mb-2">Park Bulunamadı</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Arama kriterlerinize uygun park bulunmamaktadır.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- İstatistik Özeti -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- En Çok Kullanılan Donatı Tipleri -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-blue-600 mr-3"></i>
+                En Çok Kullanılan Donatı Tipleri
+            </h3>
+            <div class="space-y-3">
+                {% for tip, count in donati_types %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ tip }}</span>
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full">
+                            {{ count }}
+                        </span>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Donatı bilgisi bulunmamaktadır.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- En Çok Kullanılan Habitat Tipleri -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-green-600 mr-3"></i>
+                En Çok Kullanılan Habitat Tipleri
+            </h3>
+            <div class="space-y-3">
+                {% for tip, count in habitat_types %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ tip }}</span>
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-full">
+                            {{ count }}
+                        </span>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Habitat bilgisi bulunmamaktadır.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,279 @@
+{% extends 'layout.html' %}
+{% load mathfilters %}
+
+{% block title %}Endeks Ekle - {{ abone.park.ad }} - {{ abone.get_abone_tipi_display }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'parkbahce:abonelik_takibi' %}" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            Abonelik Takibi
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'parkbahce:abone_detail' abone.uuid %}" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            {{ abone.abone_no }}
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">Endeks Ekle</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-500 via-emerald-600 to-teal-700 rounded-2xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-plus-circle mr-3"></i>
+                    Yeni Endeks Ekle
+                </h1>
+                <p class="text-green-100 text-sm">
+                    {{ abone.park.ad }} - {{ abone.get_abone_tipi_display }} ({{ abone.abone_no }})
+                </p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    {% if abone.abone_tipi == 'elektrik' %}
+                        <i class="fas fa-bolt text-4xl text-white/80"></i>
+                    {% elif abone.abone_tipi == 'su' %}
+                        <i class="fas fa-tint text-4xl text-white/80"></i>
+                    {% elif abone.abone_tipi == 'dogalgaz' %}
+                        <i class="fas fa-fire text-4xl text-white/80"></i>
+                    {% else %}
+                        <i class="fas fa-gauge-high text-4xl text-white/80"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- Form Bölümü -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Son Endeks Bilgisi -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                        Son Endeks Bilgisi
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500 dark:text-gray-400">Son Endeks Değeri:</span>
+                            <div class="font-medium text-gray-900 dark:text-white">
+                                {% if abone.endeksler.first %}
+                                    {{ abone.endeksler.first.endeks_degeri|floatformat:2 }}
+                                {% else %}
+                                    Henüz endeks kaydı yok
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 dark:text-gray-400">Son Okuma Tarihi:</span>
+                            <div class="font-medium text-gray-900 dark:text-white">
+                                {% if abone.endeksler.first %}
+                                    {{ abone.endeksler.first.endeks_tarihi|date:"d.m.Y" }}
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 dark:text-gray-400">Gün Farkı:</span>
+                            <div class="font-medium text-gray-900 dark:text-white">
+                                {% if abone.endeksler.first %}
+                                    {{ abone.endeksler.first.endeks_tarihi|timesince }} önce
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Endeks Tarihi -->
+                    <div>
+                        <label for="{{ form.endeks_tarihi.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-calendar mr-2"></i>{{ form.endeks_tarihi.label }}
+                        </label>
+                        {{ form.endeks_tarihi }}
+                        {% if form.endeks_tarihi.help_text %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.endeks_tarihi.help_text }}</p>
+                        {% endif %}
+                        {% if form.endeks_tarihi.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {% for error in form.endeks_tarihi.errors %}
+                                    <p><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Endeks Değeri -->
+                    <div>
+                        <label for="{{ form.endeks_degeri.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-tachometer-alt mr-2"></i>{{ form.endeks_degeri.label }}
+                        </label>
+                        {{ form.endeks_degeri }}
+                        {% if form.endeks_degeri.help_text %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.endeks_degeri.help_text }}</p>
+                        {% endif %}
+                        {% if form.endeks_degeri.errors %}
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {% for error in form.endeks_degeri.errors %}
+                                    <p><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Hesaplanan Tüketim (JavaScript ile) -->
+                <div id="tuketim-bilgisi" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800 hidden">
+                    <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                        <i class="fas fa-calculator text-blue-600 mr-2"></i>
+                        Hesaplanan Tüketim
+                    </h4>
+                    <div class="text-lg font-bold text-blue-900 dark:text-blue-100" id="tuketim-degeri">
+                        --
+                    </div>
+                    <div class="text-sm text-blue-700 dark:text-blue-300" id="tuketim-aciklama">
+                        Son endeksten fark
+                    </div>
+                </div>
+
+                <!-- Form Hataları -->
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-triangle text-red-400 mr-3 mt-0.5"></i>
+                            <div class="text-sm text-red-700 dark:text-red-300">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-6">
+                    <button type="submit" 
+                            class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 transition-all">
+                        <i class="fas fa-save mr-2"></i>
+                        Endeks Kaydet
+                    </button>
+                    <a href="{% url 'parkbahce:abone_detail' abone.uuid %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 transition-all">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Endeks Geçmişi Bölümü -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                    <i class="fas fa-history text-purple-600 mr-2"></i>Son Endeks Kayıtları
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Son 5 endeks kaydı</p>
+            </div>
+            
+            <div class="p-4">
+                {% if son_endeksler %}
+                    <div class="space-y-3">
+                        {% for endeks in son_endeksler %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg {% if forloop.first %}border-2 border-green-500{% endif %}">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 {% if forloop.first %}bg-green-100 dark:bg-green-900/30{% else %}bg-purple-100 dark:bg-purple-900/30{% endif %} rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar {% if forloop.first %}text-green-600 dark:text-green-400{% else %}text-purple-600 dark:text-purple-400{% endif %} text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ endeks.endeks_tarihi|date:"d.m.Y" }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ endeks.endeks_tarihi|timesince }} önce
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-bold text-gray-900 dark:text-white">
+                                    {{ endeks.endeks_degeri|floatformat:2 }}
+                                </div>
+                                {% if forloop.first %}
+                                    <div class="text-xs text-green-600 dark:text-green-400">Son Kayıt</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-chart-line text-gray-400 text-lg"></i>
+                        </div>
+                        <h4 class="text-base font-medium text-gray-900 dark:text-white mb-2">Henüz endeks kaydı yok</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Bu ilk endeks kaydınız olacak</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const endeksDegeriInput = document.getElementById('{{ form.endeks_degeri.id_for_label }}');
+    const tuketimBilgisi = document.getElementById('tuketim-bilgisi');
+    const tuketimDegeri = document.getElementById('tuketim-degeri');
+    const tuketimAciklama = document.getElementById('tuketim-aciklama');
+    
+    // Son endeks değeri
+    const sonEndeks = {% if abone.endeksler.first %}{{ abone.endeksler.first.endeks_degeri }}{% else %}0{% endif %};
+    
+    // Endeks değeri değiştiğinde tüketimi hesapla
+    endeksDegeriInput.addEventListener('input', function() {
+        const yeniEndeks = parseFloat(this.value);
+        
+        if (!isNaN(yeniEndeks) && sonEndeks > 0) {
+            const tuketim = yeniEndeks - sonEndeks;
+            
+            if (tuketim >= 0) {
+                tuketimDegeri.textContent = tuketim.toFixed(2);
+                tuketimAciklama.textContent = `Son endeksten (${sonEndeks}) fark`;
+                tuketimBilgisi.classList.remove('hidden');
+                tuketimBilgisi.classList.remove('bg-red-50', 'border-red-200', 'dark:bg-red-900/20', 'dark:border-red-800');
+                tuketimBilgisi.classList.add('bg-blue-50', 'border-blue-200', 'dark:bg-blue-900/20', 'dark:border-blue-800');
+                tuketimDegeri.classList.remove('text-red-900', 'dark:text-red-100');
+                tuketimDegeri.classList.add('text-blue-900', 'dark:text-blue-100');
+                tuketimAciklama.classList.remove('text-red-700', 'dark:text-red-300');
+                tuketimAciklama.classList.add('text-blue-700', 'dark:text-blue-300');
+            } else {
+                tuketimDegeri.textContent = Math.abs(tuketim).toFixed(2);
+                tuketimAciklama.textContent = `Uyarı: Endeks değeri son endeksten küçük!`;
+                tuketimBilgisi.classList.remove('hidden');
+                tuketimBilgisi.classList.remove('bg-blue-50', 'border-blue-200', 'dark:bg-blue-900/20', 'dark:border-blue-800');
+                tuketimBilgisi.classList.add('bg-red-50', 'border-red-200', 'dark:bg-red-900/20', 'dark:border-red-800');
+                tuketimDegeri.classList.remove('text-blue-900', 'dark:text-blue-100');
+                tuketimDegeri.classList.add('text-red-900', 'dark:text-red-100');
+                tuketimAciklama.classList.remove('text-blue-700', 'dark:text-blue-300');
+                tuketimAciklama.classList.add('text-red-700', 'dark:text-red-300');
+            }
+        } else {
+            tuketimBilgisi.classList.add('hidden');
+        }
+    });
+});
+</script>
+{% endblock %}
