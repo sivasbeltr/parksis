@@ -1,29 +1,219 @@
-<div class="space-y-8 animate-fade-in">
-    <!-- Modern Başlık -->
+<div class="space-y-6 animate-fade-in">
+    <!-- Kompakt Başlık -->
     <div class="relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-green-500/10 to-teal-500/10 rounded-2xl"></div>
-        <div class="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-green-200/50 dark:border-green-700/50">
+        <div class="absolute inset-0 bg-gradient-to-r from-green-500/10 to-teal-500/10 rounded-xl"></div>
+        <div class="relative p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-map text-white text-xl"></i>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-map text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
                             Park Alanları
                         </h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">Bu parka ait alan bilgileri</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs">Alan bilgileri</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                         {{ yesil_alanlar.count|add:spor_alanlar.count|add:oyun_alanlar.count|add:binalar.count }}
                     </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Toplam Alan</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Toplam</div>
                 </div>
             </div>
         </div>
-    </div>    <!-- Modern Alan Kategorileri Grid -->
+    </div>
+
+    <!-- Kompakt Alan Kartları Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Yeşil Alanlar -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-leaf text-green-600 dark:text-green-400 text-xs"></i>
+                        </div>
+                        Yeşil Alanlar
+                    </h4>
+                    <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ yesil_alanlar.count }}</div>
+                </div>
+                
+                <div class="space-y-2 max-h-32 overflow-y-auto">
+                    {% for alan in yesil_alanlar|slice:":3" %}
+                    <div class="flex items-center justify-between p-2 bg-green-50/50 dark:bg-green-900/10 rounded-lg text-xs">
+                        <span class="text-green-900 dark:text-green-100">Yeşil Alan {{ forloop.counter }}</span>
+                        {% if alan.alan %}
+                        <span class="text-green-600 dark:text-green-400 font-medium">{{ alan.alan|floatformat:0 }} m²</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-xs text-gray-500 dark:text-gray-400">
+                        Henüz yeşil alan bulunmuyor
+                    </div>
+                    {% endfor %}
+                    {% if yesil_alanlar.count > 3 %}
+                    <div class="text-center text-xs text-green-600 dark:text-green-400">
+                        +{{ yesil_alanlar.count|add:"-3" }} daha...
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Spor Alanları -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-running text-orange-600 dark:text-orange-400 text-xs"></i>
+                        </div>
+                        Spor Alanları
+                    </h4>
+                    <div class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ spor_alanlar.count }}</div>
+                </div>
+                
+                <div class="space-y-2 max-h-32 overflow-y-auto">
+                    {% for alan in spor_alanlar|slice:":3" %}
+                    <div class="flex items-center justify-between p-2 bg-orange-50/50 dark:bg-orange-900/10 rounded-lg text-xs">
+                        <span class="text-orange-900 dark:text-orange-100">{{ alan.spor_alan_tipi.ad|default:"Spor Alanı" }}</span>
+                        {% if alan.alan %}
+                        <span class="text-orange-600 dark:text-orange-400 font-medium">{{ alan.alan|floatformat:0 }} m²</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-xs text-gray-500 dark:text-gray-400">
+                        Henüz spor alanı bulunmuyor
+                    </div>
+                    {% endfor %}
+                    {% if spor_alanlar.count > 3 %}
+                    <div class="text-center text-xs text-orange-600 dark:text-orange-400">
+                        +{{ spor_alanlar.count|add:"-3" }} daha...
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Oyun Alanları -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-child text-purple-600 dark:text-purple-400 text-xs"></i>
+                        </div>
+                        Oyun Alanları
+                    </h4>
+                    <div class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ oyun_alanlar.count }}</div>
+                </div>
+                
+                <div class="space-y-2 max-h-32 overflow-y-auto">
+                    {% for alan in oyun_alanlar|slice:":3" %}
+                    <div class="flex items-center justify-between p-2 bg-purple-50/50 dark:bg-purple-900/10 rounded-lg text-xs">
+                        <span class="text-purple-900 dark:text-purple-100">Oyun Alanı {{ forloop.counter }}</span>
+                        {% if alan.alan %}
+                        <span class="text-purple-600 dark:text-purple-400 font-medium">{{ alan.alan|floatformat:0 }} m²</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-xs text-gray-500 dark:text-gray-400">
+                        Henüz oyun alanı bulunmuyor
+                    </div>
+                    {% endfor %}
+                    {% if oyun_alanlar.count > 3 %}
+                    <div class="text-center text-xs text-purple-600 dark:text-purple-400">
+                        +{{ oyun_alanlar.count|add:"-3" }} daha...
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Binalar -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-building text-gray-600 dark:text-gray-400 text-xs"></i>
+                        </div>
+                        Binalar
+                    </h4>
+                    <div class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ binalar.count }}</div>
+                </div>
+                
+                <div class="space-y-2 max-h-32 overflow-y-auto">
+                    {% for bina in binalar|slice:":3" %}
+                    <div class="flex items-center justify-between p-2 bg-gray-50/50 dark:bg-gray-700/50 rounded-lg text-xs">
+                        <span class="text-gray-900 dark:text-gray-100">{{ bina.ad|default:"Bina" }}</span>
+                        {% if bina.alan %}
+                        <span class="text-gray-600 dark:text-gray-400 font-medium">{{ bina.alan|floatformat:0 }} m²</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-xs text-gray-500 dark:text-gray-400">
+                        Henüz bina bulunmuyor
+                    </div>
+                    {% endfor %}
+                    {% if binalar.count > 3 %}
+                    <div class="text-center text-xs text-gray-600 dark:text-gray-400">
+                        +{{ binalar.count|add:"-3" }} daha...
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kompakt İstatistik Kartı -->
+    <div class="bg-gradient-to-br from-green-50 via-teal-50 to-emerald-50 dark:from-green-900/20 dark:via-teal-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200/50 dark:border-green-700/50 p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-bar text-white text-xs"></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Alan İstatistikleri</h4>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center mb-1">
+                    <i class="fas fa-leaf text-green-600 dark:text-green-400 text-xs"></i>
+                </div>
+                <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ yesil_alanlar.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Yeşil Alan</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-6 h-6 bg-orange-100 dark:bg-orange-900/30 rounded-md flex items-center justify-center mb-1">
+                    <i class="fas fa-running text-orange-600 dark:text-orange-400 text-xs"></i>
+                </div>
+                <div class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ spor_alanlar.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Spor Alanı</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-6 h-6 bg-purple-100 dark:bg-purple-900/30 rounded-md flex items-center justify-center mb-1">
+                    <i class="fas fa-child text-purple-600 dark:text-purple-400 text-xs"></i>
+                </div>
+                <div class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ oyun_alanlar.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Oyun Alanı</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-6 h-6 bg-gray-100 dark:bg-gray-600 rounded-md flex items-center justify-center mb-1">
+                    <i class="fas fa-building text-gray-600 dark:text-gray-400 text-xs"></i>
+                </div>
+                <div class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ binalar.count }}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Bina</div>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Yeşil Alanlar -->
         <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-500 hover:shadow-xl hover:shadow-green-500/10">

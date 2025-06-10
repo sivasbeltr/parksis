@@ -1,0 +1,211 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}Günlük Rapor - Saha Personeli{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in px-4">
+    <!-- Başlık ve Tarih -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                    Günlük Rapor
+                </h2>
+                <p class="text-gray-600 mt-1">{{ "now"|date:"d F Y" }} - Bugünkü performansınız</p>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-blue-600">{{ bugun_toplam }}</div>
+                <div class="text-sm text-gray-500">Toplam Kontrol</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-2 gap-4">
+        <!-- Sorun Yok -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-2xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-2xl font-bold text-green-700">{{ bugun_sorun_yok }}</div>
+                    <div class="text-sm text-green-600 font-medium">Sorun Yok</div>
+                </div>
+                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sorun Var -->
+        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-2xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-2xl font-bold text-yellow-700">{{ bugun_sorun_var }}</div>
+                    <div class="text-sm text-yellow-600 font-medium">Sorun Var</div>
+                </div>
+                <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acil Durumlar -->
+        <div class="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-2xl font-bold text-red-700">{{ bugun_acil }}</div>
+                    <div class="text-sm text-red-600 font-medium">Acil Durum</div>
+                </div>
+                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Başarı Oranı -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-2xl font-bold text-blue-700">
+                        {% if bugun_toplam > 0 %}
+                            {{ bugun_basari_orani|floatformat:0 }}%
+                        {% else %}
+                            --%
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-blue-600 font-medium">Başarı Oranı</div>
+                </div>
+                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-trophy text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if personel %}
+        <!-- Personel Bilgileri -->
+        <div class="bg-white rounded-2xl shadow-soft p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-user text-park-green-600 mr-2"></i>
+                Personel Bilgileri
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Ad Soyad</span>
+                    <span class="font-medium text-gray-900">{{ personel.ad }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Pozisyon</span>
+                    <span class="font-medium text-gray-900">{{ personel.pozisyon|default:"Belirtilmemiş" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Telefon</span>
+                    <span class="font-medium text-gray-900">{{ personel.telefon|default:"Belirtilmemiş" }}</span>
+                </div>
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-gray-600">E-posta</span>
+                    <span class="font-medium text-gray-900">{{ personel.eposta|default:"Belirtilmemiş" }}</span>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Bugünkü Kontroller -->
+    {% if bugun_kontroller %}
+        <div class="bg-white rounded-2xl shadow-soft p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+                Bugünkü Kontroller
+            </h3>
+            
+            <div class="space-y-4">
+                {% for kontrol in bugun_kontroller %}
+                    <div class="border border-gray-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">{{ kontrol.park.ad }}</h4>
+                                <p class="text-sm text-gray-600">{{ kontrol.park.mahalle.ad }}</p>
+                                <p class="text-xs text-gray-500">{{ kontrol.kontrol_tarihi|date:"H:i" }}</p>
+                            </div>
+                            <div>
+                                {% if kontrol.durum == 'sorun_yok' %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                                        <i class="fas fa-check mr-1"></i>Sorun Yok
+                                    </span>
+                                {% elif kontrol.durum == 'sorun_var' %}
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>Sorun Var
+                                    </span>
+                                {% elif kontrol.durum == 'acil' %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>Acil
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if kontrol.aciklama %}
+                            <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-700">
+                                {{ kontrol.aciklama }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if kontrol.resimler.all %}
+                            <div class="mt-3">
+                                <div class="flex space-x-2">
+                                    {% for resim in kontrol.resimler.all %}
+                                        <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                                            <img src="{{ resim.resim.url }}" alt="{{ resim.aciklama }}" class="w-full h-full object-cover">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl shadow-soft p-6 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-calendar-day text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Bugün Henüz Kontrol Yok</h3>
+            <p class="text-gray-600 mb-6">Bugün henüz hiç kontrol yapmadınız. İlk kontrolünüzü yapın!</p>
+            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="bg-park-green-600 hover:bg-park-green-700 text-white font-bold py-3 px-6 rounded-xl transition-colors mobile-button">
+                <i class="fas fa-plus mr-2"></i>İlk Kontrolü Yap
+            </a>
+        </div>
+    {% endif %}
+    
+    <!-- Hızlı Aksiyonlar -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-bolt text-yellow-600 mr-2"></i>
+            Hızlı Aksiyonlar
+        </h3>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="bg-park-green-100 hover:bg-park-green-200 text-park-green-800 font-bold py-4 px-6 rounded-xl transition-colors text-center mobile-button">
+                <i class="fas fa-plus text-2xl mb-2 block"></i>
+                <span class="text-sm">Yeni Kontrol</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_kontrol_listesi' %}" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-4 px-6 rounded-xl transition-colors text-center mobile-button">
+                <i class="fas fa-list text-2xl mb-2 block"></i>
+                <span class="text-sm">Kontrol Geçmişi</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_sorun_listesi' %}" class="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-4 px-6 rounded-xl transition-colors text-center mobile-button">
+                <i class="fas fa-bug text-2xl mb-2 block"></i>
+                <span class="text-sm">Sorunlarım</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_atanan_gorevler' %}" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-4 px-6 rounded-xl transition-colors text-center mobile-button">
+                <i class="fas fa-tasks text-2xl mb-2 block"></i>
+                <span class="text-sm">Görevlerim</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

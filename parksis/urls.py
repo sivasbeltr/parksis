@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("admin/", admin.site.urls),
     path("parkbahce/", include("parkbahce.urls")),
+    path("istakip/", include("istakip.urls")),
     path("api/v1/", include("api.urls")),
 ]
 

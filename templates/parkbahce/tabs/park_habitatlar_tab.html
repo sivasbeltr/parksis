@@ -1,142 +1,119 @@
-<div class="space-y-8 animate-fade-in">
-    <!-- Modern Başlık -->
+<div class="space-y-6 animate-fade-in">
+    <!-- Kompakt Başlık -->
     <div class="relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-2xl"></div>
-        <div class="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-green-200/50 dark:border-green-700/50">
+        <div class="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl"></div>
+        <div class="relative p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-green-200/50 dark:border-green-700/50">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-tree text-white text-xl"></i>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-tree text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                             Habitatlar
                         </h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">Bu parka ait habitat bilgileri</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs">Habitat bilgileri</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ toplam_habitat }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Toplam Habitat</div>
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ toplam_habitat }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Toplam</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modern Habitat Kartları -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <!-- Kompakt Habitat Kartları -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {% for grup in habitat_gruplari %}
-        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-500 hover:shadow-2xl hover:shadow-green-500/10 hover:-translate-y-2">
-            <!-- Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
-            <!-- Floating Badge -->
-            <div class="absolute top-4 right-4 z-10">
-                <div class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                    {{ grup.adet }} adet
-                </div>
-            </div>
-            
-            <div class="relative p-6">
-                <div class="flex items-start space-x-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-seedling text-green-600 dark:text-green-400 text-2xl"></i>
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                        <i class="fas fa-seedling text-green-600 dark:text-green-400 text-lg"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                             {{ grup.habitat_tipi__ad|default:"Belirtilmemiş Habitat" }}
                         </h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Bu habitatta {{ grup.adet }} farklı tür bulunmaktadır
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                            {{ grup.adet }} farklı tür bulunuyor
                         </p>
                         
                         <!-- Progress Bar -->
-                        <div class="space-y-2">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs">
-                                <span class="text-gray-500 dark:text-gray-400">Habitat Yoğunluğu</span>
+                                <span class="text-gray-500 dark:text-gray-400">Yoğunluk</span>
                                 <span class="text-green-600 dark:text-green-400 font-medium">
                                     {% widthratio grup.adet toplam_habitat 100 %}%
                                 </span>
                             </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                                 <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" 
                                      style="width: {% widthratio grup.adet toplam_habitat 100 %}%"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ grup.adet }}</div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Shimmer Effect -->
-            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
         {% empty %}
         <div class="col-span-full">
-            <div class="text-center py-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-tree text-gray-400 text-3xl"></i>
+            <div class="text-center py-12 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-tree text-gray-400 text-2xl"></i>
                 </div>
-                <h4 class="text-xl font-bold text-gray-500 dark:text-gray-400 mb-2">Henüz habitat bulunmuyor</h4>
-                <p class="text-gray-400 dark:text-gray-500">Bu parka ait habitat bilgileri henüz eklenmemiş.</p>
+                <h4 class="text-lg font-bold text-gray-500 dark:text-gray-400 mb-1">Henüz habitat bulunmuyor</h4>
+                <p class="text-gray-400 dark:text-gray-500 text-sm">Bu parka ait habitat bilgileri henüz eklenmemiş.</p>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Modern İstatistik Kartı -->
+    <!-- Kompakt İstatistik Kartı -->
     {% if toplam_habitat %}
-    <div class="relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 rounded-2xl border border-green-200/50 dark:border-green-700/50">
-        <!-- Decorative Elements -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full -translate-y-16 translate-x-16"></div>
-        <div class="absolute bottom-0 left-0 w-24 h-24 bg-emerald-500/10 rounded-full translate-y-12 -translate-x-12"></div>
-        
-        <div class="relative p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-chart-line text-white"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Habitat Özet Raporu</h4>
+    <div class="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-green-200/50 dark:border-green-700/50 p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-white text-xs"></i>
                 </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Habitat Özeti</h4>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-leaf text-green-600 dark:text-green-400 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Toplam</span>
+                </div>
+                <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ toplam_habitat }}</div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-leaf text-green-600 dark:text-green-400"></i>
-                            </div>
-                            <span class="font-medium text-gray-700 dark:text-gray-300">Toplam Habitat</span>
-                        </div>
-                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ toplam_habitat }}</div>
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-teal-100 dark:bg-teal-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-layer-group text-teal-600 dark:text-teal-400 text-xs"></i>
                     </div>
-                    
-                    <div class="flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-layer-group text-teal-600 dark:text-teal-400"></i>
-                            </div>
-                            <span class="font-medium text-gray-700 dark:text-gray-300">Habitat Çeşidi</span>
-                        </div>
-                        <div class="text-2xl font-bold text-teal-600 dark:text-teal-400">{{ habitat_gruplari|length }}</div>
-                    </div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Çeşit</span>
                 </div>
-                
-                <div class="flex items-center justify-center">
-                    <div class="text-center">
-                        <div class="relative w-32 h-32 mx-auto mb-4">
-                            <div class="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full opacity-20"></div>
-                            <div class="absolute inset-2 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">100%</div>
-                                    <div class="text-xs text-gray-500">Sağlıklı</div>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Habitat Sağlık Durumu</p>
+                <div class="text-lg font-bold text-teal-600 dark:text-teal-400">{{ habitat_gruplari|length }}</div>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-emerald-600 dark:text-emerald-400 text-xs"></i>
                     </div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Sağlık</span>
                 </div>
+                <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400">100%</div>
             </div>
         </div>
     </div>

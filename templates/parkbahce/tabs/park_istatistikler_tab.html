@@ -1,0 +1,438 @@
+<div class="space-y-6 animate-fade-in">
+    <!-- Kompakt Başlık -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl"></div>
+        <div class="relative p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-indigo-200/50 dark:border-indigo-700/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chart-line text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            Park İstatistikleri
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs">Detaylı analiz ve raporlar</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{% now "m/Y" %}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Bu Ay</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        <!-- Yeşil Alan İstatistikleri -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-leaf text-green-600 dark:text-green-400 text-xs"></i>
+                        </div>
+                        Yeşil Alanlar
+                    </h4>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Toplam Alan</span>
+                        <span class="font-bold text-green-600 dark:text-green-400">
+                            {{ yesil_alan_stats.toplam_alan|floatformat:0 }} m²
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Parça Sayısı</span>
+                        <span class="font-bold text-green-600 dark:text-green-400">
+                            {{ yesil_alan_stats.adet }}
+                        </span>
+                    </div>
+                    {% if su_tuketim_stats.m2_aylik %}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">m²/Aylık Su</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">
+                            {{ su_tuketim_stats.m2_aylik|floatformat:2 }} m³
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Habitat İstatistikleri -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-seedling text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                        </div>
+                        Habitatlar
+                    </h4>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Toplam Adet</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                            {{ habitat_stats.toplam_adet }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Tür Çeşitliliği</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                            {{ habitat_stats.cesit_sayisi }} çeşit
+                        </span>
+                    </div>                    {% if habitat_stats.habitat_yogunlugu %}
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Habitat/m²</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                            {{ habitat_stats.habitat_yogunlugu|floatformat:3 }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Su Tüketimi İstatistikleri -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-tint text-blue-600 dark:text-blue-400 text-xs"></i>
+                        </div>
+                        Su Tüketimi
+                    </h4>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Aylık Ortalama</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">
+                            {{ su_tuketim_stats.aylik_ortalama|floatformat:1 }} m³
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Yıllık Toplam</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">
+                            {{ su_tuketim_stats.yillik_toplam|floatformat:0 }} m³
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Abone Sayısı</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">
+                            {{ su_tuketim_stats.toplam_abone }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elektrik Tüketimi İstatistikleri -->
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-yellow-300 dark:hover:border-yellow-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                        <div class="w-8 h-8 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400 text-xs"></i>
+                        </div>
+                        Elektrik Tüketimi
+                    </h4>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Aylık Ortalama</span>
+                        <span class="font-bold text-yellow-600 dark:text-yellow-400">
+                            {{ elektrik_tuketim_stats.aylik_ortalama|floatformat:1 }} kWh
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Yıllık Toplam</span>
+                        <span class="font-bold text-yellow-600 dark:text-yellow-400">
+                            {{ elektrik_tuketim_stats.yillik_toplam|floatformat:0 }} kWh
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500 dark:text-gray-400">Abone Sayısı</span>
+                        <span class="font-bold text-yellow-600 dark:text-yellow-400">
+                            {{ elektrik_tuketim_stats.toplam_abone }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Tüketim İstatistikleri -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Su Tüketimi Detaylı İstatistikleri -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+                </div>
+                Su Tüketimi Analizi
+            </h4>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                        {{ su_tuketim_stats.aylik_ortalama|floatformat:1 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Aylık Ortalama (m³)</div>
+                </div>
+                <div class="text-center p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                        {{ su_tuketim_stats.yillik_toplam|floatformat:0 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Yıllık Toplam (m³)</div>
+                </div>
+                <div class="text-center p-4 bg-cyan-50/50 dark:bg-cyan-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mb-1">
+                        {{ su_tuketim_stats.m2_aylik|floatformat:3 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">m²/Aylık (m³)</div>
+                </div>
+                <div class="text-center p-4 bg-cyan-50/50 dark:bg-cyan-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mb-1">
+                        {{ su_tuketim_stats.toplam_abone }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Abone Sayısı</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elektrik Tüketimi Detaylı İstatistikleri -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-bolt text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                Elektrik Tüketimi Analizi
+            </h4>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-4 bg-yellow-50/50 dark:bg-yellow-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">
+                        {{ elektrik_tuketim_stats.aylik_ortalama|floatformat:1 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Aylık Ortalama (kWh)</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-50/50 dark:bg-yellow-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">
+                        {{ elektrik_tuketim_stats.yillik_toplam|floatformat:0 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Yıllık Toplam (kWh)</div>
+                </div>
+                <div class="text-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-amber-600 dark:text-amber-400 mb-1">
+                        {{ elektrik_tuketim_stats.oyun_alani_orani|floatformat:1 }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Oyun Alanı/kWh</div>
+                </div>
+                <div class="text-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg">
+                    <div class="text-2xl font-bold text-amber-600 dark:text-amber-400 mb-1">
+                        {{ elektrik_tuketim_stats.toplam_abone }}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Abone Sayısı</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Park Altyapı İstatistikleri -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-cogs text-green-600 dark:text-green-400"></i>
+            </div>
+            Park Altyapı ve Donatı Analizi
+        </h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-green-50/50 dark:bg-green-900/10 rounded-lg">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
+                    {{ ek_istatistikler.sulama_nokta_sayisi }}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Sulama Noktası</div>
+            </div>
+            <div class="text-center p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                    {{ ek_istatistikler.elektrik_nokta_sayisi }}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Elektrik Noktası</div>
+            </div>
+            <div class="text-center p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-lg">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+                    {{ ek_istatistikler.toplam_donati }}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Toplam Donatı</div>
+            </div>
+            <div class="text-center p-4 bg-pink-50/50 dark:bg-pink-900/10 rounded-lg">
+                <div class="text-2xl font-bold text-pink-600 dark:text-pink-400 mb-1">
+                    {{ ek_istatistikler.toplam_oyun_grubu }}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Oyun Grubu</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performans Göstergeleri -->
+    <div class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 rounded-xl border border-indigo-200/50 dark:border-indigo-700/50 p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-trophy text-white text-xs"></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Performans Göstergeleri</h4>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-2">
+                    <i class="fas fa-leaf text-green-600 dark:text-green-400 text-sm"></i>
+                </div>
+                <div class="text-lg font-bold text-green-600 dark:text-green-400">
+                    {% if su_tuketim_stats.m2_aylik %}
+                        {{ su_tuketim_stats.m2_aylik|floatformat:2 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">m² başına su tüketimi</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-2">
+                    <i class="fas fa-gamepad text-purple-600 dark:text-purple-400 text-sm"></i>
+                </div>
+                <div class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                    {% if elektrik_tuketim_stats.oyun_alani_orani %}
+                        {{ elektrik_tuketim_stats.oyun_alani_orani|floatformat:1 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Oyun alanı başına elektrik</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-2">
+                    <i class="fas fa-chart-pie text-blue-600 dark:text-blue-400 text-sm"></i>
+                </div>    <!-- Performans Göstergeleri -->
+    <div class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 rounded-xl border border-indigo-200/50 dark:border-indigo-700/50 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-trophy text-white"></i>
+                </div>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Performans Göstergeleri ve Verimlilik</h4>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-leaf text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="text-xl font-bold text-green-600 dark:text-green-400">
+                    {% if su_tuketim_stats.m2_aylik %}
+                        {{ su_tuketim_stats.m2_aylik|floatformat:2 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">m² başına su tüketimi (m³)</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-gamepad text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <div class="text-xl font-bold text-purple-600 dark:text-purple-400">
+                    {% if elektrik_tuketim_stats.oyun_alani_orani %}
+                        {{ elektrik_tuketim_stats.oyun_alani_orani|floatformat:1 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Oyun alanı başına elektrik (kWh)</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-tint text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                    {% if ek_istatistikler.m2_basina_sulama_noktasi %}
+                        {{ ek_istatistikler.m2_basina_sulama_noktasi|floatformat:0 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">m²/Sulama noktası</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-tools text-orange-600 dark:text-orange-400"></i>
+                </div>
+                <div class="text-xl font-bold text-orange-600 dark:text-orange-400">
+                    {% if ek_istatistikler.m2_basina_donati %}
+                        {{ ek_istatistikler.m2_basina_donati|floatformat:0 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">m²/Donatı oranı</div>
+            </div>
+        </div>
+        
+        <!-- Ek Verimlilik Göstergeleri -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-seedling text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {% if habitat_stats.yesil_alan_verimliligi %}
+                        {{ habitat_stats.yesil_alan_verimliligi|floatformat:1 }}%
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Yeşil alan verimliliği</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-running text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {% if ek_istatistikler.hectar_basina_oyun_grubu %}
+                        {{ ek_istatistikler.hectar_basina_oyun_grubu|floatformat:1 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Hektar başına oyun grubu</div>
+            </div>
+            
+            <div class="flex flex-col items-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="w-10 h-10 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-chart-pie text-rose-600 dark:text-rose-400"></i>
+                </div>
+                <div class="text-xl font-bold text-rose-600 dark:text-rose-400">
+                    {% if habitat_stats.habitat_yogunlugu %}
+                        {{ habitat_stats.habitat_yogunlugu|floatformat:3 }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-400 text-center">Habitat yoğunluğu (Adet/m²)</div>
+            </div>
+        </div>
+    </div>
+</div>

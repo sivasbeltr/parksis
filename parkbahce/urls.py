@@ -75,6 +75,11 @@ urlpatterns = [
         htmx_views.park_alanlar_tab_htmx,
         name="park_alanlar_tab_htmx",
     ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/istatistikler/",
+        htmx_views.park_istatistikler_tab_htmx,
+        name="park_istatistikler_tab_htmx",
+    ),
     # HTMX endpoints
     path("htmx/recent-parks/", htmx_views.recent_parks_htmx, name="recent_parks_htmx"),
     path(

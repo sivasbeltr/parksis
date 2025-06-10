@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}Saha Personeli - Sivas Belediyesi{% endblock %}</title>
+      <!-- Meta Tags -->
+    <meta name="description" content="Sivas Belediyesi Saha Personeli Uygulaması">
+    <meta name="theme-color" content="#22c55e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+    
+    <!-- Stylesheets -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- OpenLayers -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@8.2.0/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@8.2.0/dist/ol.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'park-green': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-in-left': 'slideInLeft 0.3s ease-out',
+                        'bounce-soft': 'bounceSoft 0.8s ease-out',
+                        'pulse-green': 'pulseGreen 2s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes bounceSoft {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-2px); }
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+        }
+        
+        /* Mobile optimizations */
+        .mobile-button {
+            min-height: 48px;
+            touch-action: manipulation;
+        }
+        
+        .mobile-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+        
+        /* Custom scrollbar for mobile */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 2px;
+        }        /* Map container */
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+        
+        /* Image upload styling */
+        .image-upload-item {
+            background: #f8fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload-item:hover {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+        
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .image-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+            background: #22c55e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .file-input-wrapper:hover {
+            background: #16a34a;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Sidebar animations */
+        .sidebar-enter {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar-enter-active {
+            transform: translateX(0);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .sidebar-exit {
+            transform: translateX(0);
+        }
+        
+        .sidebar-exit-active {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-out;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="h-full bg-gradient-to-br from-gray-50 to-gray-100 font-sans">
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden"></div>
+    
+    <!-- Mobile Sidebar -->
+    <div id="mobile-sidebar" class="fixed top-0 left-0 z-50 w-80 h-full bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out">
+        <!-- Sidebar Header -->
+        <div class="bg-gradient-to-r from-park-green-600 to-park-green-700 p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-hard-hat text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">Saha Personeli</h3>
+                        <p class="text-sm opacity-90">{{ user.get_full_name|default:user.username }}</p>
+                    </div>
+                </div>
+                <button id="close-sidebar" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+          <!-- Sidebar Navigation -->
+        <nav class="p-4 space-y-2">
+            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-exclamation-triangle w-5 text-center"></i>
+                <span class="font-medium">Sorun Bildir</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_kontrol_listesi' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-list-check w-5 text-center"></i>
+                <span class="font-medium">Yaptığım Kontroller</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_sorun_listesi' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-bug w-5 text-center"></i>
+                <span class="font-medium">Bildirdiğim Sorunlar</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_sorumlu_parklar' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-tree w-5 text-center"></i>
+                <span class="font-medium">Sorumlu Olduğum Parklar</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_atanan_gorevler' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-tasks w-5 text-center"></i>
+                <span class="font-medium">Atanan Görevlerim</span>
+            </a>
+            
+            <a href="{% url 'istakip:mobil_gunluk_rapor' %}" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-park-green-50 hover:text-park-green-700 transition-colors mobile-button">
+                <i class="fas fa-chart-line w-5 text-center"></i>
+                <span class="font-medium">Günlük Rapor</span>
+            </a>
+            
+            <div class="border-t border-gray-200 my-4"></div>
+            
+            <a href="/admin/logout/" class="flex items-center space-x-3 w-full p-4 text-left rounded-xl hover:bg-red-50 hover:text-red-700 transition-colors mobile-button">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                <span class="font-medium">Çıkış Yap</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="min-h-screen">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+            <div class="flex items-center justify-between p-4">
+                <button id="open-sidebar" class="w-10 h-10 flex items-center justify-center rounded-lg bg-park-green-100 text-park-green-700 hover:bg-park-green-200 transition-colors mobile-button">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-tree text-white text-sm"></i>
+                    </div>
+                    <h1 class="font-bold text-gray-900">Saha Uygulaması</h1>
+                </div>
+                
+                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
+            </div>
+        </header>
+          <!-- Page Content -->
+        <main>
+            {% block content %}
+            <!-- Content will be inserted here -->
+            {% endblock %}
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center h-full">
+            <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-park-green-600"></div>
+                <span class="text-gray-900 font-medium">Yükleniyor...</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Sidebar functionality
+        const openSidebar = document.getElementById('open-sidebar');
+        const closeSidebar = document.getElementById('close-sidebar');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        
+        openSidebar.addEventListener('click', () => {
+            mobileSidebar.classList.remove('-translate-x-full');
+            sidebarBackdrop.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        closeSidebar.addEventListener('click', () => {
+            mobileSidebar.classList.add('-translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+        
+        sidebarBackdrop.addEventListener('click', () => {
+            mobileSidebar.classList.add('-translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+        
+        // Loading functions
+        window.showLoading = function() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        };
+        
+        window.hideLoading = function() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        };
+        
+        // Toast notification function
+        window.showToast = function(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-park-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            toast.className = `${colors[type] || colors.info} px-6 py-4 rounded-lg shadow-lg animate-fade-in max-w-sm`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="font-medium">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        };
+        
+        // CSRF Token
+        window.getCsrfToken = function() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            return token ? token.value : '';
+        };
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

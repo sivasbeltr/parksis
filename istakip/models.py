@@ -130,6 +130,8 @@ class GunlukKontrol(models.Model):
         SORUN_YOK = "sorun_yok", _("Sorun Yok")
         SORUN_VAR = "sorun_var", _("Sorun Var")
         ACIL = "acil", _("Acil Müdahale Gerekli")
+        GOZDEN_GECIRILDI = "gozden_gecirildi", _("Gözden Geçirildi")
+        ISE_DONUSTURULDU = "ise_donusturuldu", _("İşe Dönüştürüldü")
 
     class KontrolTipiChoices(models.TextChoices):
         RUTIN = "rutin", _("Rutin Kontrol")
@@ -252,21 +254,63 @@ class KontrolResim(models.Model):
         verbose_name = _("Kontrol Resmi")
         verbose_name_plural = _("Kontrol Resimleri")
         db_table = '"parkbahce"."kontrol_resimler"'
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(gunluk_kontrol__durum__in=["sorun_var", "acil"]),
-                name="kontrol_resim_sorun_var_veya_acil",
-                violation_error_message=_(
-                    "Resim sadece sorun var veya acil durumunda eklenebilir."
-                ),
-            ),
-        ]
 
     def save(self, *args, **kwargs):
         # Ensure no more than 3 images per GunlukKontrol
         if self.gunluk_kontrol.resimler.count() >= 3 and not self.pk:
             raise ValueError(_("Bir günlük kontrol için en fazla 3 resim eklenebilir."))
         super().save(*args, **kwargs)
+
+    def clean(self):
+        # Django admin ve form validation için
+        from django.core.exceptions import ValidationError
+
+        if self.gunluk_kontrol and self.gunluk_kontrol.durum not in [
+            "sorun_var",
+            "acil",
+        ]:
+            raise ValidationError(
+                _("Resim sadece sorun var veya acil durumunda eklenebilir.")
+            )
+        super().clean()
+
+    def save_image(self, image_file):
+        """
+        Resmi kaydet ve gerekirse boyutunu küçült, UUID isim ver
+        """
+        import io
+        import uuid
+
+        from django.core.files.base import ContentFile
+        from PIL import Image
+
+        # UUID ile dosya adı oluştur
+        file_extension = image_file.name.split(".")[-1].lower()
+        new_filename = f"{uuid.uuid4()}.{file_extension}"
+
+        # Resmi aç
+        img = Image.open(image_file)
+
+        # Resim boyutunu kontrol et ve gerekirse küçült
+        max_size = (1920, 1080)
+        if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+        # Resmi kaydet
+        output = io.BytesIO()
+        img_format = (
+            "JPEG"
+            if file_extension.lower() in ["jpg", "jpeg"]
+            else file_extension.upper()
+        )
+        img.save(output, format=img_format, quality=85)
+        output.seek(0)
+
+        # Django dosya objesi oluştur
+        content_file = ContentFile(output.read(), name=new_filename)
+        self.resim.save(new_filename, content_file, save=False)
+
+        return new_filename
 
 
 class GorevTipi(models.Model):
@@ -577,6 +621,20 @@ class GorevAsama(models.Model):
         blank=True,
         null=True,
     )
+    resim = models.ImageField(
+        _("Aşama Resmi"),
+        upload_to="asama_resimler/%Y/%m/%d/",
+        help_text=_("Aşama ilerlemesi ile ilgili resmi yükleyiniz."),
+        blank=True,
+        null=True,
+    )
+    konum = models.PointField(
+        _("Resim Konumu"),
+        srid=settings.SRID,
+        help_text=_("Resmin çekildiği konum."),
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name=_("Oluşturulma Tarihi"), blank=True, null=True
     )
@@ -659,3 +717,100 @@ class GorevDenetimKaydi(models.Model):
         verbose_name_plural = _("Görev Denetim Kayıtları")
         db_table = '"parkbahce"."gorev_denetim_kayitlari"'
         ordering = ["-islem_tarihi"]
+
+
+class GorevTamamlamaResim(models.Model):
+    """
+    Model for images attached when completing tasks, with UUID naming and size optimization.
+    """
+
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True, blank=True, null=True
+    )
+    gorev = models.ForeignKey(
+        Gorev,
+        on_delete=models.CASCADE,
+        related_name="tamamlama_resimleri",
+        verbose_name=_("Görev"),
+        help_text=_("Tamamlanan görevi seçiniz."),
+    )
+    resim = models.ImageField(
+        _("Tamamlama Resmi"),
+        upload_to="gorev_tamamlama_resimler/%Y/%m/%d/",
+        help_text=_("Görev tamamlandığında çekilen resmi yükleyiniz."),
+    )
+    aciklama = models.CharField(
+        _("Resim Açıklaması"),
+        max_length=200,
+        help_text=_("Tamamlama resmi ile ilgili açıklama giriniz."),
+        blank=True,
+        null=True,
+    )
+    konum = models.PointField(
+        _("Resim Konumu"),
+        srid=settings.SRID,
+        help_text=_("Resmin çekildiği konum."),
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("Oluşturulma Tarihi"), blank=True, null=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name=_("Güncellenme Tarihi"), blank=True, null=True
+    )
+
+    def __str__(self):
+        return f"{self.gorev.baslik} - Tamamlama Resmi {self.id}"
+
+    class Meta:
+        verbose_name = _("Görev Tamamlama Resmi")
+        verbose_name_plural = _("Görev Tamamlama Resimleri")
+        db_table = '"parkbahce"."gorev_tamamlama_resimleri"'
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        # Limit to 3 images per task completion
+        if self.gorev.tamamlama_resimleri.count() >= 3 and not self.pk:
+            raise ValueError(
+                _("Bir görev için en fazla 3 tamamlama resmi eklenebilir.")
+            )
+        super().save(*args, **kwargs)
+
+    def save_image(self, image_file):
+        """
+        Resmi kaydet ve gerekirse boyutunu küçült, UUID isim ver
+        """
+        import io
+        import uuid
+
+        from django.core.files.base import ContentFile
+        from PIL import Image
+
+        # UUID ile dosya adı oluştur
+        file_extension = image_file.name.split(".")[-1].lower()
+        new_filename = f"{uuid.uuid4()}.{file_extension}"
+
+        # Resmi aç
+        img = Image.open(image_file)
+
+        # Resim boyutunu kontrol et ve gerekirse küçült
+        max_size = (1920, 1080)
+        if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+        # Resmi kaydet
+        output = io.BytesIO()
+        img_format = (
+            "JPEG"
+            if file_extension.lower() in ["jpg", "jpeg"]
+            else file_extension.upper()
+        )
+        img.save(output, format=img_format, quality=85)
+        output.seek(0)
+
+        # Django dosya objesi oluştur
+        content_file = ContentFile(output.read(), name=new_filename)
+        self.resim.save(new_filename, content_file, save=False)
+
+        return new_filename

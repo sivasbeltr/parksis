@@ -1,148 +1,132 @@
-<div class="space-y-8 animate-fade-in">
-    <!-- Modern Başlık -->
+<div class="space-y-6 animate-fade-in">
+    <!-- Kompakt Başlık -->
     <div class="relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-2xl"></div>
-        <div class="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-blue-200/50 dark:border-blue-700/50">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-xl"></div>
+        <div class="relative p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-blue-200/50 dark:border-blue-700/50">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-chair text-white text-xl"></i>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chair text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                             Donatılar
                         </h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">Bu parka ait donatı bilgileri</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs">Donatı bilgileri</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ toplam_donati }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Toplam Donatı</div>
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ toplam_donati }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Toplam</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modern Donatı Kartları -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <!-- Kompakt Donatı Kartları -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {% for grup in donati_gruplari %}
-        <div class="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2">
-            <!-- Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
-            <!-- Floating Badge -->
-            <div class="absolute top-4 right-4 z-10">
-                <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                    {{ grup.adet }} adet
-                </div>
-            </div>
-            
-            <div class="relative p-6">
-                <div class="flex items-start space-x-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg">
+            <div class="p-4">
+                <div class="flex items-start space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                         {% if grup.donati_tipi__deger == 'bank' %}
-                            <i class="fas fa-chair text-blue-600 dark:text-blue-400 text-2xl"></i>
+                            <i class="fas fa-chair text-blue-600 dark:text-blue-400 text-lg"></i>
                         {% elif grup.donati_tipi__deger == 'cop_kutusu' %}
-                            <i class="fas fa-trash text-green-600 dark:text-green-400 text-2xl"></i>
+                            <i class="fas fa-trash text-green-600 dark:text-green-400 text-lg"></i>
                         {% elif grup.donati_tipi__deger == 'aydinlatma' %}
-                            <i class="fas fa-lightbulb text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+                            <i class="fas fa-lightbulb text-yellow-600 dark:text-yellow-400 text-lg"></i>
                         {% elif grup.donati_tipi__deger == 'pergola' %}
-                            <i class="fas fa-umbrella text-amber-600 dark:text-amber-400 text-2xl"></i>
+                            <i class="fas fa-umbrella text-amber-600 dark:text-amber-400 text-lg"></i>
                         {% elif grup.donati_tipi__deger == 'cesme' %}
-                            <i class="fas fa-fountain text-blue-600 dark:text-blue-400 text-2xl"></i>
+                            <i class="fas fa-fountain text-blue-600 dark:text-blue-400 text-lg"></i>
                         {% else %}
-                            <i class="fas fa-cube text-blue-600 dark:text-blue-400 text-2xl"></i>
+                            <i class="fas fa-cube text-blue-600 dark:text-blue-400 text-lg"></i>
                         {% endif %}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                             {{ grup.donati_tipi__ad|default:"Belirtilmemiş Donatı" }}
                         </h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Toplam {{ grup.adet }} adet donatı bulunmaktadır
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                            {{ grup.adet }} adet donatı bulunuyor
                         </p>
                         
                         <!-- Progress Bar -->
-                        <div class="space-y-2">
+                        <div class="space-y-1">
                             <div class="flex justify-between text-xs">
-                                <span class="text-gray-500 dark:text-gray-400">Donatı Oranı</span>
+                                <span class="text-gray-500 dark:text-gray-400">Oran</span>
                                 <span class="text-blue-600 dark:text-blue-400 font-medium">
                                     {% widthratio grup.adet toplam_donati 100 %}%
                                 </span>
                             </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                                 <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-1000 ease-out" 
                                      style="width: {% widthratio grup.adet toplam_donati 100 %}%"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ grup.adet }}</div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Shimmer Effect -->
-            <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
         {% empty %}
         <div class="col-span-full">
-            <div class="text-center py-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-chair text-gray-400 text-3xl"></i>
+            <div class="text-center py-12 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chair text-gray-400 text-2xl"></i>
                 </div>
-                <h4 class="text-xl font-bold text-gray-500 dark:text-gray-400 mb-2">Henüz donatı bulunmuyor</h4>
-                <p class="text-gray-400 dark:text-gray-500">Bu parka ait donatı bilgileri henüz eklenmemiş.</p>
+                <h4 class="text-lg font-bold text-gray-500 dark:text-gray-400 mb-1">Henüz donatı bulunmuyor</h4>
+                <p class="text-gray-400 dark:text-gray-500 text-sm">Bu parka ait donatı bilgileri henüz eklenmemiş.</p>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Modern İstatistik Kartı -->
+    <!-- Kompakt İstatistik Kartı -->
     {% if toplam_donati %}
-    <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-blue-200/50 dark:border-blue-700/50">
-        <!-- Decorative Elements -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
-        <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full translate-y-12 -translate-x-12"></div>
-        
-        <div class="relative p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-chart-bar text-white"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Donatı Özet Raporu</h4>
+    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-bar text-white text-xs"></i>
                 </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Donatı Özeti</h4>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-cube text-blue-600 dark:text-blue-400 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Toplam</span>
+                </div>
+                <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ toplam_donati }}</div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-cube text-blue-600 dark:text-blue-400"></i>
-                        </div>
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Toplam</span>
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-layer-group text-indigo-600 dark:text-indigo-400 text-xs"></i>
                     </div>
-                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ toplam_donati }}</div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Çeşit</span>
                 </div>
-                
-                <div class="flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-layer-group text-indigo-600 dark:text-indigo-400"></i>
-                        </div>
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Tip Çeşidi</span>
+                <div class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ donati_gruplari|length }}</div>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg border border-white/20">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-100 dark:bg-purple-900/30 rounded-md flex items-center justify-center">
+                        <i class="fas fa-percentage text-purple-600 dark:text-purple-400 text-xs"></i>
                     </div>
-                    <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ donati_gruplari|length }}</div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Yoğunluk</span>
                 </div>
-                
-                <div class="flex items-center justify-between p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-percentage text-purple-600 dark:text-purple-400"></i>
-                        </div>
-                        <span class="font-medium text-gray-700 dark:text-gray-300">Donatı/m²</span>
-                    </div>
-                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        {% widthratio toplam_donati park.alan 1 %}
-                    </div>
+                <div class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                    {% if park.alan %}{% widthratio toplam_donati park.alan 1 %}{% else %}--{% endif %}
                 </div>
             </div>
         </div>

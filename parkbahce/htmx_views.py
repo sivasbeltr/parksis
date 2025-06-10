@@ -1,6 +1,7 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from django.db import models
 from django.db.models import Count, Sum
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
@@ -286,11 +287,29 @@ def park_aboneler_tab_htmx(request, park_uuid):
         return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
 
     park = get_object_or_404(Park, uuid=park_uuid)
-    aboneler = park.aboneler.order_by("abone_tipi", "abone_no")
+
+    # Aboneleri endeks bilgileri ile birlikte getir - en son endeks üstte olacak şekilde
+    from .models import AboneEndeks
+
+    aboneler = park.aboneler.prefetch_related(
+        models.Prefetch(
+            "endeksler", queryset=AboneEndeks.objects.order_by("-endeks_tarihi")
+        )
+    ).order_by("abone_tipi", "abone_no")
+
+    # AboneTipChoices'dan abone tipi istatistikleri
+    from .models import AboneTipChoices
+
+    abone_stats = {choice[0]: 0 for choice in AboneTipChoices.choices}
+
+    for abone in aboneler:
+        if abone.abone_tipi in abone_stats:
+            abone_stats[abone.abone_tipi] += 1
 
     context = {
         "park": park,
         "aboneler": aboneler,
+        "abone_stats": abone_stats,
     }
 
     return render(request, "parkbahce/tabs/park_aboneler_tab.html", context)
@@ -347,3 +366,178 @@ def park_alanlar_tab_htmx(request, park_uuid):
     }
 
     return render(request, "parkbahce/tabs/park_alanlar_tab.html", context)
+
+
+@require_http_methods(["GET"])
+def park_istatistikler_tab_htmx(request, park_uuid):
+    """Park istatistikleri sekmesi"""
+    if not request.htmx:
+        return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
+
+    park = get_object_or_404(Park, uuid=park_uuid)  # Temel istatistikler
+    from datetime import datetime, timedelta
+
+    from django.db.models import Avg, Count, Sum
+
+    from .models import AboneEndeks
+
+    # Son 12 ay tarihi (tüm hesaplamalar için ortak)
+    son_yil = datetime.now() - timedelta(days=365)
+
+    # Yeşil alan istatistikleri
+    yesil_alan_stats = {
+        "toplam_alan": park.yesil_alanlar.aggregate(total=Sum("alan"))["total"] or 0,
+        "adet": park.yesil_alanlar.count(),
+    }  # Habitat istatistikleri
+    habitat_stats = {
+        "toplam_adet": park.habitatlar.count(),
+        "cesit_sayisi": park.habitatlar.values("habitat_tipi").distinct().count(),
+    }
+
+    # Habitat yoğunluğu hesaplama
+    if yesil_alan_stats["toplam_alan"] > 0 and habitat_stats["toplam_adet"] > 0:
+        habitat_stats["habitat_yogunlugu"] = (
+            habitat_stats["toplam_adet"] / yesil_alan_stats["toplam_alan"]
+        )
+        habitat_stats["yesil_alan_verimliligi"] = (
+            habitat_stats["toplam_adet"] * 100
+        ) / yesil_alan_stats["toplam_alan"]
+    else:
+        habitat_stats["habitat_yogunlugu"] = 0
+        habitat_stats["yesil_alan_verimliligi"] = 0
+
+    # Su abonesi istatistikleri (varsa)
+    su_aboneleri = park.aboneler.filter(abone_tipi="su")
+    su_tuketim_stats = {
+        "toplam_abone": su_aboneleri.count(),
+        "aylik_ortalama": 0,
+        "yillik_toplam": 0,
+        "m2_aylik": 0,
+        "m2_yillik": 0,
+    }
+    if su_aboneleri.exists():
+        endeksler = AboneEndeks.objects.filter(
+            park_abone__in=su_aboneleri, endeks_tarihi__gte=son_yil
+        ).order_by("park_abone", "endeks_tarihi")
+
+        # Tüketim hesaplama
+        tuketimler = []
+        for abone in su_aboneleri:
+            abone_endeksleri = endeksler.filter(park_abone=abone).order_by(
+                "endeks_tarihi"
+            )
+            if abone_endeksleri.count() >= 2:
+                for i in range(1, len(abone_endeksleri)):
+                    tuketim = (
+                        abone_endeksleri[i].endeks_degeri
+                        - abone_endeksleri[i - 1].endeks_degeri
+                    )
+                    if tuketim > 0:
+                        tuketimler.append(tuketim)
+
+        if tuketimler:
+            su_tuketim_stats["aylik_ortalama"] = sum(tuketimler) / len(tuketimler)
+            su_tuketim_stats["yillik_toplam"] = sum(tuketimler)
+
+            # Yeşil alan başına tüketim
+            if yesil_alan_stats["toplam_alan"] > 0:
+                su_tuketim_stats["m2_aylik"] = (
+                    su_tuketim_stats["aylik_ortalama"] / yesil_alan_stats["toplam_alan"]
+                )
+                su_tuketim_stats["m2_yillik"] = (
+                    su_tuketim_stats["yillik_toplam"] / yesil_alan_stats["toplam_alan"]
+                )
+
+    # Elektrik abonesi istatistikleri (varsa)
+    elektrik_aboneleri = park.aboneler.filter(abone_tipi="elektrik")
+    elektrik_tuketim_stats = {
+        "toplam_abone": elektrik_aboneleri.count(),
+        "aylik_ortalama": 0,
+        "yillik_toplam": 0,
+        "oyun_alani_orani": 0,
+    }
+
+    if elektrik_aboneleri.exists():
+        # Oyun alanları sayısı
+        oyun_alani_sayisi = park.oyun_alanlar.count() + park.oyun_gruplari.count()
+
+        # Elektrik tüketimi hesaplama (benzer mantık)
+        elektrik_endeksleri = AboneEndeks.objects.filter(
+            park_abone__in=elektrik_aboneleri, endeks_tarihi__gte=son_yil
+        ).order_by("park_abone", "endeks_tarihi")
+
+        elektrik_tuketimler = []
+        for abone in elektrik_aboneleri:
+            abone_endeksleri = elektrik_endeksleri.filter(park_abone=abone).order_by(
+                "endeks_tarihi"
+            )
+            if abone_endeksleri.count() >= 2:
+                for i in range(1, len(abone_endeksleri)):
+                    tuketim = (
+                        abone_endeksleri[i].endeks_degeri
+                        - abone_endeksleri[i - 1].endeks_degeri
+                    )
+                    if tuketim > 0:
+                        elektrik_tuketimler.append(tuketim)
+
+        if elektrik_tuketimler:
+            elektrik_tuketim_stats["aylik_ortalama"] = sum(elektrik_tuketimler) / len(
+                elektrik_tuketimler
+            )
+            elektrik_tuketim_stats["yillik_toplam"] = sum(elektrik_tuketimler)
+
+            # Oyun alanı başına elektrik tüketimi
+            if oyun_alani_sayisi > 0:
+                elektrik_tuketim_stats["oyun_alani_orani"] = (
+                    elektrik_tuketim_stats["aylik_ortalama"] / oyun_alani_sayisi
+                )
+
+    # Ek istatistikler hesapla
+    ek_istatistikler = {
+        "toplam_alan": park.alan or 0,
+        "toplam_donati": park.donatilar.count(),
+        "toplam_oyun_grubu": park.oyun_gruplari.count(),
+        "sulama_nokta_sayisi": park.sulama_noktalari.count(),
+        "elektrik_nokta_sayisi": park.elektrik_noktalar.count(),
+    }
+
+    # Sulama sistemi verimliliği
+    if (
+        ek_istatistikler["sulama_nokta_sayisi"] > 0
+        and yesil_alan_stats["toplam_alan"] > 0
+    ):
+        ek_istatistikler["m2_basina_sulama_noktasi"] = (
+            yesil_alan_stats["toplam_alan"] / ek_istatistikler["sulama_nokta_sayisi"]
+        )
+    else:
+        ek_istatistikler["m2_basina_sulama_noktasi"] = 0
+
+    # Oyun grubu yoğunluğu
+    if (
+        ek_istatistikler["toplam_alan"] > 0
+        and ek_istatistikler["toplam_oyun_grubu"] > 0
+    ):
+        ek_istatistikler["hectar_basina_oyun_grubu"] = (
+            ek_istatistikler["toplam_oyun_grubu"] * 10000
+        ) / ek_istatistikler["toplam_alan"]
+    else:
+        ek_istatistikler["hectar_basina_oyun_grubu"] = 0
+
+    # Donatı yoğunluğu
+    if ek_istatistikler["toplam_alan"] > 0 and ek_istatistikler["toplam_donati"] > 0:
+        ek_istatistikler["m2_basina_donati"] = (
+            ek_istatistikler["toplam_alan"] / ek_istatistikler["toplam_donati"]
+        )
+    else:
+        ek_istatistikler["m2_basina_donati"] = 0
+
+    context = {
+        "park": park,
+        "yesil_alan_stats": yesil_alan_stats,
+        "habitat_stats": habitat_stats,
+        "su_tuketim_stats": su_tuketim_stats,
+        "elektrik_tuketim_stats": elektrik_tuketim_stats,
+        "ek_istatistikler": ek_istatistikler,
+    }
+
+    return render(request, "parkbahce/tabs/park_istatistikler_tab.html", context)
