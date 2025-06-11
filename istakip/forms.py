@@ -24,6 +24,76 @@ class MobilKontrolForm(forms.ModelForm):
     Mobil saha personeli için günlük kontrol formu
     """
 
+    # Resim alanları
+    resim_1 = forms.ImageField(
+        label=_("Resim 1"),
+        required=False,
+        widget=forms.FileInput(
+            attrs={
+                "class": "hidden",
+                "accept": "image/jpeg,image/png",
+            }
+        ),
+    )
+
+    resim_2 = forms.ImageField(
+        label=_("Resim 2"),
+        required=False,
+        widget=forms.FileInput(
+            attrs={
+                "class": "hidden",
+                "accept": "image/jpeg,image/png",
+            }
+        ),
+    )
+
+    resim_3 = forms.ImageField(
+        label=_("Resim 3"),
+        required=False,
+        widget=forms.FileInput(
+            attrs={
+                "class": "hidden",
+                "accept": "image/jpeg,image/png",
+            }
+        ),
+    )
+
+    resim_aciklama_1 = forms.CharField(
+        label=_("Resim 1 Açıklaması"),
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={
+                "class": "flex-1 p-1.5 border border-gray-300 rounded-lg text-xs",
+                "placeholder": "Açıklama (opsiyonel)",
+            }
+        ),
+    )
+
+    resim_aciklama_2 = forms.CharField(
+        label=_("Resim 2 Açıklaması"),
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={
+                "class": "flex-1 p-1.5 border border-gray-300 rounded-lg text-xs",
+                "placeholder": "Açıklama (opsiyonel)",
+            }
+        ),
+    )
+
+    resim_aciklama_3 = forms.CharField(
+        label=_("Resim 3 Açıklaması"),
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={
+                "class": "flex-1 p-1.5 border border-gray-300 rounded-lg text-xs",
+                "placeholder": "Açıklama (opsiyonel)",
+            }
+        ),
+    )
+
     class Meta:
         model = GunlukKontrol
         fields = ["durum", "aciklama", "geom"]
@@ -77,35 +147,6 @@ class MobilKontrolForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-
-
-class MobilKontrolResimForm(forms.ModelForm):
-    """
-    Mobil kontrol resim formu
-    """
-
-    class Meta:
-        model = KontrolResim
-        fields = ["resim", "aciklama"]
-        widgets = {
-            "resim": forms.FileInput(
-                attrs={
-                    "class": "w-full p-4 bg-white border-2 border-gray-300 rounded-xl text-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-park-green-50 file:text-park-green-700 hover:file:bg-park-green-100",
-                    "accept": "image/*",
-                    "capture": "environment",  # Arka kamera
-                }
-            ),
-            "aciklama": forms.TextInput(
-                attrs={
-                    "class": "w-full p-4 bg-white border-2 border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500",
-                    "placeholder": "Resim açıklaması (opsiyonel)",
-                }
-            ),
-        }
-        labels = {
-            "resim": _("Resim"),
-            "aciklama": _("Resim Açıklaması"),
-        }
 
 
 class PersonelKullaniciForm(forms.Form):

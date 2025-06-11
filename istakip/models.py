@@ -257,7 +257,7 @@ class KontrolResim(models.Model):
 
     def save(self, *args, **kwargs):
         # Ensure no more than 3 images per GunlukKontrol
-        if self.gunluk_kontrol.resimler.count() >= 3 and not self.pk:
+        if not self.pk and self.gunluk_kontrol.resimler.count() >= 3:
             raise ValueError(_("Bir günlük kontrol için en fazla 3 resim eklenebilir."))
         super().save(*args, **kwargs)
 

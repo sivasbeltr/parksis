@@ -3,6 +3,15 @@
 {% block title %}Sorun Bildir - Saha Personeli{% endblock %}
 
 {% block content %}
+<!-- Ana Form -->
+<form method="post" enctype="multipart/form-data" id="main-form" class="space-y-4">
+    {% csrf_token %}
+    
+    <!-- Gizli alanlar -->
+    <input type="hidden" name="park_uuid" id="park-uuid">
+    <input type="hidden" name="lat" id="lat">
+    <input type="hidden" name="lng" id="lng">
+
 <!-- Harita Bölümü - Tam Genişlik -->
 <div class="bg-white shadow-soft rounded-2xl mb-4 overflow-hidden">
     <div class="p-3">
@@ -24,11 +33,11 @@
     <div class="p-3">
         <!-- Konum Butonları -->
         <div class="flex space-x-2">
-            <button id="find-location-btn" class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm mobile-button">
+            <button type="button" id="find-location-btn" class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm mobile-button">
                 <i class="fas fa-crosshairs mr-1"></i>
                 Konumumu Bul
             </button>
-            <button id="refresh-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm mobile-button">
+            <button type="button" id="refresh-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm mobile-button">
                 <i class="fas fa-sync-alt"></i>
             </button>
         </div>
@@ -47,11 +56,11 @@
     <div id="status-selection" class="bg-white rounded-2xl shadow-soft p-4 hidden">
         <h3 class="text-base font-bold text-gray-900 mb-3">Parkın Durumu</h3>
         <div class="grid grid-cols-2 gap-3">
-            <button id="no-problem-btn" class="bg-park-green-100 hover:bg-park-green-200 text-park-green-800 font-medium py-3 px-4 rounded-lg border border-park-green-200 transition-all text-sm mobile-button">
+            <button type="button" id="no-problem-btn" class="bg-park-green-100 hover:bg-park-green-200 text-park-green-800 font-medium py-3 px-4 rounded-lg border border-park-green-200 transition-all text-sm mobile-button">
                 <i class="fas fa-check-circle text-lg mb-1 block"></i>
                 Sorun Yok
             </button>
-            <button id="problem-btn" class="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-3 px-4 rounded-lg border border-red-200 transition-all text-sm mobile-button">
+            <button type="button" id="problem-btn" class="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-3 px-4 rounded-lg border border-red-200 transition-all text-sm mobile-button">
                 <i class="fas fa-exclamation-triangle text-lg mb-1 block"></i>
                 Sorun Var
             </button>
@@ -65,9 +74,7 @@
             Sorun Detayları
         </h3>
         
-        <form id="problem-submit-form" enctype="multipart/form-data" class="space-y-4">
-            {% csrf_token %}
-            
+        <div class="space-y-4">
             <!-- Sorun Türü -->
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Sorun Türü</label>
@@ -82,18 +89,19 @@
                 <label class="block text-xs font-medium text-gray-700 mb-1">Açıklama *</label>
                 <textarea id="problem-description" name="aciklama" rows="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm mobile-input resize-none focus:ring-1 focus:ring-red-500 focus:border-red-500" placeholder="Sorunun detaylarını yazın..." required></textarea>
             </div>
-            
-            <!-- Resim Yükleme -->
+              <!-- Resim Yükleme -->
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-2">Resimler (Maks. 3)</label>
                 <div class="space-y-2">
                     <!-- Resim 1 -->
                     <div class="image-upload-item" id="upload-card-1">
                         <div class="image-upload-container flex items-center gap-2">
-                            <label for="image-1" class="file-input-wrapper cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors">
-                                <i class="fas fa-camera mr-1"></i>Resim
-                                <input type="file" id="image-1" name="resim_1" accept="image/jpeg,image/png" class="hidden" onchange="handleImageUpload(1)">
-                            </label>
+                            <div class="file-input-wrapper">
+                                <label for="image-1" class="file-label cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors inline-block">
+                                    <i class="fas fa-camera mr-1"></i><span class="label-text">Resim</span>
+                                </label>
+                                <input type="file" id="image-1" name="resim_1" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="handleImageUpload(1)">
+                            </div>
                             <input type="text" id="image-desc-1" name="resim_aciklama_1" placeholder="Açıklama (opsiyonel)" class="flex-1 p-1.5 border border-gray-300 rounded-lg text-xs">
                         </div>
                         <div class="preview-container mt-2" id="preview-1"></div>
@@ -102,10 +110,12 @@
                     <!-- Resim 2 -->
                     <div class="image-upload-item hidden" id="upload-card-2">
                         <div class="image-upload-container flex items-center gap-2">
-                            <label for="image-2" class="file-input-wrapper cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors">
-                                <i class="fas fa-camera mr-1"></i>Resim
-                                <input type="file" id="image-2" name="resim_2" accept="image/jpeg,image/png" class="hidden" onchange="handleImageUpload(2)">
-                            </label>
+                            <div class="file-input-wrapper">
+                                <label for="image-2" class="file-label cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors inline-block">
+                                    <i class="fas fa-camera mr-1"></i><span class="label-text">Resim</span>
+                                </label>
+                                <input type="file" id="image-2" name="resim_2" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="handleImageUpload(2)">
+                            </div>
                             <input type="text" id="image-desc-2" name="resim_aciklama_2" placeholder="Açıklama (opsiyonel)" class="flex-1 p-1.5 border border-gray-300 rounded-lg text-xs">
                         </div>
                         <div class="preview-container mt-2" id="preview-2"></div>
@@ -114,10 +124,12 @@
                     <!-- Resim 3 -->
                     <div class="image-upload-item hidden" id="upload-card-3">
                         <div class="image-upload-container flex items-center gap-2">
-                            <label for="image-3" class="file-input-wrapper cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors">
-                                <i class="fas fa-camera mr-1"></i>Resim
-                                <input type="file" id="image-3" name="resim_3" accept="image/jpeg,image/png" class="hidden" onchange="handleImageUpload(3)">
-                            </label>
+                            <div class="file-input-wrapper">
+                                <label for="image-3" class="file-label cursor-pointer bg-park-green-600 hover:bg-park-green-700 text-white text-xs py-1.5 px-3 rounded-lg transition-colors inline-block">
+                                    <i class="fas fa-camera mr-1"></i><span class="label-text">Resim</span>
+                                </label>
+                                <input type="file" id="image-3" name="resim_3" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="handleImageUpload(3)">
+                            </div>
                             <input type="text" id="image-desc-3" name="resim_aciklama_3" placeholder="Açıklama (opsiyonel)" class="flex-1 p-1.5 border border-gray-300 rounded-lg text-xs">
                         </div>
                         <div class="preview-container mt-2" id="preview-3"></div>
@@ -131,29 +143,19 @@
             </div>
             
             <!-- Gönder Butonu -->
-            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm mobile-button">
+            <button type="submit" id="submit-problem-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm mobile-button">
                 <i class="fas fa-paper-plane mr-1"></i>
-                Sorun Bildir
+                <span id="submit-text">Sorun Bildir</span>
+                <div id="submit-loading" class="hidden inline-flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Gönderiliyor...
+                </div>
             </button>
-        </form>
-    </div>
-    
-    <!-- Başarı Mesajı -->
-    <div id="success-message" class="bg-park-green-50 border border-park-green-200 rounded-2xl p-4 hidden">
-        <div class="flex items-center">
-            <div class="w-8 h-8 bg-park-green-500 rounded-full flex items-center justify-center mr-2">
-                <i class="fas fa-check text-white text-sm"></i>
-            </div>
-            <div>
-                <h3 class="text-base font-bold text-park-green-800">Başarılı!</h3>
-                <p class="text-park-green-700 text-sm">Kontrol kaydınız oluşturuldu.</p>
-            </div>
         </div>
-        <button id="new-control-btn" class="mt-2 w-full bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm mobile-button">
-            Yeni Kontrol
-        </button>
     </div>
 </div>
+
+</form>
 {% endblock %}
 
 {% block extra_js %}
@@ -247,6 +249,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         lng: position.coords.longitude
                     };
                     
+                    // Form gizli alanlarını doldur
+                    document.getElementById('lat').value = currentLocation.lat;
+                    document.getElementById('lng').value = currentLocation.lng;
+                    
                     // Haritayı konuma odakla
                     const coords = ol.proj.fromLonLat([currentLocation.lng, currentLocation.lat]);
                     map.getView().setCenter(coords);
@@ -324,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 currentPark = data.park;
+                document.getElementById('park-uuid').value = currentPark.uuid;
                 showParkOnMap(data.park);
                 showStatusSelection();
                 // Mesafe bilgisini göster
@@ -340,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Parkı haritada göster ve odaklan
+    // Parkı haritada göster
     function showParkOnMap(park) {
         if (!currentLocation) return;
         
@@ -439,26 +446,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 duration: 1000,
                 maxZoom: 19
             });
-            
-            // Popup ile park bilgilerini göster
-            popupContent.innerHTML = `
-                <div class="font-bold text-park-green-800">${park.ad}</div>
-                <div class="text-gray-600">
-                    <div><i class="fas fa-map-marker-alt mr-1"></i>${park.mahalle || 'Belirtilmemiş'}</div>
-                    <div><i class="fas fa-ruler-combined mr-1"></i>${park.alan ? park.alan.toLocaleString() + ' m²' : 'Belirtilmemiş'}</div>
-                    <div><i class="fas fa-tag mr-1"></i>${park.park_tipi || 'Belirtilmemiş'}</div>
-                </div>
-            `;
-            popup.setPosition(parkCenter);
 
         } catch (error) {
             console.error('Park haritada gösterilirken hata:', error);
-            const userCoords = ol.proj.fromLonLat([currentLocation.lng, currentLocation.lat]);
-            map.getView().animate({
-                center: userCoords,
-                zoom: 18,
-                duration: 1000
-            });
         }
     }
 
@@ -467,42 +457,36 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('status-selection').classList.remove('hidden');
     }
 
-    // Sorun yok işlemi
+    // Sorun yok butonuna tıklama
     function submitNoProblem() {
         if (!currentPark || !currentLocation) {
             showToast('Konum ve park bilgisi gerekli.', 'error');
             return;
         }
         
-        showLoading();
+        // Loading göster
+        const btn = document.getElementById('no-problem-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-park-green-600 mx-auto"></div>';
+        btn.disabled = true;
         
-        const formData = new FormData();
-        formData.append('park_uuid', currentPark.uuid);
-        formData.append('durum', 'sorun_yok');
-        formData.append('lat', currentLocation.lat);
-        formData.append('lng', currentLocation.lng);
-        formData.append('csrfmiddlewaretoken', getCsrfToken());
+        // Form alanlarını doldur ve gönder
+        document.getElementById('park-uuid').value = currentPark.uuid;
+        document.getElementById('lat').value = currentLocation.lat;
+        document.getElementById('lng').value = currentLocation.lng;
         
-        fetch('{% url "istakip:mobil_sorun_kaydet" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            hideLoading();
-            if (data.success) {
-                showSuccessMessage();
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            showToast('Kayıt hatası: ' + error.message, 'error');
-        });
+        // Gizli durum alanı ekle
+        const durumInput = document.createElement('input');
+        durumInput.type = 'hidden';
+        durumInput.name = 'durum';
+        durumInput.value = 'sorun_yok';
+        document.getElementById('main-form').appendChild(durumInput);
+        
+        // Formu gönder
+        document.getElementById('main-form').submit();
     }
 
-    // Sorun var formu göster
+    // Sorun var butonuna tıklama
     function showProblemForm() {
         document.getElementById('problem-form').classList.remove('hidden');
         document.getElementById('problem-form').scrollIntoView({
@@ -521,20 +505,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (imageCount >= 3) {
             document.getElementById('add-image-btn').style.display = 'none';
         }
-    }
-
-    // Resim yükleme işlemi
+    }    // Resim yükleme işlemi
     window.handleImageUpload = function(index) {
         const input = document.getElementById(`image-${index}`);
         const preview = document.getElementById(`preview-${index}`);
+        const label = document.querySelector(`label[for="image-${index}"] .label-text`);
         
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            console.log(`Resim ${index} seçildi:`, {
-                name: file.name,
-                size: file.size,
-                type: file.type
-            });
             
             if (file.size > 5 * 1024 * 1024) {
                 showToast('Resim boyutu 5MB\'dan küçük olmalı.', 'error');
@@ -552,154 +530,110 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </div>
                 `;
+                
+                // Sadece label metnini güncelle, input'u koru
+                if (label) {
+                    label.innerHTML = '<i class="fas fa-check mr-1"></i>Seçildi';
+                }
+                
+                // Sonraki resim kartını göster
+                if (index < 3) {
+                    const nextCard = document.getElementById(`upload-card-${index + 1}`);
+                    if (nextCard && nextCard.classList.contains('hidden')) {
+                        nextCard.classList.remove('hidden');
+                        imageCount = index + 1;
+                    }
+                }
+                
+                if (imageCount >= 3) {
+                    document.getElementById('add-image-btn').style.display = 'none';
+                }
             };
             reader.readAsDataURL(file);
-            
-            const wrapper = input.closest('.image-upload-container').querySelector('.file-input-wrapper');
-            wrapper.innerHTML = `<i class="fas fa-check mr-1"></i>Seçildi`;
-            wrapper.classList.remove('bg-park-green-600', 'hover:bg-park-green-700');
-            wrapper.classList.add('bg-park-green-500');
-        } else {
-            console.log(`Resim ${index} seçilemedi:`, input.files);
-            showToast(`Resim ${index} seçilemedi.`, 'error');
         }
-    };
-
-    // Resim kaldırma
+    };    // Resim kaldırma
     window.removeImage = function(index) {
         const input = document.getElementById(`image-${index}`);
         const preview = document.getElementById(`preview-${index}`);
-        const wrapper = input.closest('.image-upload-container').querySelector('.file-input-wrapper');
+        const label = document.querySelector(`label[for="image-${index}"] .label-text`);
         
         input.value = '';
         preview.innerHTML = '';
-        wrapper.innerHTML = `<i class="fas fa-camera mr-1"></i>Resim`;
-        wrapper.classList.remove('bg-park-green-500');
-        wrapper.classList.add('bg-park-green-600', 'hover:bg-park-green-700');
-        console.log(`Resim ${index} kaldırıldı`);
-    };
-
-    // Sorun bildirimi gönder
-    function submitProblem() {
+        
+        if (label) {
+            label.innerHTML = '<i class="fas fa-camera mr-1"></i>Resim';
+        }
+        
+        // Sonraki kartları gizle ve imageCount'u güncelle
+        for (let i = index + 1; i <= 3; i++) {
+            const nextCard = document.getElementById(`upload-card-${i}`);
+            const nextInput = document.getElementById(`image-${i}`);
+            const nextPreview = document.getElementById(`preview-${i}`);
+            const nextLabel = document.querySelector(`label[for="image-${i}"] .label-text`);
+            
+            if (nextInput && !nextInput.files[0]) {
+                nextCard.classList.add('hidden');
+                if (nextLabel) {
+                    nextLabel.innerHTML = '<i class="fas fa-camera mr-1"></i>Resim';
+                }
+                nextPreview.innerHTML = '';
+            }
+        }
+        
+        // imageCount'u güncelle
+        imageCount = 1;
+        for (let i = 1; i <= 3; i++) {
+            const checkInput = document.getElementById(`image-${i}`);
+            if (checkInput && checkInput.files && checkInput.files[0]) {
+                imageCount = i;
+            }
+        }
+        
+        // Add image butonunu göster
+        document.getElementById('add-image-btn').style.display = 'block';
+    };    // Form submit işlemi
+    function handleFormSubmit(e) {
         if (!currentPark || !currentLocation) {
+            e.preventDefault();
             showToast('Konum ve park bilgisi gerekli.', 'error');
             return;
         }
         
-        const form = document.getElementById('problem-submit-form');
-        const formData = new FormData();
+        // Form validasyonu
+        const problemForm = document.getElementById('problem-form');
+        if (!problemForm.classList.contains('hidden')) {
+            const aciklama = document.getElementById('problem-description').value.trim();
+            if (!aciklama) {
+                e.preventDefault();
+                showToast('Açıklama alanı zorunludur.', 'error');
+                return;
+            }
+        }
         
-        // Formdaki metin alanlarını ekle
-        formData.append('durum', document.getElementById('problem-type').value);
-        formData.append('aciklama', document.getElementById('problem-description').value);
-        formData.append('csrfmiddlewaretoken', getCsrfToken());
-        formData.append('park_uuid', currentPark.uuid);
-        formData.append('lat', currentLocation.lat);
-        formData.append('lng', currentLocation.lng);
+        // Loading göster
+        const submitBtn = document.getElementById('submit-problem-btn');
+        const submitText = document.getElementById('submit-text');
+        const submitLoading = document.getElementById('submit-loading');
         
-        // Resim dosyalarını ve açıklamalarını manuel olarak ekle
-        for (let i = 1; i <= 3; i++) {
-            const input = document.getElementById(`image-${i}`);
-            const desc = document.getElementById(`image-desc-${i}`).value;
-            if (input.files && input.files[0]) {
-                formData.append(`resim_${i}`, input.files[0]);
-                if (desc) {
-                    formData.append(`resim_aciklama_${i}`, desc);
-                }
-                console.log(`Resim ${i} eklendi:`, input.files[0].name);
+        submitText.classList.add('hidden');
+        submitLoading.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Form alanlarını doldur
+        document.getElementById('park-uuid').value = currentPark.uuid;
+        document.getElementById('lat').value = currentLocation.lat;
+        document.getElementById('lng').value = currentLocation.lng;
+        
+        // Debug: Form verilerini konsola yazdır
+        const formData = new FormData(document.getElementById('main-form'));
+        console.log('Form verileri:');
+        for (let [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(key, ':', value.name, '-', value.size, 'bytes');
             } else {
-                console.log(`Resim ${i} bulunamadı`);
+                console.log(key, ':', value);
             }
         }
-        
-        // FormData içeriğini kontrol et
-        for (let pair of formData.entries()) {
-            console.log(`FormData: ${pair[0]} =`, pair[1]);
-        }
-        
-        showLoading();
-        
-        fetch('{% url "istakip:mobil_sorun_kaydet" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            console.log('Sunucu yanıtı:', response.status, response.statusText);
-            return response.json();
-        })
-        .then(data => {
-            hideLoading();
-            console.log('Sunucu veri:', data);
-            if (data.success) {
-                showSuccessMessage();
-            } else {
-                showToast(data.message || 'Kayıt başarısız.', 'error');
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            console.error('Hata:', error);
-            showToast('Kayıt hatası: ' + error.message, 'error');
-        });
-    }
-
-    // Başarı mesajını göster
-    function showSuccessMessage() {
-        document.getElementById('status-selection').classList.add('hidden');
-        document.getElementById('problem-form').classList.add('hidden');
-        document.getElementById('success-message').classList.remove('hidden');
-    }
-
-    // Yeni kontrol
-    function resetForm() {
-        document.getElementById('status-selection').classList.add('hidden');
-        document.getElementById('problem-form').classList.add('hidden');
-        document.getElementById('success-message').classList.add('hidden');
-        document.getElementById('location-info').classList.add('hidden');
-        document.getElementById('location-status').classList.add('hidden');
-        
-        document.getElementById('problem-submit-form').reset();
-        
-        imageCount = 1;
-        for (let i = 2; i <= 3; i++) {
-            const uploadCard = document.getElementById(`upload-card-${i}`);
-            if (uploadCard) uploadCard.classList.add('hidden');
-            uploadCard.classList.add('hidden');
-        }
-        
-        for (let i = 1; i <= 3; i++) {
-            const preview = document.getElementById(`preview-${i}`);
-            const input = document.getElementById(`image-${i}`);
-            const wrapper = input.closest('.image-upload-container').querySelector('.file-input-wrapper');
-            if (preview) {
-                preview.innerHTML = '';
-            }
-            if (input) {
-                input.value = '';
-            }
-            if (wrapper) {
-                wrapper.innerHTML = `<i class="fas fa-camera mr-1"></i>Resim`;
-                wrapper.classList.remove('bg-park-green-500');
-                wrapper.classList.add('bg-park-green-600', 'hover:bg-park-green-700');
-            }
-        }
-        
-        document.getElementById('add-image-btn').style.display = 'block';
-        
-        if (parkLayer) {
-            parkLayer.getSource().clear();
-        }
-        
-        map.getView().animate({
-            center: ol.proj.fromLonLat([37.0, 39.7]),
-            zoom: 12,
-            duration: 500
-        });
-        
-        currentLocation = null;
-        currentPark = null;
-        userMarker = null;
-        popup.setPosition(undefined);
     }
 
     // Event Listeners
@@ -708,11 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('no-problem-btn').addEventListener('click', submitNoProblem);
     document.getElementById('problem-btn').addEventListener('click', showProblemForm);
     document.getElementById('add-image-btn').addEventListener('click', addImageUpload);
-    document.getElementById('problem-submit-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitProblem();
-    });
-    document.getElementById('new-control-btn').addEventListener('click', resetForm);
+    document.getElementById('main-form').addEventListener('submit', handleFormSubmit);
 
     // Haritayı başlat
     setTimeout(function() {

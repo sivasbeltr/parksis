@@ -1,0 +1,172 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}Kontrol Gönderildi - Saha Personeli{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+    {% if kontrol %}
+    <!-- Başarı Mesajı -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 animate-fade-in">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-soft">
+                <i class="fas fa-check text-white text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Kontrol Gönderildi!</h2>
+            <p class="text-gray-600">Raporunuz başarıyla kaydedildi.</p>
+        </div>
+        
+        <!-- Kontrol Detayları -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+            <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-info-circle text-park-green-600 mr-2"></i>
+                Kontrol Detayları
+            </h3>
+            
+            <div class="space-y-3">
+                <!-- Park Bilgisi -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-park-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-tree text-park-green-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900">{{ kontrol.park.ad }}</div>
+                        <div class="text-sm text-gray-500">
+                            {% if kontrol.park.mahalle %}{{ kontrol.park.mahalle.ad }}{% endif %}
+                            {% if kontrol.park.park_tipi %} • {{ kontrol.park.park_tipi.ad }}{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Durum -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {% if kontrol.durum == 'sorun_yok' %}
+                            <i class="fas fa-check-circle text-park-green-600 text-sm"></i>
+                        {% elif kontrol.durum == 'sorun_var' %}
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
+                        {% elif kontrol.durum == 'acil' %}
+                            <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900">{{ kontrol.get_durum_display }}</div>
+                        <div class="text-sm text-gray-500">
+                            {{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Açıklama -->
+                {% if kontrol.aciklama %}
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-comment text-blue-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900">Açıklama</div>
+                        <div class="text-sm text-gray-600 break-words">{{ kontrol.aciklama }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Personel -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user text-purple-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900">{{ kontrol.personel.ad }}</div>
+                        <div class="text-sm text-gray-500">
+                            {% if kontrol.personel.pozisyon %}{{ kontrol.personel.pozisyon }}{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resimler -->
+        {% if kontrol.resimler.exists %}
+        <div class="mb-6">
+            <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-images text-orange-600 mr-2"></i>
+                Eklenen Resimler ({{ kontrol.resimler.count }})
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-3">
+                {% for resim in kontrol.resimler.all %}
+                <div class="bg-white rounded-lg overflow-hidden shadow-soft">
+                    <div class="aspect-square">
+                        <img src="{{ resim.resim.url }}" alt="Kontrol Resmi" class="w-full h-full object-cover">
+                    </div>
+                    {% if resim.aciklama %}
+                    <div class="p-2">
+                        <p class="text-xs text-gray-600">{{ resim.aciklama }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Aksiyon Butonları -->
+        <div class="space-y-3">
+            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="w-full bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center block mobile-button">
+                <i class="fas fa-plus mr-2"></i>
+                Yeni Kontrol Raporu
+            </a>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{% url 'istakip:mobil_sorumlu_parklar' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center text-sm mobile-button">
+                    <i class="fas fa-tree mr-1"></i>
+                    Sorumlu Parklarım
+                </a>
+                
+                <a href="{% url 'istakip:mobil_kontrol_listesi' %}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center text-sm mobile-button">
+                    <i class="fas fa-list-check mr-1"></i>
+                    Günlük Kontrollerim
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Hata Mesajı -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">Kontrol Bulunamadı</h2>
+        <p class="text-gray-600 mb-6">Aradığınız kontrol kaydı bulunamadı veya size ait değil.</p>
+        
+        <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Yeni Kontrol Raporu
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sayfa yüklendiğinde animasyon
+    const elements = document.querySelectorAll('.animate-fade-in');
+    elements.forEach((el, index) => {
+        setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+
+<style>
+.animate-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+</style>
+{% endblock %}

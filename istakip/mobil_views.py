@@ -18,7 +18,7 @@ from django.views.generic import ListView, TemplateView
 
 from parkbahce.models import Park
 
-from .forms import MobilKontrolForm, MobilKontrolResimForm
+from .forms import MobilKontrolForm
 from .models import Gorev, GorevAsama, GunlukKontrol, KontrolResim, Personel
 
 
@@ -40,7 +40,107 @@ class MobilSorunBildirView(LoginRequiredMixin, TemplateView):
             context["personel"] = None
 
         context["kontrol_form"] = MobilKontrolForm()
-        context["resim_form"] = MobilKontrolResimForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Form post işlemi - sorun bildirimi
+        """
+        print("Gelen Dosyalar:", request.FILES)
+        try:
+            personel = Personel.objects.get(user=request.user)
+        except Personel.DoesNotExist:
+            messages.error(request, _("Personel kaydınız bulunamadı."))
+            return redirect("istakip:mobil_sorun_bildir")
+
+        # Form verilerini al
+        park_uuid = request.POST.get("park_uuid")
+        durum = request.POST.get("durum")
+        aciklama = request.POST.get("aciklama", "")
+        lat = request.POST.get("lat")
+        lng = request.POST.get("lng")
+
+        if not park_uuid or not durum:
+            messages.error(request, _("Gerekli alanlar eksik."))
+            return redirect("istakip:mobil_sorun_bildir")
+
+        try:
+            park = Park.objects.get(uuid=park_uuid)
+
+            # Konum oluştur
+            konum = None
+            if lat and lng:
+                konum = Point(float(lng), float(lat), srid=4326)
+                konum.transform(5256)
+
+            # Günlük kontrol oluştur
+            kontrol = GunlukKontrol.objects.create(
+                park=park,
+                personel=personel,
+                durum=durum,
+                aciklama=aciklama,
+                geom=konum,
+                kontrol_tipi="rutin",
+            )
+
+            # Eğer sorun varsa ve resimler yüklenecekse
+            resim_sayisi = 0
+            if durum in ["sorun_var", "acil"]:
+                for i in range(1, 4):  # En fazla 3 resim
+                    resim_field = f"resim_{i}"
+                    if resim_field in request.FILES:
+                        resim_file = request.FILES[resim_field]
+                        aciklama_field = request.POST.get(f"resim_aciklama_{i}", "")
+
+                        try:
+                            # Resim kaydı oluştur
+                            KontrolResim.objects.create(
+                                gunluk_kontrol=kontrol,
+                                resim=resim_file,
+                                aciklama=aciklama_field,
+                            )
+                            resim_sayisi += 1
+                        except ValueError as e:
+                            # 3 resim sınırı aşılırsa
+                            if resim_sayisi >= 3:
+                                break
+
+            # Başarılı sayfaya yönlendir
+            return redirect(
+                "istakip:mobil_kontrol_gonderildi", kontrol_uuid=kontrol.uuid
+            )
+
+        except Park.DoesNotExist:
+            messages.error(request, _("Park bulunamadı."))
+            return redirect("istakip:mobil_sorun_bildir")
+        except Exception as e:
+            messages.error(request, _("Bir hata oluştu: {}").format(str(e)))
+            return redirect("istakip:mobil_sorun_bildir")
+
+
+class MobilKontrolGonderildiView(LoginRequiredMixin, TemplateView):
+    """
+    Kontrol başarıyla gönderildi sayfası
+    """
+
+    template_name = "istakip/mobil/kontrol_gonderildi.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        kontrol_uuid = kwargs.get("kontrol_uuid")
+        try:
+            kontrol = get_object_or_404(
+                GunlukKontrol.objects.select_related(
+                    "park", "personel"
+                ).prefetch_related("resimler"),
+                uuid=kontrol_uuid,
+                personel__user=self.request.user,
+            )
+            context["kontrol"] = kontrol
+        except GunlukKontrol.DoesNotExist:
+            context["kontrol"] = None
 
         return context
 
