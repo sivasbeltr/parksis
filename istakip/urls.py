@@ -109,4 +109,11 @@ urlpatterns = [
         htmx_views.park_atama_sil_htmx,
         name="park_atama_sil_htmx",
     ),
+    # Park personel yönetimi
+    path("park-personel-ata/", views.park_personel_ata, name="park_personel_ata"),
+    path(
+        "park-personel/<uuid:atama_uuid>/kaldir/",
+        views.park_personel_kaldir,
+        name="park_personel_kaldir",
+    ),
 ]

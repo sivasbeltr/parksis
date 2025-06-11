@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -70,7 +71,9 @@ def mobil_konum_park_bul(request):
                 5256
             )  # Türkiye koordinat sistemine dönüştür            # En yakın parkı bul (500 metre yarıçapında)
             park = (
-                Park.objects.filter(geom__distance_lte=(konum, D(m=500)))
+                Park.objects.filter(
+                    geom__distance_lte=(konum, D(m=settings.DISTANCE_PRECISION))
+                )
                 .annotate(distance=Distance("geom", konum))  # Mesafe hesaplaması
                 .order_by("distance")
                 .first()

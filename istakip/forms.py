@@ -127,6 +127,7 @@ class PersonelKullaniciForm(forms.Form):
 
     eposta = forms.EmailField(
         label=_("E-posta"),
+        required=False,
         widget=forms.EmailInput(
             attrs={
                 "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
@@ -237,15 +238,9 @@ class PersonelKullaniciForm(forms.Form):
 
         return cleaned_data
 
-    def clean_kullanici_adi(self):
-        kullanici_adi = self.cleaned_data["kullanici_adi"]
-        if User.objects.filter(username=kullanici_adi).exists():
-            raise ValidationError(_("Bu kullanıcı adı zaten kullanılıyor."))
-        return kullanici_adi
-
     def clean_eposta(self):
-        eposta = self.cleaned_data["eposta"]
-        if User.objects.filter(email=eposta).exists():
+        eposta = self.cleaned_data.get("eposta")
+        if eposta and User.objects.filter(email=eposta).exists():
             raise ValidationError(_("Bu e-posta adresi zaten kullanılıyor."))
         return eposta
 

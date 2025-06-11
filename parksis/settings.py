@@ -144,6 +144,10 @@ DEFAULT_MAP_LATITUDE = 39.7480
 DEFAULT_MAP_LONGITUDE = 37.0145
 DEFAULT_MAP_ZOOM = 13
 
+DISTANCE_PRECISION = 100
+if DEBUG:
+    DISTANCE_PRECISION = 500  # metre
+
 # Cache ayarları
 CACHES = {
     "default": {
@@ -164,12 +168,12 @@ if USE_MINIO:
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", os.getenv("AWS_ACCESS_KEY_ID"))
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", os.getenv("AWS_SECRET_ACCESS_KEY"))
     MINIO_BUCKET_NAME = os.getenv(
-        "MINIO_BUCKET_NAME", os.getenv("AWS_STORAGE_BUCKET_NAME", "akillisehir")
+        "MINIO_BUCKET_NAME", os.getenv("AWS_STORAGE_BUCKET_NAME", "parkbahce")
     )
     MINIO_USE_HTTPS = os.getenv("MINIO_USE_HTTPS", "False").lower() == "true"
     MINIO_CUSTOM_DOMAIN = os.getenv(
         "MINIO_CUSTOM_DOMAIN",
-        os.getenv("AWS_S3_CUSTOM_DOMAIN", "akillisehir.sivas.bel.tr"),
+        os.getenv("AWS_S3_CUSTOM_DOMAIN", "parkbahce.sivas.bel.tr"),
     )
 
     # Static ve Media klasör ayarları

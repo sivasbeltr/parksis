@@ -541,3 +541,125 @@ def park_istatistikler_tab_htmx(request, park_uuid):
     }
 
     return render(request, "parkbahce/tabs/park_istatistikler_tab.html", context)
+
+
+@require_http_methods(["GET"])
+def park_sorumlu_tab_htmx(request, park_uuid):
+    """Park sorumlu bilgileri sekmesi"""
+    if not request.htmx:
+        return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
+
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Park personellerini getir
+    from istakip.models import ParkPersonel, Personel
+
+    park_personelleri = (
+        ParkPersonel.objects.filter(park=park)
+        .select_related("personel", "personel__user")
+        .order_by("-atama_tarihi")
+    )
+
+    # Atanabilir personelleri getir (aktif ve henüz atanmamış)
+    atanmis_personel_ids = park_personelleri.values_list("personel_id", flat=True)
+    atanabilir_personeller = (
+        Personel.objects.filter(aktif=True)
+        .exclude(id__in=atanmis_personel_ids)
+        .select_related("user")
+        .order_by("ad")
+    )
+
+    context = {
+        "park": park,
+        "park_personelleri": park_personelleri,
+        "atanabilir_personeller": atanabilir_personeller,
+    }
+
+    return render(request, "parkbahce/tabs/park_sorumlu_tab.html", context)
+
+
+@require_http_methods(["GET"])
+def park_sorun_gecmisi_tab_htmx(request, park_uuid):
+    """Park sorun geçmişi sekmesi"""
+    if not request.htmx:
+        return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
+
+    park = get_object_or_404(Park, uuid=park_uuid)
+
+    # Filtreleme parametreleri
+    durum_filter = request.GET.get("durum", "")
+    baslangic_tarihi = request.GET.get("baslangic_tarihi", "")
+    bitis_tarihi = request.GET.get("bitis_tarihi", "")
+
+    # Günlük kontrolleri getir
+    from datetime import datetime, timedelta
+
+    from istakip.models import GunlukKontrol
+
+    # Son 3 ay varsayılan
+    if not baslangic_tarihi:
+        baslangic_tarihi = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+    if not bitis_tarihi:
+        bitis_tarihi = datetime.now().strftime("%Y-%m-%d")
+
+    kontroller = (
+        GunlukKontrol.objects.filter(park=park)
+        .select_related("personel")
+        .prefetch_related("resimler")
+        .order_by("-kontrol_tarihi")
+    )
+
+    # Tarih filtresi
+    if baslangic_tarihi:
+        try:
+            baslangic_date = datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
+            kontroller = kontroller.filter(kontrol_tarihi__date__gte=baslangic_date)
+        except ValueError:
+            pass
+
+    if bitis_tarihi:
+        try:
+            bitis_date = datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
+            kontroller = kontroller.filter(kontrol_tarihi__date__lte=bitis_date)
+        except ValueError:
+            pass
+
+    # Durum filtresi
+    if durum_filter:
+        kontroller = kontroller.filter(durum=durum_filter)
+
+    # Son 20 kayıt
+    kontroller = kontroller[:20]
+
+    # İstatistikler
+    from django.db.models import Count
+
+    durum_stats = (
+        GunlukKontrol.objects.filter(
+            park=park,
+            kontrol_tarihi__date__gte=(
+                datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
+                if baslangic_tarihi
+                else datetime.now() - timedelta(days=90)
+            ),
+            kontrol_tarihi__date__lte=(
+                datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
+                if bitis_tarihi
+                else datetime.now()
+            ),
+        )
+        .values("durum")
+        .annotate(sayi=Count("id"))
+        .order_by("durum")
+    )
+
+    context = {
+        "park": park,
+        "kontroller": kontroller,
+        "durum_stats": durum_stats,
+        "durum_filter": durum_filter,
+        "baslangic_tarihi": baslangic_tarihi,
+        "bitis_tarihi": bitis_tarihi,
+    }
+
+    return render(request, "parkbahce/tabs/park_sorun_gecmisi_tab.html", context)

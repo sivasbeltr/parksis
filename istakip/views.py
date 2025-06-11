@@ -231,39 +231,84 @@ def kullanici_edit(request, personel_uuid):
     personel = get_object_or_404(Personel, uuid=personel_uuid)
 
     if request.method == "POST":
+        # Düzenleme modunda özel form validasyonu
         form = PersonelKullaniciForm(request.POST)
+
+        # Şifre alanlarını opsiyonel yap
+        form.fields["sifre"].required = False
+        form.fields["sifre_tekrar"].required = False
+
+        # Kullanıcı adı kontrolünü bypass et (readonly olduğu için)
         if form.is_valid():
-            try:
-                with transaction.atomic():
-                    # Kullanıcı bilgilerini güncelle
-                    user = personel.user
-                    user.first_name = form.cleaned_data["first_name"]
-                    user.last_name = form.cleaned_data["last_name"]
-                    user.email = form.cleaned_data["eposta"]
-                    user.is_active = form.cleaned_data["is_active"]
-                    user.save()
-
-                    # Personel bilgilerini güncelle
-                    personel.ad = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}"
-                    personel.telefon = form.cleaned_data["telefon"]
-                    personel.eposta = form.cleaned_data["eposta"]
-                    personel.pozisyon = form.cleaned_data["pozisyon"]
-                    personel.aktif = form.cleaned_data["is_active"]
-                    personel.save()
-
-                    # Grupları güncelle
-                    if form.cleaned_data["groups"]:
-                        user.groups.set(form.cleaned_data["groups"])
-
-                    messages.success(
-                        request, f"{personel.ad} bilgileri başarıyla güncellendi."
+            # Kullanıcı adı değişikliği kontrolü
+            kullanici_adi = form.cleaned_data["kullanici_adi"]
+            if kullanici_adi != personel.user.username:
+                # Başka kullanıcı bu kullanıcı adını kullanıyor mu?
+                if (
+                    User.objects.filter(username=kullanici_adi)
+                    .exclude(id=personel.user.id)
+                    .exists()
+                ):
+                    messages.error(request, "Bu kullanıcı adı zaten kullanılıyor.")
+                    form.add_error(
+                        "kullanici_adi", "Bu kullanıcı adı zaten kullanılıyor."
                     )
-                    return redirect(
-                        "istakip:kullanici_detail", personel_uuid=personel.uuid
-                    )
+                else:
+                    # Kullanıcı adını güncelle
+                    personel.user.username = kullanici_adi
 
-            except Exception as e:
-                messages.error(request, f"Kullanıcı güncellenirken hata: {str(e)}")
+            # Şifre kontrolü - sadece girilmişse güncelle
+            sifre = form.cleaned_data.get("sifre")
+            sifre_tekrar = form.cleaned_data.get("sifre_tekrar")
+
+            if sifre and sifre_tekrar:
+                if sifre != sifre_tekrar:
+                    messages.error(request, "Şifreler eşleşmiyor.")
+                    form.add_error("sifre_tekrar", "Şifreler eşleşmiyor.")
+                elif len(sifre) < 6:
+                    messages.error(request, "Şifre en az 6 karakter olmalıdır.")
+                    form.add_error("sifre", "Şifre en az 6 karakter olmalıdır.")
+                else:
+                    # Şifreyi güncelle
+                    personel.user.set_password(sifre)
+
+            # Hata yoksa kaydet
+            if not form.errors:
+                try:
+                    with transaction.atomic():
+                        # Kullanıcı bilgilerini güncelle
+                        user = personel.user
+                        user.first_name = form.cleaned_data["first_name"]
+                        user.last_name = form.cleaned_data["last_name"]
+                        user.email = form.cleaned_data["eposta"]
+                        user.is_active = form.cleaned_data["is_active"]
+                        user.save()
+
+                        # Personel bilgilerini güncelle
+                        personel.ad = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}"
+                        personel.telefon = form.cleaned_data["telefon"]
+                        personel.eposta = form.cleaned_data["eposta"]
+                        personel.pozisyon = form.cleaned_data["pozisyon"]
+                        personel.aktif = form.cleaned_data["is_active"]
+                        personel.save()
+
+                        # Grupları güncelle
+                        if form.cleaned_data["groups"]:
+                            user.groups.set(form.cleaned_data["groups"])
+
+                        success_message = (
+                            f"{personel.ad} bilgileri başarıyla güncellendi."
+                        )
+                        if sifre and sifre_tekrar:
+                            success_message += " Şifre de değiştirildi."
+
+                        messages.success(request, success_message)
+                        return redirect(
+                            "istakip:kullanici_detail", personel_uuid=personel.uuid
+                        )
+
+                except Exception as e:
+                    messages.error(request, f"Kullanıcı güncellenirken hata: {str(e)}")
     else:
         # Formu mevcut verilerle doldur
         initial_data = {
@@ -278,10 +323,15 @@ def kullanici_edit(request, personel_uuid):
         }
         form = PersonelKullaniciForm(initial=initial_data)
 
-        # Kullanıcı adı alanını readonly yap
-        form.fields["kullanici_adi"].widget.attrs["readonly"] = True
+        # Düzenleme modunda şifre alanlarını opsiyonel yap
         form.fields["sifre"].required = False
         form.fields["sifre_tekrar"].required = False
+        form.fields["sifre"].help_text = (
+            "Şifreyi değiştirmek istemiyorsanız boş bırakın."
+        )
+        form.fields["sifre_tekrar"].help_text = (
+            "Şifreyi değiştirmek istemiyorsanız boş bırakın."
+        )
 
     context = {
         "form": form,
@@ -403,3 +453,70 @@ def kullanici_activate(request, personel_uuid):
     except Exception as e:
         messages.error(request, f"Hesap aktif hale getirilirken hata: {str(e)}")
         return redirect("istakip:kullanici_list")
+
+
+@login_required
+@require_http_methods(["POST"])
+def park_personel_ata(request):
+    """Park personel atama işlemi"""
+    park_uuid = request.POST.get("park_uuid")
+    personel_uuid = request.POST.get("personel_uuid")
+
+    if not park_uuid or not personel_uuid:
+        messages.error(request, "Gerekli parametreler eksik.")
+        return redirect("istakip:kullanici_list")
+
+    try:
+        from parkbahce.models import Park
+
+        park = get_object_or_404(Park, uuid=park_uuid)
+        personel = get_object_or_404(Personel, uuid=personel_uuid)
+
+        # Zaten atanmış mı kontrol et
+        if ParkPersonel.objects.filter(park=park, personel=personel).exists():
+            messages.warning(request, f"{personel.ad} zaten bu parka atanmış.")
+        else:
+            ParkPersonel.objects.create(
+                park=park,
+                personel=personel,
+                gorev_aciklama=f"{park.ad} parkının bakım ve kontrolü",
+            )
+            messages.success(
+                request, f"{personel.ad} başarıyla {park.ad} parkına atandı."
+            )
+
+        # HTMX request ise sorumlu sekmesini yeniden yükle
+        if request.htmx:
+            from parkbahce.htmx_views import park_sorumlu_tab_htmx
+
+            return park_sorumlu_tab_htmx(request, park_uuid)
+
+    except Exception as e:
+        messages.error(request, f"Personel atama sırasında hata: {str(e)}")
+
+    return redirect("parkbahce:park_detail", park_uuid=park_uuid)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def park_personel_kaldir(request, atama_uuid):
+    """Park personel kaldırma işlemi"""
+    try:
+        atama = get_object_or_404(ParkPersonel, uuid=atama_uuid)
+        park_uuid = atama.park.uuid
+        personel_ad = atama.personel.ad
+
+        atama.delete()
+        messages.success(request, f"{personel_ad} parktan başarıyla kaldırıldı.")
+
+        # HTMX request ise sorumlu sekmesini yeniden yükle
+        if request.htmx:
+            from parkbahce.htmx_views import park_sorumlu_tab_htmx
+
+            return park_sorumlu_tab_htmx(request, park_uuid)
+
+    except Exception as e:
+        messages.error(request, f"Personel kaldırma sırasında hata: {str(e)}")
+        return redirect("istakip:kullanici_list")
+
+    return redirect("parkbahce:park_detail", park_uuid=park_uuid)

@@ -1,0 +1,246 @@
+<div class="space-y-6 animate-fade-in">
+    <!-- Kompakt Başlık -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-xl"></div>
+        <div class="relative p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border border-red-200/50 dark:border-red-700/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                            Sorun Bildirim Geçmişi
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs">Günlük kontrol raporları</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ kontroller.count }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Kayıt</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme Formu -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <form hx-get="{% url 'parkbahce:park_sorun_gecmisi_tab_htmx' park.uuid %}" 
+              hx-target="#tab-content" 
+              hx-trigger="change, submit"
+              hx-indicator="#filter-loading"
+              class="space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Başlangıç Tarihi -->
+                <div>
+                    <label for="baslangic_tarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-calendar mr-2"></i>Başlangıç Tarihi
+                    </label>
+                    <input type="date" 
+                           id="baslangic_tarihi" 
+                           name="baslangic_tarihi" 
+                           value="{{ baslangic_tarihi }}" 
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+
+                <!-- Bitiş Tarihi -->
+                <div>
+                    <label for="bitis_tarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-calendar mr-2"></i>Bitiş Tarihi
+                    </label>
+                    <input type="date" 
+                           id="bitis_tarihi" 
+                           name="bitis_tarihi" 
+                           value="{{ bitis_tarihi }}" 
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+
+                <!-- Durum Filtresi -->
+                <div>
+                    <label for="durum" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-filter mr-2"></i>Durum
+                    </label>
+                    <select id="durum" 
+                            name="durum" 
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="sorun_yok" {% if durum_filter == 'sorun_yok' %}selected{% endif %}>Sorun Yok</option>
+                        <option value="sorun_var" {% if durum_filter == 'sorun_var' %}selected{% endif %}>Sorun Var</option>
+                        <option value="acil" {% if durum_filter == 'acil' %}selected{% endif %}>Acil Müdahale Gerekli</option>
+                        <option value="gozden_gecirildi" {% if durum_filter == 'gozden_gecirildi' %}selected{% endif %}>Gözden Geçirildi</option>
+                        <option value="ise_donusturuldu" {% if durum_filter == 'ise_donusturuldu' %}selected{% endif %}>İşe Dönüştürüldü</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="filter-loading" class="htmx-indicator flex items-center justify-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
+                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Filtreleniyor...</span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Durum İstatistikleri -->
+    {% if durum_stats %}
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {% for stat in durum_stats %}
+        <div class="flex flex-col items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="w-8 h-8 {% if stat.durum == 'sorun_yok' %}bg-green-100 dark:bg-green-900/30{% elif stat.durum == 'sorun_var' %}bg-yellow-100 dark:bg-yellow-900/30{% elif stat.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% else %}bg-blue-100 dark:bg-blue-900/30{% endif %} rounded-lg flex items-center justify-center mb-2">
+                {% if stat.durum == 'sorun_yok' %}
+                    <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-sm"></i>
+                {% elif stat.durum == 'sorun_var' %}
+                    <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-sm"></i>
+                {% elif stat.durum == 'acil' %}
+                    <i class="fas fa-times-circle text-red-600 dark:text-red-400 text-sm"></i>
+                {% else %}
+                    <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-sm"></i>
+                {% endif %}
+            </div>
+            <div class="text-lg font-bold {% if stat.durum == 'sorun_yok' %}text-green-600 dark:text-green-400{% elif stat.durum == 'sorun_var' %}text-yellow-600 dark:text-yellow-400{% elif stat.durum == 'acil' %}text-red-600 dark:text-red-400{% else %}text-blue-600 dark:text-blue-400{% endif %}">
+                {{ stat.sayi }}
+            </div>
+            <div class="text-xs text-gray-600 dark:text-gray-400 text-center">
+                {% if stat.durum == 'sorun_yok' %}
+                    Sorun Yok
+                {% elif stat.durum == 'sorun_var' %}
+                    Sorun Var
+                {% elif stat.durum == 'acil' %}
+                    Acil
+                {% elif stat.durum == 'gozden_gecirildi' %}
+                    Gözden Geçirildi
+                {% elif stat.durum == 'ise_donusturuldu' %}
+                    İşe Dönüştürüldü
+                {% else %}
+                    {{ stat.durum }}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Kontrol Kayıtları -->
+    <div class="space-y-4">
+        {% for kontrol in kontroller %}
+        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300 
+                    {% if kontrol.durum == 'sorun_yok' %}hover:border-green-300 dark:hover:border-green-600{% elif kontrol.durum == 'sorun_var' %}hover:border-yellow-300 dark:hover:border-yellow-600{% elif kontrol.durum == 'acil' %}hover:border-red-300 dark:hover:border-red-600{% else %}hover:border-blue-300 dark:hover:border-blue-600{% endif %}">
+            <div class="p-4">
+                <div class="flex items-start space-x-4">
+                    <!-- Durum İkonu -->
+                    <div class="w-12 h-12 {% if kontrol.durum == 'sorun_yok' %}bg-green-100 dark:bg-green-900/30{% elif kontrol.durum == 'sorun_var' %}bg-yellow-100 dark:bg-yellow-900/30{% elif kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% else %}bg-blue-100 dark:bg-blue-900/30{% endif %} rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                        {% if kontrol.durum == 'sorun_yok' %}
+                            <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-lg"></i>
+                        {% elif kontrol.durum == 'sorun_var' %}
+                            <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-lg"></i>
+                        {% elif kontrol.durum == 'acil' %}
+                            <i class="fas fa-times-circle text-red-600 dark:text-red-400 text-lg"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-lg"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Kontrol Bilgileri -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <h5 class="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                                    {{ kontrol.get_durum_display }}
+                                </h5>
+                                <div class="flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user mr-1"></i>
+                                        <span>{{ kontrol.personel.ad }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <span>{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        <span>{{ kontrol.get_kontrol_tipi_display }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Durum Badge -->
+                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                        {% if kontrol.durum == 'sorun_yok' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
+                                        {% elif kontrol.durum == 'sorun_var' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300
+                                        {% elif kontrol.durum == 'acil' %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
+                                        {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300{% endif %}">
+                                {{ kontrol.get_durum_display }}
+                            </div>
+                        </div>
+                        
+                        <!-- Açıklama -->
+                        {% if kontrol.aciklama %}
+                        <div class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-3">
+                            {{ kontrol.aciklama }}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Resimler -->
+                        {% if kontrol.resimler.all %}
+                        <div class="flex space-x-2 mt-3">
+                            {% for resim in kontrol.resimler.all %}
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <img src="{{ resim.resim.url }}" 
+                                     alt="{{ resim.aciklama|default:'Kontrol resmi' }}"
+                                     class="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                     onclick="showImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:"Kontrol resmi" }}')">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-lg font-bold text-gray-500 dark:text-gray-400 mb-1">Kontrol kaydı bulunamadı</h4>
+            <p class="text-gray-400 dark:text-gray-500 text-sm">Belirtilen tarih aralığında ve kriterlerde kontrol kaydı bulunmuyor.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Resim Modal -->
+<dialog id="image-modal" class="backdrop:bg-black backdrop:bg-opacity-75 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 id="image-title" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
+            <button onclick="closeImageModal()" 
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="flex justify-center">
+            <img id="modal-image" src="" alt="" class="max-w-full max-h-[70vh] object-contain rounded-lg">
+        </div>
+    </div>
+</dialog>
+
+<script>
+    function showImageModal(imageUrl, title) {
+        const modal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const imageTitle = document.getElementById('image-title');
+        
+        modalImage.src = imageUrl;
+        modalImage.alt = title;
+        imageTitle.textContent = title;
+        
+        modal.showModal();
+    }
+    
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        modal.close();
+    }
+</script>

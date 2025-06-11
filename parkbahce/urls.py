@@ -80,6 +80,16 @@ urlpatterns = [
         htmx_views.park_istatistikler_tab_htmx,
         name="park_istatistikler_tab_htmx",
     ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/sorumlu/",
+        htmx_views.park_sorumlu_tab_htmx,
+        name="park_sorumlu_tab_htmx",
+    ),
+    path(
+        "htmx/park-tabs/<uuid:park_uuid>/sorun-gecmisi/",
+        htmx_views.park_sorun_gecmisi_tab_htmx,
+        name="park_sorun_gecmisi_tab_htmx",
+    ),
     # HTMX endpoints
     path("htmx/recent-parks/", htmx_views.recent_parks_htmx, name="recent_parks_htmx"),
     path(

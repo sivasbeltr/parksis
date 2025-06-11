@@ -249,13 +249,26 @@
                 class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap">
                 <i class="fas fa-plug mr-2"></i>
                 Aboneler
-            </button>
-            <button 
+            </button>            <button 
                 data-tab="istatistikler"
                 data-url="{% url 'parkbahce:park_istatistikler_tab_htmx' park.uuid %}"
                 class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap">
                 <i class="fas fa-chart-line mr-2"></i>
                 İstatistikler
+            </button>
+            <button 
+                data-tab="sorumlu"
+                data-url="{% url 'parkbahce:park_sorumlu_tab_htmx' park.uuid %}"
+                class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap">
+                <i class="fas fa-user-cog mr-2"></i>
+                Sorumlu Bilgileri
+            </button>
+            <button 
+                data-tab="sorun-gecmisi"
+                data-url="{% url 'parkbahce:park_sorun_gecmisi_tab_htmx' park.uuid %}"
+                class="tab-button px-4 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Sorun Geçmişi
             </button>
         </div>        <!-- Sekme İçeriği -->
         <div class="p-6">
