@@ -129,6 +129,7 @@ def mobil_sorun_kaydet(request):
     """
     if request.method == "POST":
         # Personel kontrolü
+        print("Gelen request.FILES:", request.FILES)
         try:
             personel = Personel.objects.get(user=request.user)
         except Personel.DoesNotExist:
