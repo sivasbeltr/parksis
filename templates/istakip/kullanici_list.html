@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+
+{% block title %}Kullanıcı Listesi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-park-green-500 via-park-green-600 to-park-green-700 rounded-xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fas fa-users mr-3"></i>
+                    Kullanıcı Yönetimi
+                </h1>
+                <p class="text-park-green-100 text-sm">
+                    Toplam {{ total_kullanicilar }} kullanıcı
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'istakip:kullanici_create' %}" 
+                   class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-medium transition-all backdrop-blur-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Kullanıcı
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+             onclick="toggleFilters()">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-filter text-park-green-600 mr-3"></i>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Filtreler ve Arama</h2>
+                    {% if search_query or grup_filter or aktif_filter %}
+                        <span class="ml-3 inline-flex items-center px-2.5 py-0.5 bg-park-green-100 text-park-green-800 text-xs font-medium rounded-full">
+                            Aktif Filtre
+                        </span>
+                    {% endif %}
+                </div>
+                <i id="filter-chevron" class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+            </div>
+        </div>
+
+        <div id="filter-content" class="hidden">
+            <div class="p-6">
+                <form method="get" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Search -->
+                        <div class="lg:col-span-2">
+                            <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-search mr-2"></i>Kullanıcı Ara
+                            </label>
+                            <input type="text" id="search" name="search" value="{{ search_query }}" 
+                                   placeholder="Ad, kullanıcı adı, e-posta, telefon..."
+                                   class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent transition-all">
+                        </div>
+
+                        <!-- Grup Filter -->
+                        <div>
+                            <label for="grup" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-users-cog mr-2"></i>Kullanıcı Grubu
+                            </label>
+                            <select id="grup" name="grup" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="">Tüm Gruplar</option>
+                                {% for grup in gruplar %}
+                                    <option value="{{ grup.id }}" {% if grup_filter == grup.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ grup.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Aktif Filter -->
+                        <div>
+                            <label for="aktif" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-toggle-on mr-2"></i>Durum
+                            </label>
+                            <select id="aktif" name="aktif" 
+                                    class="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                                <option value="">Tümü</option>
+                                <option value="true" {% if aktif_filter == 'true' %}selected{% endif %}>Aktif</option>
+                                <option value="false" {% if aktif_filter == 'false' %}selected{% endif %}>Pasif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-park-green-500 to-park-green-600 text-white text-sm font-medium rounded-lg hover:from-park-green-600 hover:to-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300 hover:scale-105 shadow-lg">
+                            <i class="fas fa-search mr-2"></i>
+                            Filtrele
+                        </button>
+                        <a href="{% url 'istakip:kullanici_list' %}" 
+                           class="inline-flex items-center px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all duration-300">
+                            <i class="fas fa-undo mr-2"></i>
+                            Temizle
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcılar Listesi -->
+    {% if kullanicilar %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Kullanıcı Bilgileri
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                İletişim
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Gruplar
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                İstatistikler
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                İşlemler
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for kullanici in kullanicilar %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <!-- Kullanıcı Bilgileri -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-park-green-100 dark:bg-park-green-800 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-park-green-600 dark:text-park-green-200">
+                                                {{ kullanici.ad|first|upper }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ kullanici.ad }}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            @{{ kullanici.user.username }}
+                                        </div>
+                                        {% if kullanici.pozisyon %}
+                                        <div class="text-xs text-gray-400">
+                                            {{ kullanici.pozisyon }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- İletişim -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">
+                                    {% if kullanici.eposta %}
+                                        <div class="flex items-center mb-1">
+                                            <i class="fas fa-envelope text-gray-400 mr-2 text-xs"></i>
+                                            {{ kullanici.eposta }}
+                                        </div>
+                                    {% endif %}
+                                    {% if kullanici.telefon %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-phone text-gray-400 mr-2 text-xs"></i>
+                                            {{ kullanici.telefon }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Gruplar -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-wrap gap-1">
+                                    {% for grup in kullanici.user.groups.all %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                                            {{ grup.name }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-gray-400 text-sm">Grup yok</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <!-- İstatistikler -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">
+                                    <div class="flex items-center mb-1">
+                                        <i class="fas fa-tree text-park-green-500 mr-2 text-xs"></i>
+                                        {{ kullanici.park_personeller.count }} park
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar-check text-blue-500 mr-2 text-xs"></i>
+                                        {{ kullanici.gunluk_kontroller.count }} kontrol
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- İşlemler -->
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'istakip:kullanici_detail' kullanici.uuid %}" 
+                                       class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Detay
+                                    </a>
+                                    {% if kullanici.aktif %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check mr-1"></i>
+                                            Aktif
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-times mr-1"></i>
+                                            Pasif
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if kullanicilar.has_other_pages %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <span>{{ kullanicilar.start_index }}-{{ kullanicilar.end_index }} / {{ kullanicilar.paginator.count }}</span>
+                    </div>
+                    <nav class="flex space-x-2">
+                        {% if kullanicilar.has_previous %}
+                            <a href="?page={{ kullanicilar.previous_page_number }}&{{ request.GET.urlencode }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Önceki
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-3 py-2 text-sm font-medium text-white bg-park-green-600 rounded-lg">
+                            {{ kullanicilar.number }}
+                        </span>
+                        
+                        {% if kullanicilar.has_next %}
+                            <a href="?page={{ kullanicilar.next_page_number }}&{{ request.GET.urlencode }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Sonraki
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-gray-400 dark:text-gray-500 text-xl"></i>
+            </div>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">Kullanıcı Bulunamadı</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Arama kriterlerinize uygun kullanıcı bulunmamaktadır.</p>
+            <a href="{% url 'istakip:kullanici_create' %}" 
+               class="inline-flex items-center px-4 py-2 bg-park-green-600 text-white text-sm font-medium rounded-lg hover:bg-park-green-700 transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                İlk Kullanıcıyı Oluştur
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleFilters() {
+        const content = document.getElementById('filter-content');
+        const chevron = document.getElementById('filter-chevron');
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            chevron.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    // Filtre varsa açık başlat
+    {% if search_query or grup_filter or aktif_filter %}
+        toggleFilters();
+    {% endif %}
+</script>
+{% endblock %}

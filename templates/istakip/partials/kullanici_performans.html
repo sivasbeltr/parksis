@@ -1,0 +1,273 @@
+<!-- Performans Analizi Sekmesi -->
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-chart-line text-purple-600 mr-3"></i>
+                    Performans Analizi
+                </h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ personel.ad }} için detaylı performans raporları
+                </p>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-purple-600">{{ performans_skoru|floatformat:1 }}%</div>
+                <div class="text-sm text-gray-500">Genel Performans</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performans Metrikleri -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Kontrol Başarısı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kontrol Başarısı</p>
+                    <p class="text-2xl font-bold text-green-600">
+                        {% if kontrol_performansi.toplam > 0 %}
+                            {% widthratio kontrol_performansi.basarili kontrol_performansi.toplam 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>{{ kontrol_performansi.basarili }} / {{ kontrol_performansi.toplam }} kontrol</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ortalama Tepki Süresi -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ortalama Tepki Süresi</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ ortalama_tepki_suresi|floatformat:1 }}h</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>Son 30 gün ortalaması</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Görev Tamamlama -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Görev Tamamlama</p>
+                    <p class="text-2xl font-bold text-orange-600">
+                        {% if gorev_performansi.toplam > 0 %}
+                            {% widthratio gorev_performansi.tamamlanan gorev_performansi.toplam 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tasks text-orange-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>{{ gorev_performansi.tamamlanan }} / {{ gorev_performansi.toplam }} görev</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aylık Aktivite -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Bu Ay Aktivite</p>
+                    <p class="text-2xl font-bold text-purple-600">{{ aylik_aktivite }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>Toplam işlem sayısı</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Haftalık Performans Grafiği -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Haftalık Performans Trendi</h5>
+        <div class="h-64">
+            <canvas id="performans-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Detaylı Analiz -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Kontrol Dağılımı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Kontrol Dağılımı</h5>
+            <div class="space-y-4">
+                {% for durum, sayi in kontrol_dagilimi.items %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            {% if durum == 'sorun_yok' %}
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Sorun Yok</span>
+                            {% elif durum == 'sorun_var' %}
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Sorun Var</span>
+                            {% else %}
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">Acil</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white mr-2">{{ sayi }}</span>
+                            <div class="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                {% if kontrol_performansi.toplam > 0 %}
+                                    <div class="h-2 rounded-full
+                                        {% if durum == 'sorun_yok' %}bg-green-500
+                                        {% elif durum == 'sorun_var' %}bg-yellow-500
+                                        {% else %}bg-red-500{% endif %}" 
+                                         style="width: {% widthratio sayi kontrol_performansi.toplam 100 %}%"></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Park Bazlı Performans -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Park Bazlı Performans</h5>
+            <div class="space-y-4">
+                {% for park_stat in park_performansi %}
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-b-0">
+                        <div class="flex items-center justify-between mb-2">
+                            <h6 class="text-sm font-medium text-gray-900 dark:text-white">{{ park_stat.park_ad }}</h6>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ park_stat.kontrol_sayisi }} kontrol</span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                            <div class="h-2 bg-blue-500 rounded-full" style="width: {{ park_stat.basari_orani }}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Başarı Oranı</span>
+                            <span class="text-xs font-medium text-gray-900 dark:text-white">{{ park_stat.basari_orani }}%</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        Henüz park bazlı performans verisi bulunmuyor.
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Öneriler -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-xl border border-blue-200 dark:border-blue-700 p-6">
+        <h5 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4 flex items-center">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Performans Önerileri
+        </h5>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% if kontrol_performansi.toplam > 0 and kontrol_performansi.basarili|add:0 < kontrol_performansi.toplam|floatformat:0|add:0 %}
+                <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                            Kontrol başarı oranını artırmak için düzenli eğitimler alınabilir.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if ortalama_tepki_suresi > 24 %}
+                <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                            Tepki süresini iyileştirmek için mobil bildirimler aktifleştirilebilir.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if aylik_aktivite < 50 %}
+                <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
+                            Daha fazla park sorumluluğu verilebilir veya görev çeşitliliği artırılabilir.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if performans_skoru >= 80 %}
+                <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <p class="text-sm text-green-800 dark:text-green-200">
+                            Mükemmel performans! Bu seviyeyi korumak için motivasyon artırıcı ödüller verilebilir.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Performans grafiği
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('performans-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ haftalik_tarihler|safe }},
+                datasets: [{
+                    label: 'Kontrol Sayısı',
+                    data: {{ haftalik_kontroller|safe }},
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Görev Sayısı',
+                    data: {{ haftalik_gorevler|safe }},
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>

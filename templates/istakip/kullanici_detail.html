@@ -1,0 +1,289 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ personel.ad }} - Kullanıcı Detayı{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'istakip:kullanici_list' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            Kullanıcı Yönetimi
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">{{ personel.ad }}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                    <span class="text-2xl font-bold text-white">{{ personel.ad|first|upper }}</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold mb-1">{{ personel.ad }}</h1>
+                    <div class="flex items-center space-x-4 text-blue-100">
+                        <span class="flex items-center">
+                            <i class="fas fa-user mr-2"></i>
+                            @{{ personel.user.username }}
+                        </span>
+                        {% if personel.pozisyon %}
+                        <span class="flex items-center">
+                            <i class="fas fa-briefcase mr-2"></i>
+                            {{ personel.pozisyon }}
+                        </span>
+                        {% endif %}
+                        <span class="flex items-center">
+                            {% if personel.aktif %}
+                                <i class="fas fa-check-circle text-green-300 mr-2"></i>
+                                Aktif
+                            {% else %}
+                                <i class="fas fa-times-circle text-red-300 mr-2"></i>
+                                Pasif
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm">
+                        <div class="text-2xl font-bold text-white">{{ stats.sorumlu_park_sayisi }}</div>
+                        <div class="text-xs text-blue-100">Sorumlu Park</div>
+                    </div>
+                    <div class="bg-white/15 rounded-lg p-3 text-center backdrop-blur-sm">
+                        <div class="text-2xl font-bold text-white">{{ stats.toplam_kontrol }}</div>
+                        <div class="text-xs text-blue-100">Toplam Kontrol</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Bugünkü Kontroller -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-green-600 dark:text-green-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Bugün</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.bugun_kontrol }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bu Hafta -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-week text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Bu Hafta</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.bu_hafta_kontrol }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bu Ay -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-purple-600 dark:text-purple-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Bu Ay</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.bu_ay_kontrol }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam Sorun -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-800/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Sorun</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.toplam_sorun }}</p>
+                    <p class="text-xs text-gray-400">%{{ sorun_orani }} oran</p>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Sekmeli İçerik -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Sekme Başlıkları -->
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                <button id="tab-bilgileri" 
+                        class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                        onclick="switchTab('bilgileri')"
+                        hx-get="{% url 'istakip:kullanici_bilgileri_htmx' personel.uuid %}"
+                        hx-target="#tab-content"
+                        hx-trigger="click">
+                    <i class="fas fa-user mr-2"></i>
+                    Kullanıcı Bilgileri
+                </button>
+                
+                <button id="tab-parklar" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                        onclick="switchTab('parklar')"
+                        hx-get="{% url 'istakip:kullanici_parklar_htmx' personel.uuid %}"
+                        hx-target="#tab-content"
+                        hx-trigger="click">
+                    <i class="fas fa-tree mr-2"></i>
+                    Sorumlu Parklar
+                    <span class="ml-2 px-2 py-0.5 bg-park-green-100 dark:bg-park-green-800 text-park-green-700 dark:text-park-green-200 text-xs rounded-full">
+                        {{ stats.sorumlu_park_sayisi }}
+                    </span>
+                </button>
+                
+                <button id="tab-kontroller" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                        onclick="switchTab('kontroller')"
+                        hx-get="{% url 'istakip:kullanici_kontroller_htmx' personel.uuid %}"
+                        hx-target="#tab-content"
+                        hx-trigger="click">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Kontroller
+                    <span class="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs rounded-full">
+                        {{ stats.toplam_kontrol }}
+                    </span>
+                </button>
+                
+                <button id="tab-performans" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                        onclick="switchTab('performans')"
+                        hx-get="{% url 'istakip:kullanici_performans_htmx' personel.uuid %}"
+                        hx-target="#tab-content"
+                        hx-trigger="click">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Performans
+                </button>
+                
+                <button id="tab-gorevler" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                        onclick="switchTab('gorevler')"
+                        hx-get="{% url 'istakip:kullanici_gorevler_htmx' personel.uuid %}"
+                        hx-target="#tab-content"
+                        hx-trigger="click">
+                    <i class="fas fa-tasks mr-2"></i>
+                    Görevler
+                    <span class="ml-2 px-2 py-0.5 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
+                        {{ stats.bekleyen_gorevler }}
+                    </span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sekme İçerikleri -->
+        <div id="tab-content" class="p-6">
+            <!-- İlk açılışta kullanıcı bilgileri yüklenecek -->
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-park-green-600"></div>
+                <span class="ml-3 text-gray-600 dark:text-gray-400">Yükleniyor...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Park Atama Modal -->
+<div id="park-atama-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-tree text-park-green-600 mr-3"></i>
+                Park Atamaları - {{ personel.ad }}
+            </h3>
+            <button onclick="closeParkAtamaModal()" 
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="park-atama-content" class="p-6 overflow-y-auto max-h-[70vh]">
+            <!-- HTMX ile yüklenecek -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sekme değiştirme fonksiyonu
+    function switchTab(tabName) {
+        // Tüm sekme butonlarından active class'ını kaldır
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            button.classList.remove('border-park-green-500', 'text-park-green-600');
+        });
+        
+        // Aktif sekmeye active class'ını ekle
+        const activeTab = document.getElementById(`tab-${tabName}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            activeTab.classList.add('border-park-green-500', 'text-park-green-600');
+        }
+    }
+    
+    // Sayfa yüklendiğinde ilk sekmeyi aktif et
+    document.addEventListener('DOMContentLoaded', function() {
+        // İlk sekmeyi aktif et
+        switchTab('bilgileri');
+        
+        // İlk sekme içeriğini yükle
+        htmx.ajax('GET', '{% url "istakip:kullanici_bilgileri_htmx" personel.uuid %}', {
+            target: '#tab-content'
+        });
+    });
+    
+    // Park atama modal fonksiyonları
+    function openParkAtamaModal() {
+        const modal = document.getElementById('park-atama-modal');
+        const content = document.getElementById('park-atama-content');
+        
+        modal.classList.remove('hidden');
+        
+        // HTMX ile park atama formunu yükle
+        htmx.ajax('GET', '{% url "istakip:park_atama_htmx" personel.uuid %}', {
+            target: '#park-atama-content'
+        });
+    }
+    
+    function closeParkAtamaModal() {
+        document.getElementById('park-atama-modal').classList.add('hidden');
+    }
+    
+    // Modal dışına tıklandığında kapat
+    document.getElementById('park-atama-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeParkAtamaModal();
+        }
+    });
+</script>
+
+<style>
+    .tab-button.active {
+        border-bottom-color: #10b981;
+        color: #10b981;
+    }
+    
+    .tab-button:not(.active) {
+        border-bottom-color: transparent;
+        color: #6b7280;
+    }
+    
+    .tab-button:not(.active):hover {
+        color: #374151;
+        border-bottom-color: #d1d5db;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'istakip:kullanici_list' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            Kullanıcı Yönetimi
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">{{ title }}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-park-green-500 via-park-green-600 to-park-green-700 rounded-xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative">
+            <h1 class="text-2xl font-bold mb-2">
+                <i class="fas fa-user-plus mr-3"></i>
+                {{ title }}
+            </h1>
+            <p class="text-park-green-100 text-sm">
+                Yeni kullanıcı hesabı oluşturun ve personel bilgilerini girin
+            </p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Kullanıcı Bilgileri -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-user text-park-green-600 mr-3"></i>
+                    Kullanıcı Hesap Bilgileri
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Kullanıcı Adı -->
+                    <div>
+                        <label for="{{ form.kullanici_adi.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.kullanici_adi.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.kullanici_adi }}
+                        {% if form.kullanici_adi.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.kullanici_adi.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- E-posta -->
+                    <div>
+                        <label for="{{ form.eposta.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.eposta.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.eposta }}
+                        {% if form.eposta.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.eposta.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Şifre -->
+                    <div>
+                        <label for="{{ form.sifre.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.sifre.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.sifre }}
+                        {% if form.sifre.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.sifre.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Şifre Tekrar -->
+                    <div>
+                        <label for="{{ form.sifre_tekrar.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.sifre_tekrar.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.sifre_tekrar }}
+                        {% if form.sifre_tekrar.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.sifre_tekrar.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personel Bilgileri -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-id-card text-blue-600 mr-3"></i>
+                    Personel Bilgileri
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Ad -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.first_name.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Soyad -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.last_name.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Telefon -->
+                    <div>
+                        <label for="{{ form.telefon.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.telefon.label }}
+                        </label>
+                        {{ form.telefon }}
+                        {% if form.telefon.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.telefon.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Pozisyon -->
+                    <div>
+                        <label for="{{ form.pozisyon.id_for_label }}" 
+                               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.pozisyon.label }}
+                        </label>
+                        {{ form.pozisyon }}
+                        {% if form.pozisyon.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.pozisyon.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Aktif Checkbox -->
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" 
+                               class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                            {{ form.is_active.label }}
+                        </label>
+                    </div>
+                    {% if form.is_active.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {{ form.is_active.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Kullanıcı Grupları -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-users-cog text-purple-600 mr-3"></i>
+                    Kullanıcı Grupları ve Yetkiler
+                </h3>
+                
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Kullanıcının dahil olacağı grupları seçin. Bu gruplar sistemdeki yetkileri belirler.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {% for choice in form.groups %}
+                            <div class="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                {{ choice.tag }}
+                                <label for="{{ choice.id_for_label }}" 
+                                       class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    {{ choice.choice_label }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if form.groups.errors %}
+                        <div class="mt-2 text-sm text-red-600">
+                            {{ form.groups.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Hataları -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <div class="flex">
+                        <i class="fas fa-exclamation-circle text-red-400 mr-3 mt-0.5"></i>
+                        <div class="text-sm text-red-700 dark:text-red-300">
+                            {{ form.non_field_errors.0 }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" 
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-park-green-500 to-park-green-600 text-white font-medium rounded-lg hover:from-park-green-600 hover:to-park-green-700 focus:ring-2 focus:ring-park-green-500 focus:ring-offset-2 transition-all duration-300 hover:scale-105 shadow-lg">
+                    <i class="fas fa-save mr-2"></i>
+                    Kullanıcı Oluştur
+                </button>
+                
+                <a href="{% url 'istakip:kullanici_list' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-300">
+                    <i class="fas fa-times mr-2"></i>
+                    İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

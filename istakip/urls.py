@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import mobil_views
+from . import htmx_views, kullanici_views, mobil_views, views
 
 app_name = "istakip"
 
@@ -45,5 +45,48 @@ urlpatterns = [
         "mobil/sorumlu-parklar/",
         mobil_views.MobilSorumluParklarView.as_view(),
         name="mobil_sorumlu_parklar",
+    ),  # Kullanıcı Yönetimi
+    path("kullanicilar/", views.kullanici_list, name="kullanici_list"),
+    path("kullanicilar/yeni/", views.kullanici_create, name="kullanici_create"),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/",
+        views.kullanici_detail,
+        name="kullanici_detail",
+    ),
+    # HTMX Kullanıcı Sekmeler
+    path(
+        "kullanicilar/<uuid:personel_uuid>/bilgileri/",
+        htmx_views.kullanici_bilgileri_htmx,
+        name="kullanici_bilgileri_htmx",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/parklar/",
+        htmx_views.kullanici_parklar_htmx,
+        name="kullanici_parklar_htmx",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/kontroller/",
+        htmx_views.kullanici_kontroller_htmx,
+        name="kullanici_kontroller_htmx",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/performans/",
+        htmx_views.kullanici_performans_htmx,
+        name="kullanici_performans_htmx",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/gorevler/",
+        htmx_views.kullanici_gorevler_htmx,
+        name="kullanici_gorevler_htmx",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/park-atama/",
+        htmx_views.park_atama_htmx,
+        name="park_atama_htmx",
+    ),
+    path(
+        "park-atama/<uuid:atama_uuid>/delete/",
+        htmx_views.park_atama_sil_htmx,
+        name="park_atama_sil_htmx",
     ),
 ]

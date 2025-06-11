@@ -1,0 +1,294 @@
+<!-- Kontroller Sekmesi -->
+<div class="space-y-6">
+    <!-- Header ve Filtreler -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-clipboard-check text-blue-600 mr-3"></i>
+                    Kontrol Geçmişi
+                </h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ personel.ad }} tarafından yapılan tüm kontroller
+                </p>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-blue-600">{{ kontroller.paginator.count }}</div>
+                <div class="text-sm text-gray-500">Toplam Kontrol</div>
+            </div>
+        </div>
+
+        <!-- Filtreler -->
+        <form hx-get="{% url 'istakip:kullanici_kontroller_htmx' personel.uuid %}" 
+              hx-target="#tab-content" 
+              hx-trigger="change, submit"
+              class="space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Tarih Filtresi -->
+                <div>
+                    <label for="tarih" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-calendar mr-2"></i>Tarih
+                    </label>
+                    <input type="date" 
+                           id="tarih" 
+                           name="tarih" 
+                           value="{{ tarih_filter }}"
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Park Filtresi -->
+                <div>
+                    <label for="park" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tree mr-2"></i>Park
+                    </label>
+                    <select id="park" 
+                            name="park" 
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tüm Parklar</option>
+                        {% for atama in sorumlu_parklar %}
+                            <option value="{{ atama.park.id }}" {% if park_filter == atama.park.id|stringformat:"s" %}selected{% endif %}>
+                                {{ atama.park.ad }} - {{ atama.park.mahalle.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Durum Filtresi -->
+                <div>
+                    <label for="durum" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-flag mr-2"></i>Durum
+                    </label>
+                    <select id="durum" 
+                            name="durum" 
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="sorun_yok" {% if durum_filter == 'sorun_yok' %}selected{% endif %}>Sorun Yok</option>
+                        <option value="sorun_var" {% if durum_filter == 'sorun_var' %}selected{% endif %}>Sorun Var</option>
+                        <option value="acil" {% if durum_filter == 'acil' %}selected{% endif %}>Acil</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hızlı Filtre Butonları -->
+            <div class="flex flex-wrap gap-2">
+                <button type="button" 
+                        onclick="setTodayFilter()" 
+                        class="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-calendar-day mr-1"></i>
+                    Bugün
+                </button>
+                <button type="button" 
+                        onclick="setWeekFilter()" 
+                        class="px-3 py-1.5 bg-green-100 text-green-700 text-sm rounded-lg hover:bg-green-200 transition-colors">
+                    <i class="fas fa-calendar-week mr-1"></i>
+                    Bu Hafta
+                </button>
+                <button type="button" 
+                        onclick="clearFilters()" 
+                        class="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times mr-1"></i>
+                    Temizle
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Kontrol Listesi -->
+    {% if kontroller %}
+        <div class="space-y-4">
+            {% for kontrol in kontroller %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start flex-1">
+                            <!-- Durum İkonu -->
+                            <div class="w-4 h-4 rounded-full mr-4 mt-1 flex-shrink-0
+                                {% if kontrol.durum == 'sorun_yok' %}bg-green-500
+                                {% elif kontrol.durum == 'sorun_var' %}bg-yellow-500
+                                {% else %}bg-red-500{% endif %}">
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h6 class="text-base font-medium text-gray-900 dark:text-white">
+                                            {{ kontrol.park.ad }}
+                                        </h6>
+                                        <div class="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-map-marker-alt mr-2"></i>
+                                            <span>{{ kontrol.park.mahalle.ad }}</span>
+                                            <span class="mx-2">•</span>
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Durum Badge -->
+                                    <div class="ml-4">
+                                        {% if kontrol.durum == 'sorun_yok' %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Sorun Yok
+                                            </span>
+                                        {% elif kontrol.durum == 'sorun_var' %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                Sorun Var
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                                Acil
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {% if kontrol.aciklama %}
+                                    <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                                            {{ kontrol.aciklama }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Resimler -->
+                                {% if kontrol.resimler.all %}
+                                    <div class="mt-3">
+                                        <div class="flex items-center mb-2">
+                                            <i class="fas fa-images text-gray-400 mr-2"></i>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ kontrol.resimler.count }} resim
+                                            </span>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            {% for resim in kontrol.resimler.all|slice:":3" %}
+                                                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                                    <img src="{{ resim.resim.url }}" 
+                                                         alt="{{ resim.aciklama }}" 
+                                                         class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                                         onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:'Kontrol resmi' }}')">
+                                                </div>
+                                            {% endfor %}
+                                            {% if kontrol.resimler.count > 3 %}
+                                                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                    <span class="text-xs text-gray-500">+{{ kontrol.resimler.count|add:"-3" }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sayfalama -->
+        {% if kontroller.has_other_pages %}
+            <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-6 py-4">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>{{ kontroller.start_index }}-{{ kontroller.end_index }} / {{ kontroller.paginator.count }}</span>
+                </div>
+                <nav class="flex space-x-2">
+                    {% if kontroller.has_previous %}
+                        <button hx-get="{% url 'istakip:kullanici_kontroller_htmx' personel.uuid %}?page={{ kontroller.previous_page_number }}{% if tarih_filter %}&tarih={{ tarih_filter }}{% endif %}{% if park_filter %}&park={{ park_filter }}{% endif %}{% if durum_filter %}&durum={{ durum_filter }}{% endif %}" 
+                                hx-target="#tab-content"
+                                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Önceki
+                        </button>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
+                        {{ kontroller.number }}
+                    </span>
+                    
+                    {% if kontroller.has_next %}
+                        <button hx-get="{% url 'istakip:kullanici_kontroller_htmx' personel.uuid %}?page={{ kontroller.next_page_number }}{% if tarih_filter %}&tarih={{ tarih_filter }}{% endif %}{% if park_filter %}&park={{ park_filter }}{% endif %}{% if durum_filter %}&durum={{ durum_filter }}{% endif %}" 
+                                hx-target="#tab-content"
+                                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Sonraki
+                        </button>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- Boş Durum -->
+        <div class="text-center py-12 bg-gray-50 dark:bg-gray-700 rounded-xl">
+            <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-list text-gray-400 dark:text-gray-500 text-2xl"></i>
+            </div>
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Kontrol Bulunamadı</h4>
+            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                {% if tarih_filter or park_filter or durum_filter %}
+                    Seçilen filtrelere uygun kontrol kaydı bulunmamaktadır.
+                {% else %}
+                    Bu personel henüz hiç kontrol yapmamış.
+                {% endif %}
+            </p>
+            {% if tarih_filter or park_filter or durum_filter %}
+                <button onclick="clearFilters()" 
+                        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Filtreleri Temizle
+                </button>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Resim Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+    <div class="flex items-center justify-center h-full p-4">
+        <div class="relative max-w-full max-h-full">
+            <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+            <button onclick="closeImageModal()" class="absolute top-4 right-4 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-30">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modal-caption" class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-3 rounded-lg"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setTodayFilter() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tarih').value = today;
+        document.getElementById('tarih').form.requestSubmit();
+    }
+    
+    function setWeekFilter() {
+        const today = new Date();
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        document.getElementById('tarih').value = weekAgo.toISOString().split('T')[0];
+        document.getElementById('tarih').form.requestSubmit();
+    }
+    
+    function clearFilters() {
+        document.getElementById('tarih').value = '';
+        document.getElementById('park').value = '';
+        document.getElementById('durum').value = '';
+        document.getElementById('tarih').form.requestSubmit();
+    }
+    
+    function openImageModal(src, caption) {
+        document.getElementById('modal-image').src = src;
+        document.getElementById('modal-caption').textContent = caption;
+        document.getElementById('image-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        document.getElementById('image-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    
+    // Modal dışına tıklayınca kapat
+    document.getElementById('image-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeImageModal();
+        }
+    });
+</script>
