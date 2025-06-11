@@ -134,9 +134,9 @@ class PersonelKullaniciForm(forms.Form):
             }
         ),
     )
-
     sifre = forms.CharField(
         label=_("Şifre"),
+        required=False,
         widget=forms.PasswordInput(
             attrs={
                 "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
@@ -147,6 +147,7 @@ class PersonelKullaniciForm(forms.Form):
 
     sifre_tekrar = forms.CharField(
         label=_("Şifre Tekrar"),
+        required=False,
         widget=forms.PasswordInput(
             attrs={
                 "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",

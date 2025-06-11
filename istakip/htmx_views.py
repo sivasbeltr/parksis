@@ -206,36 +206,39 @@ def park_atama_htmx(request, personel_uuid):
 
             with transaction.atomic():
                 # Mevcut atamaları sil
-                ParkPersonel.objects.filter(personel=personel).delete()
-
-                # Yeni atamaları oluştur
+                ParkPersonel.objects.filter(
+                    personel=personel
+                ).delete()  # Yeni atamaları oluştur
                 for park_id in secili_parklar:
                     park = Park.objects.get(id=park_id)
                     ParkPersonel.objects.create(personel=personel, park=park)
 
             messages.success(request, f"{len(secili_parklar)} park başarıyla atandı.")
 
-            # Güncel atanmış parkları döndür
-            atanmis_parklar = personel.park_personeller.select_related(
+            # Güncel sorumlu parkları döndür
+            sorumlu_parklar = personel.park_personeller.select_related(
                 "park__mahalle", "park__park_tipi"
             ).order_by("park__ad")
 
             return render(
                 request,
-                "istakip/partials/atanmis_parklar.html",
-                {"atanmis_parklar": atanmis_parklar, "personel": personel},
+                "istakip/partials/kullanici_parklar.html",
+                {"personel": personel, "sorumlu_parklar": sorumlu_parklar},
             )
 
         except Exception as e:
-            return JsonResponse({"success": False, "message": str(e)})
-
-    # GET isteği - park seçim formu
+            return JsonResponse(
+                {"success": False, "message": str(e)}
+            )  # GET isteği - park seçim formu
     mahalle_filter = request.GET.get("mahalle", "")
     search_query = request.GET.get("search", "").strip()
+    atama_durumu_filter = request.GET.get("atama_durumu", "")
 
-    # Tüm parklar
-    parklar = Park.objects.select_related("mahalle", "park_tipi").order_by(
-        "mahalle__ad", "ad"
+    # Tüm parklar - geom alanını defer ile performans optimizasyonu
+    parklar = (
+        Park.objects.select_related("mahalle", "park_tipi")
+        .defer("geom")
+        .order_by("mahalle__ad", "ad")
     )
 
     # Filtreleme
@@ -261,17 +264,33 @@ def park_atama_htmx(request, personel_uuid):
             diger_atamalar[atama.park_id] = []
         diger_atamalar[atama.park_id].append(atama.personel.ad)
 
-    # Mahalleler
+    # Atama durumu filtrelemesi
+    if atama_durumu_filter:
+        if atama_durumu_filter == "atanmis":
+            # Sadece bu kullanıcıya atanmış parklar
+            parklar = parklar.filter(id__in=atanmis_parklar)
+        elif atama_durumu_filter == "atanmamis":
+            # Bu kullanıcıya atanmamış parklar
+            parklar = parklar.exclude(id__in=atanmis_parklar)
+        elif atama_durumu_filter == "baska_atanmis":
+            # Başka kullanıcıya atanmış parklar
+            diger_atanan_park_ids = set(diger_atamalar.keys())
+            parklar = parklar.filter(id__in=diger_atanan_park_ids)
+        elif atama_durumu_filter == "hic_atanmamis":
+            # Hiç kimseye atanmamış parklar
+            tum_atanan_park_ids = set(atanmis_parklar).union(set(diger_atamalar.keys()))
+            parklar = parklar.exclude(id__in=tum_atanan_park_ids)  # Mahalleler
     mahalleler = Mahalle.objects.select_related("ilce").order_by("ilce__ad", "ad")
 
     context = {
         "personel": personel,
         "parklar": parklar,
-        "atanmis_parklar": atanmis_parklar,
+        "atanmis_parklar": list(atanmis_parklar),  # Set'i liste'ye çevir
         "diger_atamalar": diger_atamalar,
         "mahalleler": mahalleler,
         "mahalle_filter": mahalle_filter,
         "search_query": search_query,
+        "atama_durumu_filter": atama_durumu_filter,
     }
 
     return render(request, "istakip/partials/park_atama_form.html", context)

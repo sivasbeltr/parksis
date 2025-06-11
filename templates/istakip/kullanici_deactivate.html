@@ -1,0 +1,193 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+        <a href="{% url 'index' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            <i class="fas fa-home"></i>
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'istakip:kullanici_list' %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            Kullanıcı Yönetimi
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'istakip:kullanici_detail' personel.uuid %}" class="hover:text-park-green-600 dark:hover:text-park-green-400 transition-colors">
+            {{ personel.ad }}
+        </a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 dark:text-white font-medium">Hesabı Devre Dışı Bırak</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-500 via-red-600 to-red-700 rounded-xl shadow-soft-lg p-6 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-y-1"></div>
+        <div class="relative">
+            <h1 class="text-2xl font-bold mb-2">
+                <i class="fas fa-user-times mr-3"></i>
+                {{ title }}
+            </h1>
+            <p class="text-red-100 text-sm">
+                Bu işlem {{ personel.ad }} hesabını kalıcı olarak devre dışı bırakacaktır
+            </p>
+        </div>
+    </div>
+
+    <!-- Uyarı ve Bilgilendirme -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6">
+        <div class="max-w-2xl mx-auto">
+            <!-- Hata ve Başarı Mesajları -->
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                            <div class="flex items-center">
+                                {% if message.tags == 'error' %}
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                {% elif message.tags == 'success' %}
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Kullanıcı Bilgileri -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-6">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-xl font-bold text-gray-600 dark:text-gray-300">{{ personel.ad|first|upper }}</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ personel.ad }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@{{ personel.user.username }}</p>
+                        {% if personel.pozisyon %}
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ personel.pozisyon }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uyarı Mesajı -->
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3 mt-1"></i>
+                    <div>
+                        <h4 class="text-lg font-medium text-red-800 dark:text-red-200 mb-2">Dikkat!</h4>
+                        <p class="text-red-700 dark:text-red-300 mb-4">
+                            Bu işlem geri alınamaz. Kullanıcı hesabı devre dışı bırakıldığında:
+                        </p>
+                        <ul class="text-red-700 dark:text-red-300 text-sm space-y-1 list-disc list-inside">
+                            <li>Kullanıcı sisteme giriş yapamayacaktır</li>
+                            <li>Tüm oturumları sonlanacaktır</li>
+                            <li>Mobil uygulamaya erişimi kesilecektir</li>
+                            {% if sorumlu_parklar.exists %}
+                                <li class="font-medium">{{ sorumlu_parklar.count }} park sorumluluğu etkilenecektir</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Park Sorumlulukları -->
+            {% if sorumlu_parklar.exists %}
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 mb-6">
+                    <h4 class="text-lg font-medium text-yellow-800 dark:text-yellow-200 mb-4">
+                        <i class="fas fa-tree mr-2"></i>
+                        Park Sorumlulukları ({{ sorumlu_parklar.count }} Park)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                        {% for atama in sorumlu_parklar %}
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-yellow-200 dark:border-yellow-700">
+                                <h5 class="font-medium text-gray-900 dark:text-white">{{ atama.park.ad }}</h5>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ atama.park.mahalle.ad }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                        Bu parkların sorumluluklarını da kaldırmak istiyorsanız aşağıdaki seçeneği işaretleyin.
+                    </p>
+                </div>
+            {% endif %}
+
+            <!-- Deaktifleştirme Formu -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if sorumlu_parklar.exists %}
+                    <!-- Park Sorumlulukları Checkbox -->
+                    <div class="flex items-start">
+                        <input type="checkbox" 
+                               id="remove_parks" 
+                               name="remove_parks" 
+                               class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mt-1">
+                        <label for="remove_parks" class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                            <span class="font-medium">Park sorumlulukları da kaldırılsın</span>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1">
+                                İşaretlerseniz, bu kullanıcının tüm park sorumluluklarıı da silinecektir.
+                            </p>
+                        </label>
+                    </div>
+                {% endif %}
+
+                <!-- Onay Metni -->
+                <div>
+                    <label for="confirm" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Onaylamak için "DEVRE_DISI" yazın
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="confirm" 
+                           name="confirm" 
+                           required
+                           placeholder="DEVRE_DISI"
+                           class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-base font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Bu metin tam olarak "DEVRE_DISI" olmalıdır</p>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-300 hover:scale-105 shadow-lg">
+                        <i class="fas fa-user-times mr-2"></i>
+                        Hesabı Devre Dışı Bırak
+                    </button>
+                    
+                    <a href="{% url 'istakip:kullanici_detail' personel.uuid %}" 
+                       class="inline-flex items-center px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>
+                        İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Onay metni kontrolü
+    document.getElementById('confirm').addEventListener('input', function() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (this.value === 'DEVRE_DISI') {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+    
+    // Sayfa yüklendiğinde submit butonunu deaktif et
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    });
+</script>
+{% endblock %}

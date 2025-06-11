@@ -257,9 +257,10 @@
             target: '#park-atama-content'
         });
     }
-    
-    function closeParkAtamaModal() {
+      function closeParkAtamaModal() {
         document.getElementById('park-atama-modal').classList.add('hidden');
+        // localStorage'ı temizle
+        localStorage.removeItem('selectedParks');
     }
     
     // Modal dışına tıklandığında kapat

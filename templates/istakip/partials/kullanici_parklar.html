@@ -16,18 +16,21 @@
                 <div class="text-2xl font-bold text-green-600">{{ sorumlu_parklar.count }}</div>
                 <div class="text-sm text-gray-500">Toplam Park</div>
             </div>
-        </div>
-
-        <!-- Park Atama Butonu -->
+        </div>        <!-- Park Atama Butonu -->
         <div class="flex justify-end">
-            <button hx-get="{% url 'istakip:park_atama_htmx' personel.uuid %}" 
-                    hx-target="#park-atama-modal" 
-                    hx-swap="innerHTML"
-                    onclick="document.getElementById('park-atama-modal').classList.remove('hidden')"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
-                <i class="fas fa-plus mr-2"></i>
-                Park Ata
-            </button>
+            {% if personel.aktif %}
+                <button onclick="openParkAtamaDialog()" 
+                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    Park Ata
+                </button>
+            {% else %}
+                <button onclick="showInactiveUserMessage()" 
+                        class="inline-flex items-center px-4 py-2 bg-gray-400 text-gray-600 font-medium rounded-lg cursor-not-allowed">
+                    <i class="fas fa-ban mr-2"></i>
+                    Park Ata (Kullanıcı Pasif)
+                </button>
+            {% endif %}
         </div>
     </div>
 
@@ -115,32 +118,73 @@
             <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-tree text-gray-400 dark:text-gray-500 text-2xl"></i>
             </div>
-            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Atanmış Park Bulunamadı</h4>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Atanmış Park Bulunamadı</h4>            <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 Bu personele henüz hiç park atanmamış. Yeni park atamak için butona tıklayın.
             </p>
-            <button hx-get="{% url 'istakip:park_atama_htmx' personel.uuid %}" 
-                    hx-target="#park-atama-modal" 
-                    hx-swap="innerHTML"
-                    onclick="document.getElementById('park-atama-modal').classList.remove('hidden')"
-                    class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
-                <i class="fas fa-plus mr-2"></i>
-                İlk Parkı Ata
-            </button>
+            {% if personel.aktif %}
+                <button onclick="openParkAtamaDialog()" 
+                        class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    İlk Parkı Ata
+                </button>
+            {% else %}
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-w-md mx-auto">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                        <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                            Bu kullanıcı pasif durumda. Park atayabilmek için önce kullanıcıyı aktif hale getirin.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 </div>
 
-<!-- Park Atama Modal -->
-<div id="park-atama-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-    <div class="flex items-center justify-center h-full p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <!-- Modal içeriği HTMX ile doldurulacak -->
-        </div>
+<!-- Native Dialog -->
+<dialog id="park-atama-dialog" class="rounded-xl shadow-2xl backdrop:bg-black/50 max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div id="park-atama-content" class="bg-white dark:bg-gray-800">
+        <!-- HTMX ile yüklenecek -->
     </div>
-</div>
+</dialog>
 
 <script>
+    function openParkAtamaDialog() {
+        const dialog = document.getElementById('park-atama-dialog');
+        const content = document.getElementById('park-atama-content');
+        
+        // Loading göster
+        content.innerHTML = `
+            <div class="flex items-center justify-center p-12">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-park-green-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Park atama formu yükleniyor...</p>
+                </div>
+            </div>
+        `;
+        
+        dialog.showModal();
+        
+        // localStorage'ı temizle
+        localStorage.removeItem('selectedParks');
+        
+        // HTMX ile park atama formunu yükle
+        htmx.ajax('GET', '{% url "istakip:park_atama_htmx" personel.uuid %}', {
+            target: '#park-atama-content'
+        });
+    }
+    
+    function closeParkAtamaModal() {
+        const dialog = document.getElementById('park-atama-dialog');
+        dialog.close();
+        // localStorage'ı temizle
+        localStorage.removeItem('selectedParks');
+    }
+    
+    function showInactiveUserMessage() {
+        alert('Bu kullanıcı pasif durumda. Park atayabilmek için önce kullanıcıyı aktif hale getirin.');
+    }
+    
     function confirmRemovePark(atamaUuid, parkAd) {
         if (confirm(`"${parkAd}" parkından bu personeli kaldırmak istediğinizden emin misiniz?`)) {
             // Park kaldırma işlemi için HTMX isteği
@@ -150,11 +194,4 @@
             });
         }
     }
-    
-    // Modal kapatma
-    document.addEventListener('click', function(e) {
-        if (e.target.id === 'park-atama-modal') {
-            document.getElementById('park-atama-modal').classList.add('hidden');
-        }
-    });
 </script>

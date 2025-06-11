@@ -1,12 +1,27 @@
-<div class="space-y-6">
+<!-- Modal Header -->
+<div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        <i class="fas fa-tree text-park-green-600 mr-3"></i>
+        Park Atamaları - {{ personel.ad }}
+    </h3>
+    <button onclick="closeParkAtamaModal()" 
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+        <i class="fas fa-times text-xl"></i>
+    </button>
+</div>
+
+<!-- Modal Content -->
+<div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
     <!-- Filtreler -->
     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
         <form hx-get="{% url 'istakip:park_atama_htmx' personel.uuid %}" 
               hx-target="#park-atama-content" 
               hx-trigger="change, submit"
+              hx-indicator="#filter-loading"
+              hx-on::after-request="restoreSelectedParks()"
               class="space-y-4">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Arama -->
                 <div>
                     <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -36,10 +51,32 @@
                         {% endfor %}
                     </select>
                 </div>
+
+                <!-- Atama Durumu Filtresi -->
+                <div>
+                    <label for="atama_durumu" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-filter mr-2"></i>Atama Durumu
+                    </label>
+                    <select id="atama_durumu" 
+                            name="atama_durumu" 
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-park-green-500 focus:border-transparent">
+                        <option value="">Tümü</option>
+                        <option value="atanmis" {% if atama_durumu_filter == 'atanmis' %}selected{% endif %}>Bu Kullanıcıya Atanmış</option>
+                        <option value="atanmamis" {% if atama_durumu_filter == 'atanmamis' %}selected{% endif %}>Bu Kullanıcıya Atanmamış</option>
+                        <option value="baska_atanmis" {% if atama_durumu_filter == 'baska_atanmis' %}selected{% endif %}>Başka Kullanıcıya Atanmış</option>
+                        <option value="hic_atanmamis" {% if atama_durumu_filter == 'hic_atanmamis' %}selected{% endif %}>Hiç Atanmamış</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="filter-loading" class="htmx-indicator flex items-center justify-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-park-green-600"></div>
+                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Filtreleniyor...</span>
             </div>
 
             <!-- Hızlı Seçim Butonları -->
-            <div class="flex space-x-2">
+            <div class="flex flex-wrap gap-2 items-center">
                 <button type="button" 
                         onclick="selectAllParks()" 
                         class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
@@ -52,8 +89,17 @@
                     <i class="fas fa-times mr-1"></i>
                     Tümünü Kaldır
                 </button>
-                <span class="text-sm text-gray-600 dark:text-gray-400 self-center ml-auto">
+                <button type="button" 
+                        onclick="selectOnlyAssigned()" 
+                        class="px-3 py-1.5 bg-park-green-600 text-white text-sm rounded-lg hover:bg-park-green-700 transition-colors">
+                    <i class="fas fa-user-check mr-1"></i>
+                    Sadece Atanmış
+                </button>
+                <span class="text-sm text-gray-600 dark:text-gray-400 ml-auto">
                     Toplam {{ parklar.count }} park
+                    <span id="selected-count" class="ml-2 px-2 py-0.5 bg-park-green-100 text-park-green-800 rounded-full text-xs font-medium">
+                        <span id="selected-number">0</span> seçili
+                    </span>
                 </span>
             </div>
         </form>
@@ -61,66 +107,64 @@
 
     <!-- Park Listesi -->
     <form hx-post="{% url 'istakip:park_atama_htmx' personel.uuid %}" 
-          hx-target="#atanmis-parklar-container" 
+          hx-target="#tab-content" 
           hx-swap="innerHTML"
+          hx-on::after-request="closeParkAtamaModal()"
           class="space-y-4">
         {% csrf_token %}
         
         <!-- Parklar Grid -->
-        <div class="max-h-96 overflow-y-auto space-y-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div class="space-y-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 max-h-80 overflow-y-auto">
             {% for park in parklar %}
-                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    <div class="flex items-center">
-                        <input type="checkbox" 
-                               id="park_{{ park.id }}" 
-                               name="parklar" 
-                               value="{{ park.id }}"
-                               {% if park.id in atanmis_parklar %}checked{% endif %}
-                               class="park-checkbox w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                        
-                        <label for="park_{{ park.id }}" class="ml-3 flex-1 cursor-pointer">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ park.ad }}
-                                        {% if park.id in atanmis_parklar %}
-                                            <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                                                <i class="fas fa-check mr-1"></i>Atanmış
-                                            </span>
-                                        {% endif %}
+                <div class="flex items-start p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <input type="checkbox" 
+                           id="park_{{ park.id }}" 
+                           name="parklar" 
+                           value="{{ park.id }}" 
+                           class="park-checkbox w-4 h-4 text-park-green-600 bg-gray-100 border-gray-300 rounded focus:ring-park-green-500 dark:focus:ring-park-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mt-1"
+                           {% if park.id in atanmis_parklar %}checked{% endif %}
+                           onchange="saveSelectedParks()">
+                    
+                    <label for="park_{{ park.id }}" class="ml-3 flex-1 cursor-pointer">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ park.ad }}
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    {{ park.mahalle.ilce.ad }} - {{ park.mahalle.ad }}
+                                    {% if park.park_tipi %}
+                                        • {{ park.park_tipi.ad }}
+                                    {% endif %}
+                                </p>
+                                
+                                <!-- Atanmış Park Göstergesi -->
+                                {% if park.id in atanmis_parklar %}
+                                    <div class="text-xs text-park-green-700 dark:text-park-green-300 bg-park-green-100 dark:bg-park-green-800/30 rounded-lg p-2 mt-2">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        <strong>Bu kullanıcıya atanmış</strong>
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        <span class="flex items-center">
-                                            <i class="fas fa-map-marker-alt mr-1"></i>
-                                            {{ park.mahalle.ad }} - {{ park.mahalle.ilce.ad }}
-                                        </span>
-                                        {% if park.alan %}
-                                            <span class="flex items-center mt-1">
-                                                <i class="fas fa-expand-arrows-alt mr-1"></i>
-                                                {{ park.alan|floatformat:0 }} m²
-                                            </span>
-                                        {% endif %}
-                                        {% if park.park_tipi %}
-                                            <span class="flex items-center mt-1">
-                                                <i class="fas fa-tag mr-1"></i>
-                                                {{ park.park_tipi.ad }}
-                                            </span>
-                                        {% endif %}
-                                    </div>                                </div>                                <!-- Diğer Atamalar - Şimdilik boş -->
-                                {% comment %}
-                                Diğer atamalar bilgisi gelecek sürümde eklenecek
-                                {% endcomment %}
+                                {% endif %}
+                                
+                                <!-- Diğer Atamalar Bilgisi -->
+                                {% if park.id in diger_atamalar %}
+                                    <div class="text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-800/30 rounded-lg p-2 mt-2">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        <strong>Diğer Sorumlu Personel Mevcut</strong> - Bu park başka personellere de atanmış
+                                    </div>
+                                {% endif %}
                             </div>
-                        </label>
-                    </div>
+                        </div>
+                    </label>
                 </div>
             {% empty %}
                 <div class="text-center py-8">
                     <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-search text-gray-400 dark:text-gray-500"></i>
+                        <i class="fas fa-search text-gray-400 text-lg"></i>
                     </div>
                     <h4 class="font-medium text-gray-900 dark:text-white mb-1">Park Bulunamadı</h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Arama kriterlerinize uygun park bulunmamaktadır.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Arama kriterlerinize uygun park bulunamadı.</p>
                 </div>
             {% endfor %}
         </div>
@@ -128,13 +172,13 @@
         <!-- Submit Butonları -->
         <div class="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button type="submit" 
-                    class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl">
                 <i class="fas fa-save mr-2"></i>
                 Atamaları Kaydet
             </button>
             <button type="button" 
                     onclick="closeParkAtamaModal()" 
-                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
+                    class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
                 <i class="fas fa-times mr-2"></i>
                 İptal
             </button>
@@ -143,15 +187,63 @@
 </div>
 
 <script>
+    // LocalStorage fonksiyonları
+    function saveSelectedParks() {
+        const selectedParks = [];
+        document.querySelectorAll('.park-checkbox:checked').forEach(checkbox => {
+            selectedParks.push(parseInt(checkbox.value));
+        });
+        localStorage.setItem('selectedParks', JSON.stringify(selectedParks));
+        updateSelectedCount();
+    }
+
+    function restoreSelectedParks() {
+        const savedParks = localStorage.getItem('selectedParks');
+        if (savedParks) {
+            const selectedParks = JSON.parse(savedParks);
+            document.querySelectorAll('.park-checkbox').forEach(checkbox => {
+                const parkId = parseInt(checkbox.value);
+                if (selectedParks.includes(parkId)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('.park-checkbox:checked').length;
+        const countElement = document.getElementById('selected-number');
+        if (countElement) {
+            countElement.textContent = selectedCount;
+        }
+    }
+
     function selectAllParks() {
         document.querySelectorAll('.park-checkbox').forEach(checkbox => {
             checkbox.checked = true;
         });
+        saveSelectedParks();
     }
     
     function deselectAllParks() {
         document.querySelectorAll('.park-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
+        saveSelectedParks();
     }
+    
+    function selectOnlyAssigned() {
+        const atanmisParklar = {{ atanmis_parklar|safe }};
+        document.querySelectorAll('.park-checkbox').forEach(checkbox => {
+            const parkId = parseInt(checkbox.value);
+            checkbox.checked = atanmisParklar.includes(parkId);
+        });
+        saveSelectedParks();
+    }
+
+    // Sayfa yüklendiğinde seçili parkları geri yükle
+    document.addEventListener('DOMContentLoaded', function() {
+        restoreSelectedParks();
+    });
 </script>

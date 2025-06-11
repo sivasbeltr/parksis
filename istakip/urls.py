@@ -53,6 +53,26 @@ urlpatterns = [
         views.kullanici_detail,
         name="kullanici_detail",
     ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/edit/",
+        views.kullanici_edit,
+        name="kullanici_edit",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/password-change/",
+        views.kullanici_password_change,
+        name="kullanici_password_change",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/deactivate/",
+        views.kullanici_deactivate,
+        name="kullanici_deactivate",
+    ),
+    path(
+        "kullanicilar/<uuid:personel_uuid>/activate/",
+        views.kullanici_activate,
+        name="kullanici_activate",
+    ),
     # HTMX Kullanıcı Sekmeler
     path(
         "kullanicilar/<uuid:personel_uuid>/bilgileri/",

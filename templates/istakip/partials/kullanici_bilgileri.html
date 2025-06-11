@@ -3,117 +3,76 @@
     <!-- Kişisel Bilgiler -->
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <i class="fas fa-id-card text-blue-600 mr-3"></i>
+            <i class="fas fa-user text-blue-600 mr-3"></i>
             Kişisel Bilgiler
         </h4>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Ad Soyad</label>
-                    <p class="text-gray-900 dark:text-white font-medium">{{ personel.ad }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Kullanıcı Adı</label>
-                    <p class="text-gray-900 dark:text-white">{{ personel.user.username }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">E-posta</label>
-                    <p class="text-gray-900 dark:text-white">
-                        {% if personel.eposta %}
-                            <a href="mailto:{{ personel.eposta }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                                <i class="fas fa-envelope mr-2"></i>
-                                {{ personel.eposta }}
-                            </a>
-                        {% else %}
-                            <span class="text-gray-400">Belirtilmemiş</span>
-                        {% endif %}
-                    </p>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ad Soyad</label>
+                <p class="text-base text-gray-900 dark:text-white font-medium">{{ personel.ad }}</p>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Telefon</label>
-                    <p class="text-gray-900 dark:text-white">
-                        {% if personel.telefon %}
-                            <a href="tel:{{ personel.telefon }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                                <i class="fas fa-phone mr-2"></i>
-                                {{ personel.telefon }}
-                            </a>
-                        {% else %}
-                            <span class="text-gray-400">Belirtilmemiş</span>
-                        {% endif %}
-                    </p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Pozisyon</label>
-                    <p class="text-gray-900 dark:text-white">{{ personel.pozisyon|default:"Belirtilmemiş" }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Durum</label>
-                    <p class="text-gray-900 dark:text-white">
-                        {% if personel.aktif %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                Aktif
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <i class="fas fa-times-circle mr-1"></i>
-                                Pasif
-                            </span>
-                        {% endif %}
-                    </p>
-                </div>
+            
+            {% if personel.telefon %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon</label>
+                <p class="text-base text-gray-900 dark:text-white">{{ personel.telefon }}</p>
             </div>
+            {% endif %}
+            
+            {% if personel.eposta %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">E-posta</label>
+                <p class="text-base text-gray-900 dark:text-white">{{ personel.eposta }}</p>
+            </div>
+            {% endif %}
+            
+            {% if personel.pozisyon %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pozisyon</label>
+                <p class="text-base text-gray-900 dark:text-white">{{ personel.pozisyon }}</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
     <!-- Hesap Bilgileri -->
     <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <i class="fas fa-user-cog text-gray-600 mr-3"></i>
+            <i class="fas fa-cog text-gray-600 mr-3"></i>
             Hesap Bilgileri
         </h4>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Kayıt Tarihi</label>
-                    <p class="text-gray-900 dark:text-white">{{ personel.created_at|date:"d F Y, H:i" }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Son Güncelleme</label>
-                    <p class="text-gray-900 dark:text-white">{{ personel.updated_at|date:"d F Y, H:i" }}</p>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kullanıcı Adı</label>
+                <p class="text-base text-gray-900 dark:text-white font-mono">@{{ personel.user.username }}</p>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Son Giriş</label>
-                    <p class="text-gray-900 dark:text-white">
-                        {% if personel.user.last_login %}
-                            {{ personel.user.last_login|date:"d F Y, H:i" }}
-                        {% else %}
-                            <span class="text-gray-400">Hiç giriş yapmamış</span>
-                        {% endif %}
-                    </p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Hesap Durumu</label>
-                    <p class="text-gray-900 dark:text-white">
-                        {% if personel.user.is_active %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                Aktif
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <i class="fas fa-times-circle mr-1"></i>
-                                Devre Dışı
-                            </span>
-                        {% endif %}
-                    </p>
-                </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Durum</label>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {% if personel.aktif %}
+                        bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200
+                    {% else %}
+                        bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200
+                    {% endif %}">
+                    {% if personel.aktif %}
+                        <i class="fas fa-check-circle mr-2"></i>Aktif
+                    {% else %}
+                        <i class="fas fa-times-circle mr-2"></i>Pasif
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kayıt Tarihi</label>
+                <p class="text-base text-gray-900 dark:text-white">{{ personel.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Son Güncelleme</label>
+                <p class="text-base text-gray-900 dark:text-white">{{ personel.updated_at|date:"d.m.Y H:i" }}</p>
             </div>
         </div>
     </div>
@@ -121,77 +80,51 @@
     <!-- Kullanıcı Grupları ve Yetkiler -->
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <i class="fas fa-users-cog text-purple-600 mr-3"></i>
+            <i class="fas fa-users text-indigo-600 mr-3"></i>
             Kullanıcı Grupları ve Yetkiler
         </h4>
         
-        <div class="space-y-4">
-            <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Dahil Olduğu Gruplar</label>
-                <div class="flex flex-wrap gap-2">
-                    {% for grup in personel.user.groups.all %}
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
-                            <i class="fas fa-users mr-2"></i>
-                            {{ grup.name }}
-                        </span>
-                    {% empty %}
-                        <span class="text-gray-400 text-sm italic">Hiçbir gruba dahil değil</span>
-                    {% endfor %}
-                </div>
+        {% if personel.user.groups.exists %}
+            <div class="flex flex-wrap gap-2">
+                {% for group in personel.user.groups.all %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        {{ group.name }}
+                    </span>
+                {% endfor %}
             </div>
-            
-            <div>
-                <label class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 block">Yönetici Yetkileri</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">Süper Kullanıcı</span>
-                        {% if personel.user.is_superuser %}
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
-                                <i class="fas fa-crown mr-1"></i>Evet
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                                <i class="fas fa-times mr-1"></i>Hayır
-                            </span>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">Personel Erişimi</span>
-                        {% if personel.user.is_staff %}
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                                <i class="fas fa-check mr-1"></i>Evet
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                                <i class="fas fa-times mr-1"></i>Hayır
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% else %}
+            <p class="text-gray-500 dark:text-gray-400 italic">Bu kullanıcıya henüz grup ataması yapılmamış.</p>
+        {% endif %}
     </div>
 
     <!-- İşlemler -->
     <div class="flex flex-col sm:flex-row gap-3">
-        <a href="#" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+        <a href="{% url 'istakip:kullanici_edit' personel.uuid %}" 
+           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
             <i class="fas fa-edit mr-2"></i>
             Bilgileri Düzenle
         </a>
-        <a href="#" class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors">
+        
+        <a href="{% url 'istakip:kullanici_password_change' personel.uuid %}" 
+           class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors">
             <i class="fas fa-key mr-2"></i>
             Şifre Değiştir
         </a>
-        {% if personel.user.is_active %}
-            <a href="#" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
-                <i class="fas fa-user-slash mr-2"></i>
+        
+        {% if personel.aktif %}
+            <a href="{% url 'istakip:kullanici_deactivate' personel.uuid %}" 
+               class="inline-flex items-center px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">
+                <i class="fas fa-user-times mr-2"></i>
                 Hesabı Devre Dışı Bırak
             </a>
-        {% else %}
-            <a href="#" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
-                <i class="fas fa-user-check mr-2"></i>
-                Hesabı Aktifleştir
+        {% endif %}
+        {% if not personel.aktif %}
+            <a href="{% url 'istakip:kullanici_activate' personel.uuid %}" 
+               onclick="return confirm('Bu hesabı tekrar aktifleştirmek istediğinize emin misiniz?');"
+               class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+            <i class="fas fa-user-check mr-2"></i>
+            Hesabı Aktif Et
             </a>
         {% endif %}
     </div>

@@ -129,10 +129,9 @@ def kullanici_create(request):
                         eposta=form.cleaned_data["eposta"],
                         pozisyon=form.cleaned_data["pozisyon"],
                         aktif=form.cleaned_data["is_active"],
-                    )
-
-                    # Grupları ata
+                    )  # Grupları ata
                     if form.cleaned_data["groups"]:
+                        user.groups.set(form.cleaned_data["groups"])
                         user.groups.set(form.cleaned_data["groups"])
 
                     messages.success(request, f"{personel.ad} başarıyla oluşturuldu.")
@@ -223,3 +222,184 @@ def kullanici_detail(request, personel_uuid):
     }
 
     return render(request, "istakip/kullanici_detail.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def kullanici_edit(request, personel_uuid):
+    """Kullanıcı bilgileri düzenleme"""
+    personel = get_object_or_404(Personel, uuid=personel_uuid)
+
+    if request.method == "POST":
+        form = PersonelKullaniciForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Kullanıcı bilgilerini güncelle
+                    user = personel.user
+                    user.first_name = form.cleaned_data["first_name"]
+                    user.last_name = form.cleaned_data["last_name"]
+                    user.email = form.cleaned_data["eposta"]
+                    user.is_active = form.cleaned_data["is_active"]
+                    user.save()
+
+                    # Personel bilgilerini güncelle
+                    personel.ad = f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}"
+                    personel.telefon = form.cleaned_data["telefon"]
+                    personel.eposta = form.cleaned_data["eposta"]
+                    personel.pozisyon = form.cleaned_data["pozisyon"]
+                    personel.aktif = form.cleaned_data["is_active"]
+                    personel.save()
+
+                    # Grupları güncelle
+                    if form.cleaned_data["groups"]:
+                        user.groups.set(form.cleaned_data["groups"])
+
+                    messages.success(
+                        request, f"{personel.ad} bilgileri başarıyla güncellendi."
+                    )
+                    return redirect(
+                        "istakip:kullanici_detail", personel_uuid=personel.uuid
+                    )
+
+            except Exception as e:
+                messages.error(request, f"Kullanıcı güncellenirken hata: {str(e)}")
+    else:
+        # Formu mevcut verilerle doldur
+        initial_data = {
+            "kullanici_adi": personel.user.username,
+            "eposta": personel.eposta,
+            "first_name": personel.user.first_name,
+            "last_name": personel.user.last_name,
+            "telefon": personel.telefon,
+            "pozisyon": personel.pozisyon,
+            "is_active": personel.aktif,
+            "groups": personel.user.groups.all(),
+        }
+        form = PersonelKullaniciForm(initial=initial_data)
+
+        # Kullanıcı adı alanını readonly yap
+        form.fields["kullanici_adi"].widget.attrs["readonly"] = True
+        form.fields["sifre"].required = False
+        form.fields["sifre_tekrar"].required = False
+
+    context = {
+        "form": form,
+        "personel": personel,
+        "title": f"{personel.ad} - Bilgi Düzenleme",
+        "is_edit": True,
+    }
+    return render(request, "istakip/kullanici_form.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def kullanici_password_change(request, personel_uuid):
+    """Kullanıcı şifre değiştirme"""
+    personel = get_object_or_404(Personel, uuid=personel_uuid)
+
+    if request.method == "POST":
+        current_password = request.POST.get("current_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        # Validasyonlar
+        if not all([current_password, new_password, confirm_password]):
+            messages.error(request, "Tüm alanları doldurunuz.")
+        elif new_password != confirm_password:
+            messages.error(request, "Yeni şifreler eşleşmiyor.")
+        elif len(new_password) < 6:
+            messages.error(request, "Şifre en az 6 karakter olmalıdır.")
+        elif not personel.user.check_password(current_password):
+            messages.error(request, "Mevcut şifre yanlış.")
+        else:
+            try:
+                personel.user.set_password(new_password)
+                personel.user.save()
+                messages.success(
+                    request, f"{personel.ad} şifresi başarıyla değiştirildi."
+                )
+                return redirect("istakip:kullanici_detail", personel_uuid=personel.uuid)
+            except Exception as e:
+                messages.error(request, f"Şifre değiştirilirken hata: {str(e)}")
+
+    context = {
+        "personel": personel,
+        "title": f"{personel.ad} - Şifre Değiştir",
+    }
+    return render(request, "istakip/kullanici_password_change.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def kullanici_deactivate(request, personel_uuid):
+    """Kullanıcı hesabını devre dışı bırakma"""
+    personel = get_object_or_404(Personel, uuid=personel_uuid)
+
+    # Sorumlu parklar
+    sorumlu_parklar = personel.park_personeller.select_related("park").order_by(
+        "park__ad"
+    )
+
+    if request.method == "POST":
+        confirm = request.POST.get("confirm")
+        remove_parks = request.POST.get("remove_parks") == "on"
+
+        if confirm == "DEVRE_DISI":
+            try:
+                with transaction.atomic():
+                    # Park sorumlulukları varsa ve kaldırılması istenmişse
+                    if remove_parks and sorumlu_parklar.exists():
+                        personel.park_personeller.all().delete()
+                        messages.info(
+                            request,
+                            f"{sorumlu_parklar.count()} park sorumluluğu kaldırıldı.",
+                        )
+
+                    # Kullanıcıyı devre dışı bırak
+                    personel.user.is_active = False
+                    personel.aktif = False
+                    personel.user.save()
+                    personel.save()
+
+                    messages.success(
+                        request, f"{personel.ad} hesabı başarıyla devre dışı bırakıldı."
+                    )
+                    return redirect("istakip:kullanici_list")
+
+            except Exception as e:
+                messages.error(request, f"Hesap devre dışı bırakılırken hata: {str(e)}")
+        else:
+            messages.error(request, "Onay metni doğru girilmedi.")
+
+    context = {
+        "personel": personel,
+        "sorumlu_parklar": sorumlu_parklar,
+        "title": f"{personel.ad} - Hesabı Devre Dışı Bırak",
+    }
+    return render(request, "istakip/kullanici_deactivate.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+# bu metod deactivate metodundan biraz farklı. Onay istemiyor ve aktif hale getiriyor. sonra da kullanıcı detayına yönlendiriyor. Herhangi bir şablon render etmiyor
+def kullanici_activate(request, personel_uuid):
+    """Kullanıcı hesabını aktif hale getirme"""
+    personel = get_object_or_404(Personel, uuid=personel_uuid)
+
+    try:
+        with transaction.atomic():
+            # Kullanıcıyı aktif hale getir
+            personel.user.is_active = True
+            personel.aktif = True
+            personel.user.save()
+            personel.save()
+
+            messages.success(
+                request, f"{personel.ad} hesabı başarıyla aktif hale getirildi."
+            )
+            return redirect("istakip:kullanici_detail", personel_uuid=personel.uuid)
+
+    except Exception as e:
+        messages.error(request, f"Hesap aktif hale getirilirken hata: {str(e)}")
+        return redirect("istakip:kullanici_list")
