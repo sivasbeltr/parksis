@@ -1,0 +1,349 @@
+{% extends 'layout.html' %}
+{% load django_htmx %}
+
+{% block title %}Sorun Bildirimleri - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white gradient-text">
+                    <i class="fas fa-exclamation-triangle text-amber-500 mr-3"></i>
+                    Sorun Bildirimleri
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                    Sahadan bildirilen sorunları yönetin ve göreve dönüştürün
+                </p>
+            </div>
+              <!-- Quick Stats -->
+            <div class="flex flex-wrap gap-4">
+                <div class="bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">
+                    <div class="text-red-700 dark:text-red-300 text-sm font-medium">Acil</div>
+                    <div class="text-red-900 dark:text-red-100 text-lg font-bold">{{ stats.acil_sorun }}</div>
+                </div>
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+                    <div class="text-amber-700 dark:text-amber-300 text-sm font-medium">Sorun Var</div>
+                    <div class="text-amber-900 dark:text-amber-100 text-lg font-bold">{{ stats.sorun_var }}</div>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2">
+                    <div class="text-blue-700 dark:text-blue-300 text-sm font-medium">Bugün</div>
+                    <div class="text-blue-900 dark:text-blue-100 text-lg font-bold">{{ stats.bugun_sorun }}</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-lg px-3 py-2">
+                    <div class="text-green-700 dark:text-green-300 text-sm font-medium">Göreve Dönüştürülen</div>
+                    <div class="text-green-900 dark:text-green-100 text-lg font-bold">{{ stats.gorev_donusen }}</div>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg px-3 py-2">
+                    <div class="text-emerald-700 dark:text-emerald-300 text-sm font-medium">Çözülen</div>
+                    <div class="text-emerald-900 dark:text-emerald-100 text-lg font-bold">{{ stats.cozuldu }}</div>
+                </div>
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg px-3 py-2">
+                    <div class="text-orange-700 dark:text-orange-300 text-sm font-medium">Bekleyen</div>
+                    <div class="text-orange-900 dark:text-orange-100 text-lg font-bold">{{ stats.bekleyen_sorun }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                <!-- Search -->
+                <div class="xl:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Arama
+                    </label>
+                    <input type="text" name="search" value="{{ search_query }}" 
+                           placeholder="Park, personel veya açıklama ara..."
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                </div>
+
+                <!-- Durum -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Durum
+                    </label>                    <select name="durum" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="sorun_var" {% if durum_filter == "sorun_var" %}selected{% endif %}>Sorun Var</option>
+                        <option value="acil" {% if durum_filter == "acil" %}selected{% endif %}>Acil</option>
+                        <option value="ise_donusturuldu" {% if durum_filter == "ise_donusturuldu" %}selected{% endif %}>İşe Dönüştürüldü</option>
+                        <option value="cozuldu" {% if durum_filter == "cozuldu" %}selected{% endif %}>Çözüldü</option>
+                    </select>
+                </div>
+
+                <!-- Personel -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Personel
+                    </label>
+                    <select name="personel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        {% for personel in personeller %}
+                        <option value="{{ personel.uuid }}" {% if personel_filter == personel.uuid|stringformat:"s" %}selected{% endif %}>
+                            {{ personel.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Görev Durumu -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Görev Durumu
+                    </label>
+                    <select name="gorev" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="var" {% if gorev_filter == "var" %}selected{% endif %}>Göreve Dönüştürüldü</option>
+                        <option value="yok" {% if gorev_filter == "yok" %}selected{% endif %}>Henüz Görev Değil</option>
+                    </select>
+                </div>
+
+                <!-- Tarih -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tarih
+                    </label>
+                    <select name="tarih" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="bugun" {% if tarih_filter == "bugun" %}selected{% endif %}>Bugün</option>
+                        <option value="bu_hafta" {% if tarih_filter == "bu_hafta" %}selected{% endif %}>Bu Hafta</option>
+                        <option value="bu_ay" {% if tarih_filter == "bu_ay" %}selected{% endif %}>Bu Ay</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit" class="btn-modern inline-flex items-center px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg transition-all duration-200 font-medium">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrele
+                </button>
+                <a href="{% url 'istakip:sorun_bildirimleri' %}" class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 font-medium">
+                    <i class="fas fa-times mr-2"></i>
+                    Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-gray-50/80 dark:bg-gray-700/80 border-b border-gray-200/60 dark:border-gray-600/60">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Sorun Listesi
+                    </h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        ({{ kontroller.paginator.count }} sonuç)
+                    </span>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm text-gray-600 dark:text-gray-400">Sırala:</label>
+                    <select onchange="updateSort(this.value)" class="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white/80 dark:bg-gray-700/80">
+                        <option value="kontrol_tarihi-desc" {% if sort_by == "kontrol_tarihi" and sort_direction == "desc" %}selected{% endif %}>Tarih (Yeni → Eski)</option>
+                        <option value="kontrol_tarihi-asc" {% if sort_by == "kontrol_tarihi" and sort_direction == "asc" %}selected{% endif %}>Tarih (Eski → Yeni)</option>
+                        <option value="park__ad-asc" {% if sort_by == "park__ad" and sort_direction == "asc" %}selected{% endif %}>Park A-Z</option>
+                        <option value="durum-desc" {% if sort_by == "durum" and sort_direction == "desc" %}selected{% endif %}>Durum</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+            {% if kontroller %}
+                <div class="space-y-4">
+                    {% for kontrol in kontroller %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border {% if kontrol.durum == 'acil' %}border-red-200 dark:border-red-800{% else %}border-gray-200 dark:border-gray-700{% endif %} p-4 hover:shadow-md transition-all duration-200">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
+                            <div class="flex-1">
+                                <div class="flex items-start space-x-3">                                    <!-- Status Icon -->
+                                    <div class="flex-shrink-0 mt-1">
+                                        {% if kontrol.durum == 'acil' %}
+                                            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                        {% elif kontrol.durum == 'sorun_var' %}
+                                            <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                        {% elif kontrol.durum == 'ise_donusturuldu' %}
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        {% elif kontrol.durum == 'cozuldu' %}
+                                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        {% else %}
+                                            <div class="w-3 h-3 bg-gray-500 rounded-full"></div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <!-- Park and Date -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2">
+                                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                {{ kontrol.park.ad }}
+                                            </h4>
+                                            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <i class="fas fa-clock"></i>
+                                                <span>{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Personnel and Status -->
+                                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                                <i class="fas fa-user text-xs mr-1"></i>
+                                                {{ kontrol.personel.ad }}
+                                            </span>
+                                              {% if kontrol.durum == 'acil' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                                    <i class="fas fa-exclamation-triangle text-xs mr-1"></i>
+                                                    ACİL
+                                                </span>
+                                            {% elif kontrol.durum == 'sorun_var' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+                                                    <i class="fas fa-exclamation-circle text-xs mr-1"></i>
+                                                    SORUN VAR
+                                                </span>
+                                            {% elif kontrol.durum == 'ise_donusturuldu' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                                    <i class="fas fa-arrow-right text-xs mr-1"></i>
+                                                    İŞE DÖNÜŞTÜRÜLDİ
+                                                </span>
+                                            {% elif kontrol.durum == 'cozuldu' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                                    <i class="fas fa-check-circle text-xs mr-1"></i>
+                                                    ÇÖZÜLDÜ
+                                                </span>
+                                            {% endif %}
+
+                                            {% if kontrol.ilgili_gorevler.exists %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                                    <i class="fas fa-check text-xs mr-1"></i>
+                                                    GÖREVE DÖNÜŞTÜRÜLDİ
+                                                </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Description -->
+                                        {% if kontrol.aciklama %}
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm">
+                                            {{ kontrol.aciklama|truncatewords:20 }}
+                                        </p>
+                                        {% endif %}
+
+                                        <!-- Images Count -->
+                                        {% if kontrol.resimler.count > 0 %}
+                                        <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-camera mr-1"></i>
+                                            {{ kontrol.resimler.count }} resim
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>                            <!-- Actions -->
+                            <div class="flex items-center space-x-3">
+                                {% if kontrol.durum == 'ise_donusturuldu' %}
+                                    {% if kontrol.ilgili_gorevler.exists %}
+                                        {% with kontrol.ilgili_gorevler.first as gorev %}
+                                        <a href="{% url 'istakip:gorev_detail' gorev.uuid %}" 
+                                           class="inline-flex items-center px-3 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-lg text-sm font-medium transition-all duration-200">
+                                            <i class="fas fa-eye mr-2"></i>
+                                            Görevi Görüntüle
+                                        </a>
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="inline-flex items-center px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-lg text-sm font-medium">
+                                            <i class="fas fa-check mr-2"></i>
+                                            İşe Dönüştürüldü
+                                        </span>
+                                    {% endif %}
+                                {% elif kontrol.durum == 'cozuldu' %}
+                                    <span class="inline-flex items-center px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-lg text-sm font-medium">
+                                        <i class="fas fa-check-circle mr-2"></i>
+                                        Çözülmüş
+                                    </span>
+                                {% elif kontrol.durum in 'sorun_var,acil' %}
+                                    {% if not kontrol.ilgili_gorevler.exists %}
+                                        <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}" 
+                                           class="btn-modern inline-flex items-center px-3 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg text-sm font-medium transition-all duration-200">
+                                            <i class="fas fa-plus-circle mr-2"></i>
+                                            Göreve Dönüştür
+                                        </a>
+                                    {% else %}
+                                        {% with kontrol.ilgili_gorevler.first as gorev %}
+                                        <a href="{% url 'istakip:gorev_detail' gorev.uuid %}" 
+                                           class="inline-flex items-center px-3 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-lg text-sm font-medium transition-all duration-200">
+                                            <i class="fas fa-eye mr-2"></i>
+                                            Görevi Görüntüle
+                                        </a>
+                                        {% endwith %}
+                                    {% endif %}
+                                {% endif %}
+                                  <a href="{% url 'istakip:sorun_detay' kontrol.uuid %}"
+                                   class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all duration-200">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Detay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if kontroller.has_other_pages %}
+                <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">{{ kontroller.start_index }}</span> - 
+                        <span class="font-medium">{{ kontroller.end_index }}</span> arası, 
+                        <span class="font-medium">{{ kontroller.paginator.count }}</span> toplam sonuç
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        {% if kontroller.has_previous %}
+                            <a href="?page={{ kontroller.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.durum %}&durum={{ request.GET.durum }}{% endif %}{% if request.GET.personel %}&personel={{ request.GET.personel }}{% endif %}{% if request.GET.gorev %}&gorev={{ request.GET.gorev }}{% endif %}{% if request.GET.tarih %}&tarih={{ request.GET.tarih }}{% endif %}&sort={{ sort_by }}&direction={{ sort_direction }}&per_page={{ per_page }}" 
+                               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-3 py-2 bg-park-green-600 text-white rounded-lg font-medium">
+                            {{ kontroller.number }}
+                        </span>
+                        
+                        {% if kontroller.has_next %}
+                            <a href="?page={{ kontroller.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.durum %}&durum={{ request.GET.durum }}{% endif %}{% if request.GET.personel %}&personel={{ request.GET.personel }}{% endif %}{% if request.GET.gorev %}&gorev={{ request.GET.gorev }}{% endif %}{% if request.GET.tarih %}&tarih={{ request.GET.tarih }}{% endif %}&sort={{ sort_by }}&direction={{ sort_direction }}&per_page={{ per_page }}" 
+                               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Sonuç bulunamadı</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Arama kriterlerinize uygun sorun bildirimi bulunamadı.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function updateSort(value) {
+    const [sort, direction] = value.split('-');
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sort);
+    url.searchParams.set('direction', direction);
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}

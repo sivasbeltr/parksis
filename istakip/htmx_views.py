@@ -329,3 +329,183 @@ def park_atama_sil_htmx(request, atama_uuid):
         )
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)})
+
+
+@login_required
+def gorev_asamalar_htmx(request, gorev_uuid):
+    """Görev aşamalarını HTMX ile getir"""
+    gorev = get_object_or_404(
+        Gorev.objects.prefetch_related("asamalar"), uuid=gorev_uuid
+    )  # Yeni aşama ekleme
+    if request.method == "POST":
+        try:
+            baslik = request.POST.get("baslik")
+            aciklama = request.POST.get("aciklama", "")
+
+            if not baslik:
+                return HttpResponse("Aşama başlığı zorunludur.", status=400)
+
+            GorevAsama.objects.create(
+                gorev=gorev,
+                ad=baslik,
+                aciklama=aciklama,
+                durum="beklemede",
+            )
+
+            # Aşamaları yeniden getir
+            asamalar = gorev.asamalar.all().order_by("created_at")
+            return render(
+                request,
+                "istakip/htmx/gorev_asamalar.html",
+                {"gorev": gorev, "asamalar": asamalar},
+            )
+
+        except Exception as e:
+            return HttpResponse(f"Hata: {str(e)}", status=400)
+
+    # GET request
+    asamalar = gorev.asamalar.all().order_by("created_at")
+    return render(
+        request,
+        "istakip/htmx/gorev_asamalar.html",
+        {"gorev": gorev, "asamalar": asamalar},
+    )
+
+
+@login_required
+def gorev_durum_guncelle_htmx(request, gorev_uuid):
+    gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+    if request.method == "POST":
+        try:
+            yeni_durum = request.POST.get("durum")
+            not_text = request.POST.get("not", "")
+
+            if not yeni_durum:
+                return render(
+                    request,
+                    "istakip/htmx/gorev_durum.html",
+                    {
+                        "gorev": gorev,
+                        "success_message": "Durum seçimi zorunludur.",
+                    },
+                )
+
+            valid_durumlar = ["planlanmis", "devam_ediyor", "tamamlandi", "iptal"]
+            if yeni_durum not in valid_durumlar:
+                return render(
+                    request,
+                    "istakip/htmx/gorev_durum.html",
+                    {
+                        "gorev": gorev,
+                        "success_message": "Geçersiz durum.",
+                    },
+                )
+
+            eski_durum = gorev.durum
+            gorev.durum = yeni_durum
+
+            if yeni_durum == "tamamlandi" and not gorev.tamamlanma_tarihi:
+                gorev.tamamlanma_tarihi = timezone.now()
+
+            gorev.save()
+
+            return render(
+                request,
+                "istakip/htmx/gorev_durum.html",
+                {
+                    "gorev": gorev,
+                    "success_message": f"Görev durumu '{gorev.get_durum_display()}' olarak güncellendi.",
+                },
+            )
+        except Exception as e:
+            return render(
+                request,
+                "istakip/htmx/gorev_durum.html",
+                {
+                    "gorev": gorev,
+                    "success_message": f"Hata: {str(e)}",
+                },
+            )
+
+    # GET request
+    edit_mode = request.GET.get("edit", "false") == "true"
+    if edit_mode:
+        return render(request, "istakip/htmx/gorev_durum_form.html", {"gorev": gorev})
+    else:
+        return render(request, "istakip/htmx/gorev_durum.html", {"gorev": gorev})
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_asama_baslat_htmx(request, asama_uuid):
+    """Görev aşamasını başlat"""
+    from .models import GorevAsama
+
+    try:
+        asama = get_object_or_404(GorevAsama, uuid=asama_uuid)
+
+        # Sadece beklemede olan aşamalar başlatılabilir
+        if asama.durum != "beklemede":
+            return HttpResponse("Bu aşama zaten başlatılmış.", status=400)
+
+        # Aşamayı başlat
+        asama.durum = "devam_ediyor"
+        asama.baslangic_tarihi = timezone.now()
+        asama.save()  # Ana görevi de devam ediyor yap (eğer planlanmış ise)
+        if asama.gorev.durum == "planlanmis":
+            asama.gorev.durum = "devam_ediyor"
+            asama.gorev.save()
+
+        # Aşamaları yeniden getir
+        asamalar = asama.gorev.asamalar.all().order_by("created_at")
+        return render(
+            request,
+            "istakip/htmx/gorev_asamalar.html",
+            {"gorev": asama.gorev, "asamalar": asamalar},
+        )
+
+    except Exception as e:
+        return HttpResponse(f"Hata: {str(e)}", status=400)
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_asama_tamamla_htmx(request, asama_uuid):
+    """Görev aşamasını tamamla"""
+    from .models import GorevAsama
+
+    try:
+        asama = get_object_or_404(GorevAsama, uuid=asama_uuid)
+
+        # Sadece devam eden aşamalar tamamlanabilir
+        if asama.durum != "devam_ediyor":
+            return HttpResponse("Bu aşama tamamlanabilir durumda değil.", status=400)
+
+        # Aşamayı tamamla
+        asama.durum = "tamamlandi"
+        asama.tamamlanma_tarihi = timezone.now()
+        asama.save()
+
+        # Tüm aşamalar tamamlandı mı kontrol et
+        tum_asamalar = asama.gorev.asamalar.all()
+        tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+        if (
+            tum_asamalar.count() > 0
+            and tum_asamalar.count() == tamamlanan_asamalar.count()
+        ):
+            # Tüm aşamalar tamamlandıysa görevi de tamamla
+            asama.gorev.durum = "tamamlandi"
+            asama.gorev.tamamlanma_tarihi = timezone.now()
+            asama.gorev.save()
+
+        # Aşamaları yeniden getir
+        asamalar = asama.gorev.asamalar.all().order_by("created_at")
+        return render(
+            request,
+            "istakip/htmx/gorev_asamalar.html",
+            {"gorev": asama.gorev, "asamalar": asamalar},
+        )
+
+    except Exception as e:
+        return HttpResponse(f"Hata: {str(e)}", status=400)

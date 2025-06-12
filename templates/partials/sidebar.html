@@ -70,10 +70,10 @@
                                 İş Takip
                             </div>
                             <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
-                        </button>
-                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                        </button>                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
                             <li><a href="{% url 'istakip:kullanici_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Kullanıcı Yönetimi</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Mobil Uygulama</a></li>
+                            <li><a href="{% url 'istakip:gorev_list' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Görev Yönetimi</a></li>
+                            <li><a href="{% url 'istakip:mobil_sorun_bildir' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Mobil Uygulama</a></li>
                         </ul>
                     </div>
                 </li>
@@ -87,10 +87,9 @@
                                 Sorun Yönetimi
                             </div>
                             <i class="fas fa-chevron-right tree-arrow transition-transform duration-200"></i>
-                        </button>
-                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Bildirimler</a></li>
-                            <li><a href="#" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Çözüm Takibi</a></li>
+                        </button>                        <ul class="tree-children mt-1 ml-8 space-y-1 hidden">
+                            <li><a href="{% url 'istakip:sorun_bildirimleri' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Bildirimler</a></li>
+                            <li><a href="{% url 'istakip:sorun_analiz' %}" class="sidebar-tree-item block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-park-green-50 dark:hover:bg-park-green-900/20">Çözüm Takibi</a></li>
                         </ul>
                     </div>
                 </li>

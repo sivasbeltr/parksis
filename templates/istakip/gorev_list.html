@@ -1,0 +1,410 @@
+{% extends 'layout.html' %}
+{% load django_htmx %}
+
+{% block title %}Görev Yönetimi - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white gradient-text">
+                    <i class="fas fa-tasks text-indigo-500 mr-3"></i>
+                    Görev Yönetimi
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                    Tüm görevleri yönetin, takip edin ve düzenleyin
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{% url 'istakip:gorev_create' %}" 
+                   class="btn-modern inline-flex items-center justify-center px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg font-medium transition-all duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Görev
+                </a>
+                <a href="{% url 'istakip:gorev_planlama' %}" 
+                   class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Takvim
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-soft animate-card">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-list text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.toplam_gorev }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-soft animate-card">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-gray-100 dark:bg-gray-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-gray-600 dark:text-gray-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Planlanmış</p>
+                    <p class="text-xl font-bold text-gray-600 dark:text-gray-400">{{ stats.planlanmis }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-soft animate-card">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-play text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Devam Eden</p>
+                    <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ stats.devam_ediyor }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-soft animate-card">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 dark:text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tamamlandı</p>
+                    <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.tamamlandi }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-4 shadow-soft animate-card">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-fire text-red-600 dark:text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Acil</p>
+                    <p class="text-xl font-bold text-red-600 dark:text-red-400">{{ stats.acil }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                <!-- Search -->
+                <div class="xl:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Arama
+                    </label>
+                    <input type="text" name="search" value="{{ search_query }}" 
+                           placeholder="Görev başlığı, park adı ara..."
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Durum
+                    </label>
+                    <select name="durum" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="planlanmis" {% if durum_filter == "planlanmis" %}selected{% endif %}>Planlanmış</option>
+                        <option value="devam_ediyor" {% if durum_filter == "devam_ediyor" %}selected{% endif %}>Devam Ediyor</option>
+                        <option value="tamamlandi" {% if durum_filter == "tamamlandi" %}selected{% endif %}>Tamamlandı</option>
+                        <option value="iptal" {% if durum_filter == "iptal" %}selected{% endif %}>İptal</option>
+                    </select>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Öncelik
+                    </label>
+                    <select name="oncelik" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="acil" {% if oncelik_filter == "acil" %}selected{% endif %}>Acil</option>
+                        <option value="yuksek" {% if oncelik_filter == "yuksek" %}selected{% endif %}>Yüksek</option>
+                        <option value="normal" {% if oncelik_filter == "normal" %}selected{% endif %}>Normal</option>
+                        <option value="dusuk" {% if oncelik_filter == "dusuk" %}selected{% endif %}>Düşük</option>
+                    </select>
+                </div>
+
+                <!-- Personnel -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Personel
+                    </label>
+                    <select name="personel" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        {% for personel in personeller %}
+                        <option value="{{ personel.uuid }}" {% if personel_filter == personel.uuid|stringformat:"s" %}selected{% endif %}>
+                            {{ personel.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Task Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Görev Tipi
+                    </label>
+                    <select name="gorev_tipi" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        {% for tip in gorev_tipleri %}
+                        <option value="{{ tip.uuid }}" {% if gorev_tipi_filter == tip.uuid|stringformat:"s" %}selected{% endif %}>
+                            {{ tip.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tarih
+                    </label>
+                    <select name="tarih" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <option value="">Tümü</option>
+                        <option value="bugun" {% if tarih_filter == "bugun" %}selected{% endif %}>Bugün</option>
+                        <option value="bu_hafta" {% if tarih_filter == "bu_hafta" %}selected{% endif %}>Bu Hafta</option>
+                        <option value="bu_ay" {% if tarih_filter == "bu_ay" %}selected{% endif %}>Bu Ay</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit" class="btn-modern inline-flex items-center px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg transition-all duration-200 font-medium">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrele
+                </button>
+                <a href="{% url 'istakip:gorev_list' %}" class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 font-medium">
+                    <i class="fas fa-times mr-2"></i>
+                    Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-gray-50/80 dark:bg-gray-700/80 border-b border-gray-200/60 dark:border-gray-600/60">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Görev Listesi
+                    </h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        ({{ gorevler.paginator.count }} sonuç)
+                    </span>
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm text-gray-600 dark:text-gray-400">Sırala:</label>
+                    <select onchange="updateSort(this.value)" class="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white/80 dark:bg-gray-700/80">
+                        <option value="baslangic_tarihi-desc" {% if sort_by == "baslangic_tarihi" and sort_direction == "desc" %}selected{% endif %}>Tarih (Yeni → Eski)</option>
+                        <option value="baslangic_tarihi-asc" {% if sort_by == "baslangic_tarihi" and sort_direction == "asc" %}selected{% endif %}>Tarih (Eski → Yeni)</option>
+                        <option value="baslik-asc" {% if sort_by == "baslik" and sort_direction == "asc" %}selected{% endif %}>Başlık A-Z</option>
+                        <option value="oncelik-desc" {% if sort_by == "oncelik" and sort_direction == "desc" %}selected{% endif %}>Öncelik</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+            {% if gorevler %}
+                <div class="space-y-4">
+                    {% for gorev in gorevler %}
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-all duration-200">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
+                            <div class="flex-1">
+                                <div class="flex items-start space-x-3">
+                                    <!-- Priority Indicator -->
+                                    <div class="flex-shrink-0 mt-1">
+                                        {% if gorev.oncelik == 'acil' %}
+                                            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                        {% elif gorev.oncelik == 'yuksek' %}
+                                            <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                        {% elif gorev.oncelik == 'normal' %}
+                                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        {% else %}
+                                            <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <!-- Title and Dates -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2">
+                                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                {{ gorev.baslik }}
+                                            </h4>
+                                            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <i class="fas fa-clock"></i>
+                                                <span>{{ gorev.baslangic_tarihi|date:"d.m.Y H:i" }}</span>
+                                                {% if gorev.bitis_tarihi %}
+                                                <span>→ {{ gorev.bitis_tarihi|date:"d.m.Y H:i" }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Status, Priority, and Park -->
+                                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                                            <!-- Status Badge -->
+                                            {% if gorev.durum == 'planlanmis' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300">
+                                                    <i class="fas fa-clock text-xs mr-1"></i>
+                                                    Planlanmış
+                                                </span>
+                                            {% elif gorev.durum == 'devam_ediyor' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+                                                    <i class="fas fa-play text-xs mr-1"></i>
+                                                    Devam Ediyor
+                                                </span>
+                                            {% elif gorev.durum == 'tamamlandi' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                                    <i class="fas fa-check text-xs mr-1"></i>
+                                                    Tamamlandı
+                                                </span>
+                                            {% elif gorev.durum == 'iptal' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                                    <i class="fas fa-times text-xs mr-1"></i>
+                                                    İptal
+                                                </span>
+                                            {% endif %}
+
+                                            <!-- Priority Badge -->
+                                            {% if gorev.oncelik == 'acil' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                                    <i class="fas fa-fire text-xs mr-1"></i>
+                                                    ACİL
+                                                </span>
+                                            {% elif gorev.oncelik == 'yuksek' %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">
+                                                    <i class="fas fa-exclamation text-xs mr-1"></i>
+                                                    YÜKSEK
+                                                </span>
+                                            {% endif %}
+
+                                            <!-- Park -->
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                                <i class="fas fa-map-marker-alt text-xs mr-1"></i>
+                                                {{ gorev.park.ad }}
+                                            </span>
+
+                                            <!-- Task Type -->
+                                            {% if gorev.gorev_tipi %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+                                                <i class="fas fa-tag text-xs mr-1"></i>
+                                                {{ gorev.gorev_tipi.ad }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Description -->
+                                        {% if gorev.aciklama %}
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                                            {{ gorev.aciklama|truncatewords:20 }}
+                                        </p>
+                                        {% endif %}
+
+                                        <!-- Assigned Personnel -->
+                                        {% if gorev.atamalar.exists %}
+                                        <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <i class="fas fa-users"></i>
+                                            <span>
+                                                {% for atama in gorev.atamalar.all %}
+                                                    {{ atama.personel.ad }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center space-x-3">
+                                <a href="{% url 'istakip:gorev_detail' gorev.uuid %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-lg text-sm font-medium transition-all duration-200">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    Detay
+                                </a>
+                                
+                                <a href="{% url 'istakip:gorev_edit' gorev.uuid %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all duration-200">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Düzenle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if gorevler.has_other_pages %}
+                <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">{{ gorevler.start_index }}</span> - 
+                        <span class="font-medium">{{ gorevler.end_index }}</span> arası, 
+                        <span class="font-medium">{{ gorevler.paginator.count }}</span> toplam sonuç
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        {% if gorevler.has_previous %}
+                            <a href="?page={{ gorevler.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.durum %}&durum={{ request.GET.durum }}{% endif %}{% if request.GET.oncelik %}&oncelik={{ request.GET.oncelik }}{% endif %}{% if request.GET.personel %}&personel={{ request.GET.personel }}{% endif %}{% if request.GET.gorev_tipi %}&gorev_tipi={{ request.GET.gorev_tipi }}{% endif %}{% if request.GET.tarih %}&tarih={{ request.GET.tarih }}{% endif %}&sort={{ sort_by }}&direction={{ sort_direction }}&per_page={{ per_page }}" 
+                               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-3 py-2 bg-park-green-600 text-white rounded-lg font-medium">
+                            {{ gorevler.number }}
+                        </span>
+                        
+                        {% if gorevler.has_next %}
+                            <a href="?page={{ gorevler.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.durum %}&durum={{ request.GET.durum }}{% endif %}{% if request.GET.oncelik %}&oncelik={{ request.GET.oncelik }}{% endif %}{% if request.GET.personel %}&personel={{ request.GET.personel }}{% endif %}{% if request.GET.gorev_tipi %}&gorev_tipi={{ request.GET.gorev_tipi }}{% endif %}{% if request.GET.tarih %}&tarih={{ request.GET.tarih }}{% endif %}&sort={{ sort_by }}&direction={{ sort_direction }}&per_page={{ per_page }}" 
+                               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-gray-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Sonuç bulunamadı</h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        Arama kriterlerinize uygun görev bulunamadı.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function updateSort(value) {
+    const [sort, direction] = value.split('-');
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sort);
+    url.searchParams.set('direction', direction);
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}

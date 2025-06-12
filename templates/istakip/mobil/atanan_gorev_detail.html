@@ -1,0 +1,443 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}{{ gorev.baslik }} - Görev Detayı{% endblock %}
+
+{% block content %}
+<div class="space-y-4 animate-fade-in">
+    <!-- Görev Header -->
+    <div class="bg-gradient-to-r from-park-green-600 to-park-green-700 rounded-2xl shadow-soft text-white p-6">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+                <h1 class="text-xl font-bold leading-tight">{{ gorev.baslik }}</h1>
+                <p class="text-park-green-100 mt-1">
+                    <i class="fas fa-map-marker-alt mr-1"></i>
+                    {{ gorev.park.ad }} - {{ gorev.park.mahalle.ad }}
+                </p>
+                {% if gorev.gorev_tipi %}
+                <p class="text-park-green-200 text-sm mt-1">
+                    <i class="fas fa-tag mr-1"></i>{{ gorev.gorev_tipi.ad }}
+                </p>
+                {% endif %}
+            </div>
+            
+            <!-- Durum ve Öncelik -->
+            <div class="flex flex-col items-end space-y-2">
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                    {% if gorev.durum == 'planlanmis' %}<i class="fas fa-clock mr-1"></i>Planlanmış
+                    {% elif gorev.durum == 'devam_ediyor' %}<i class="fas fa-play mr-1"></i>Devam Ediyor
+                    {% elif gorev.durum == 'tamamlandi' %}<i class="fas fa-check mr-1"></i>Tamamlandı
+                    {% elif gorev.durum == 'iptal' %}<i class="fas fa-times mr-1"></i>İptal
+                    {% endif %}
+                </span>
+                
+                <span class="px-3 py-1 rounded-full text-xs font-medium
+                    {% if gorev.oncelik == 'acil' %}bg-red-500 text-white
+                    {% elif gorev.oncelik == 'yuksek' %}bg-orange-500 text-white
+                    {% elif gorev.oncelik == 'normal' %}bg-blue-500 text-white
+                    {% else %}bg-gray-400 text-white{% endif %}">
+                    {% if gorev.oncelik == 'acil' %}<i class="fas fa-fire mr-1"></i>Acil
+                    {% elif gorev.oncelik == 'yuksek' %}<i class="fas fa-arrow-up mr-1"></i>Yüksek
+                    {% elif gorev.oncelik == 'normal' %}<i class="fas fa-minus mr-1"></i>Normal
+                    {% elif gorev.oncelik == 'dusuk' %}<i class="fas fa-arrow-down mr-1"></i>Düşük
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Tarih Bilgileri -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <div class="text-park-green-200 text-xs">Oluşturulma</div>
+                <div>{{ gorev.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            {% if gorev.bitis_tarihi %}
+            <div>
+                <div class="text-park-green-200 text-xs">Bitiş Tarihi</div>
+                <div>{{ gorev.bitis_tarihi|date:"d.m.Y" }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Görev Açıklaması -->
+    {% if gorev.aciklama %}
+    <div class="bg-white rounded-2xl shadow-soft p-4">
+        <h3 class="font-bold text-gray-900 mb-2 flex items-center">
+            <i class="fas fa-file-alt text-blue-600 mr-2"></i>
+            Görev Açıklaması
+        </h3>
+        <p class="text-gray-700 leading-relaxed">{{ gorev.aciklama }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Aşama Timeline -->
+    <div class="bg-white rounded-2xl shadow-soft p-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900 flex items-center">
+                <i class="fas fa-route text-purple-600 mr-2"></i>
+                Görev Aşamaları
+            </h3>
+            {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+            <button onclick="openAddStageModal()" class="bg-park-green-600 hover:bg-park-green-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors mobile-button">
+                <i class="fas fa-plus mr-1"></i>Aşama Ekle
+            </button>
+            {% endif %}
+        </div>
+        
+        <!-- Timeline -->
+        <div class="relative">
+            {% if asamalar %}
+                {% for asama in asamalar %}
+                <div class="flex items-start space-x-3 mb-6 last:mb-0">
+                    <!-- Timeline Nokta -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                            {% if asama.durum == 'tamamlandi' %}bg-green-500 text-white
+                            {% elif asama.durum == 'devam_ediyor' %}bg-blue-500 text-white
+                            {% else %}bg-gray-300 text-gray-600{% endif %}">
+                            {% if asama.durum == 'tamamlandi' %}
+                                <i class="fas fa-check text-xs"></i>
+                            {% elif asama.durum == 'devam_ediyor' %}
+                                <i class="fas fa-play text-xs"></i>
+                            {% else %}
+                                <i class="fas fa-clock text-xs"></i>
+                            {% endif %}
+                        </div>
+                        {% if not forloop.last %}
+                        <div class="w-0.5 h-16 
+                            {% if asama.durum == 'tamamlandi' %}bg-green-300
+                            {% elif asama.durum == 'devam_ediyor' %}bg-blue-300
+                            {% else %}bg-gray-200{% endif %} mt-2"></div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Aşama İçeriği -->
+                    <div class="flex-1 bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-medium text-gray-900">{{ asama.ad }}</h4>
+                            <span class="text-xs px-2 py-1 rounded-full
+                                {% if asama.durum == 'tamamlandi' %}bg-green-100 text-green-800
+                                {% elif asama.durum == 'devam_ediyor' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ asama.get_durum_display }}
+                            </span>
+                        </div>
+                        
+                        {% if asama.aciklama %}
+                        <p class="text-sm text-gray-600 mb-2">{{ asama.aciklama }}</p>
+                        {% endif %}
+                        
+                        <!-- Tarih Bilgileri -->
+                        <div class="text-xs text-gray-500 space-y-1">
+                            {% if asama.baslangic_tarihi %}
+                            <div><i class="fas fa-play mr-1"></i>Başlangıç: {{ asama.baslangic_tarihi|date:"d.m.Y H:i" }}</div>
+                            {% endif %}
+                            {% if asama.tamamlanma_tarihi %}
+                            <div><i class="fas fa-check mr-1"></i>Tamamlama: {{ asama.tamamlanma_tarihi|date:"d.m.Y H:i" }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Aşama Resmi -->
+                        {% if asama.resim %}
+                        <div class="mt-3">
+                            <img src="{{ asama.resim.url }}" alt="{{ asama.ad }}" 
+                                 class="w-full h-32 object-cover rounded-lg cursor-pointer"
+                                 onclick="openImageModal('{{ asama.resim.url }}', '{{ asama.ad }}')">
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Aşama Aksiyonları -->
+                        {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+                        <div class="mt-3 flex gap-2">
+                            {% if asama.durum == 'baslamadi' %}
+                            <button onclick="startStage('{{ asama.uuid }}')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                                <i class="fas fa-play mr-1"></i>Başlat
+                            </button>
+                            {% elif asama.durum == 'devam_ediyor' %}
+                            <button onclick="completeStage('{{ asama.uuid }}')" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                                <i class="fas fa-check mr-1"></i>Tamamla
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-6 text-gray-500">
+                    <i class="fas fa-route text-2xl mb-2"></i>
+                    <p>Henüz aşama eklenmemiş</p>
+                    {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+                    <button onclick="openAddStageModal()" class="mt-3 bg-park-green-600 hover:bg-park-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                        İlk Aşamayı Ekle
+                    </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Görev Tamamlama -->
+    {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+    <div class="bg-white rounded-2xl shadow-soft p-4">
+        <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-flag-checkered text-green-600 mr-2"></i>
+            Görev Tamamlama
+        </h3>
+        <button onclick="completeTask()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors mobile-button">
+            <i class="fas fa-check-circle mr-2"></i>
+            Görevi Tamamla
+        </button>
+    </div>
+    {% endif %}
+    
+    <!-- Görev Tamamlama Resimleri -->
+    {% if gorev.tamamlama_resimleri.all %}
+    <div class="bg-white rounded-2xl shadow-soft p-4">
+        <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-images text-green-600 mr-2"></i>
+            Tamamlama Resimleri
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+            {% for resim in gorev.tamamlama_resimleri.all %}
+            <div class="relative">
+                <img src="{{ resim.resim.url }}" alt="{{ resim.aciklama|default:'Tamamlama resmi' }}" 
+                     class="w-full h-24 object-cover rounded-lg cursor-pointer"
+                     onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:'Tamamlama resmi' }}')">
+                {% if resim.aciklama %}
+                <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-lg">
+                    {{ resim.aciklama|truncatewords:5 }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Aşama Ekleme Modal -->
+<div id="add-stage-modal" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Yeni Aşama Ekle</h3>
+                    <button onclick="closeAddStageModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="add-stage-form" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="gorev_uuid" value="{{ gorev.uuid }}">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Aşama Adı *</label>
+                        <input type="text" name="ad" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg mobile-input"
+                               placeholder="Örn: Hazırlık işlemleri">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                        <textarea name="aciklama" rows="3" 
+                                  class="w-full p-3 border border-gray-300 rounded-lg mobile-input resize-none"
+                                  placeholder="Aşama hakkında detay..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Aşama Resmi</label>
+                        <input type="file" name="resim" accept="image/*" 
+                               class="w-full p-2 border border-gray-300 rounded-lg mobile-input">
+                        <p class="text-xs text-gray-500 mt-1">Opsiyonel - Maksimum 5MB</p>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeAddStageModal()" 
+                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white py-2 rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-1"></i>Ekle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resim Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black/75 z-50 hidden">
+    <div class="flex items-center justify-center h-full p-4">
+        <div class="relative max-w-full max-h-full">
+            <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+            <button onclick="closeImageModal()" class="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modal-caption" class="absolute bottom-4 left-4 right-4 bg-black/50 text-white p-3 rounded-lg"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Modal fonksiyonları
+function openAddStageModal() {
+    document.getElementById('add-stage-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAddStageModal() {
+    document.getElementById('add-stage-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+    document.getElementById('add-stage-form').reset();
+}
+
+function openImageModal(src, caption) {
+    document.getElementById('modal-image').src = src;
+    document.getElementById('modal-caption').textContent = caption;
+    document.getElementById('image-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    document.getElementById('image-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// Aşama işlemleri
+function startStage(asama_uuid) {
+    if (confirm('Bu aşamayı başlatmak istediğinizden emin misiniz?')) {
+        showLoading();
+        
+        fetch(`/istakip/mobil/asama/${asama_uuid}/baslat/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showToast('Aşama başlatıldı!', 'success');
+                location.reload();
+            } else {
+                showToast(data.message || 'Hata oluştu', 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showToast('Bir hata oluştu', 'error');
+        });
+    }
+}
+
+function completeStage(asama_uuid) {
+    if (confirm('Bu aşamayı tamamlamak istediğinizden emin misiniz?')) {
+        showLoading();
+        
+        fetch(`/istakip/mobil/asama/${asama_uuid}/tamamla/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showToast('Aşama tamamlandı!', 'success');
+                location.reload();
+            } else {
+                showToast(data.message || 'Hata oluştu', 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showToast('Bir hata oluştu', 'error');
+        });
+    }
+}
+
+function completeTask() {
+    if (confirm('Görevi tamamlamak istediğinizden emin misiniz?')) {
+        showLoading();
+        
+        fetch(`/istakip/mobil/gorev/{{ gorev.uuid }}/tamamla/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showToast('Görev tamamlandı!', 'success');
+                location.reload();
+            } else {
+                showToast(data.message || 'Hata oluştu', 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showToast('Bir hata oluştu', 'error');
+        });
+    }
+}
+
+// Aşama ekleme formu
+document.getElementById('add-stage-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    showLoading();
+    
+    fetch('/istakip/mobil/asama/ekle/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showToast('Aşama başarıyla eklendi!', 'success');
+            closeAddStageModal();
+            location.reload();
+        } else {
+            showToast(data.message || 'Hata oluştu', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('Bir hata oluştu', 'error');
+    });
+});
+
+// Modal dışına tıklayınca kapat
+document.getElementById('add-stage-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddStageModal();
+    }
+});
+
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+</script>
+{% endblock %}

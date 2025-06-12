@@ -1,0 +1,319 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}{{ gorev.baslik }} - Görev Detayı{% endblock %}
+
+{% block page_title %}
+<div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <a href="{% url 'istakip:gorev_list' %}" 
+           class="text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="fas fa-arrow-left text-lg"></i>
+        </a>        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ gorev.baslik }}</h1>
+            <p class="text-gray-600">
+                <i class="fas fa-map-marker-alt mr-1"></i>
+                <a href="{% url 'parkbahce:park_detail' gorev.park.uuid %}" 
+                   class="text-park-green-600 hover:text-park-green-800 hover:underline">
+                    {{ gorev.park.ad }}
+                </a>
+            </p>
+        </div>
+    </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+            {% if gorev.durum == 'tamamlandi' %}
+                bg-green-100 text-green-800
+            {% elif gorev.durum == 'devam_ediyor' %}
+                bg-blue-100 text-blue-800
+            {% elif gorev.durum == 'planlanmis' %}
+                bg-yellow-100 text-yellow-800
+            {% else %}
+                bg-red-100 text-red-800
+            {% endif %}">
+            {{ gorev.get_durum_display }}
+        </span>
+        
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+            {% if gorev.oncelik == 'acil' %}
+                bg-red-100 text-red-800
+            {% elif gorev.oncelik == 'yuksek' %}
+                bg-orange-100 text-orange-800
+            {% elif gorev.oncelik == 'normal' %}
+                bg-green-100 text-green-800
+            {% else %}
+                bg-gray-100 text-gray-800
+            {% endif %}">
+            {{ gorev.get_oncelik_display }}
+        </span>
+        
+        <!-- Hızlı Erişim Butonları -->
+        <a href="{% url 'parkbahce:park_detail' gorev.park.uuid %}"
+           class="px-3 py-1 text-sm bg-park-green-600 hover:bg-park-green-700 text-white rounded-md transition-colors">
+            <i class="fas fa-map-marker-alt mr-1"></i>
+            Parka Git
+        </a>
+        
+        {% if gorev.gunluk_kontrol %}
+        <a href="{% url 'istakip:sorun_detay' gorev.gunluk_kontrol.uuid %}"
+           class="px-3 py-1 text-sm bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Sorun Detayı
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Ana Bilgiler Kartı -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-medium text-gray-900">Görev Bilgileri</h2>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'istakip:gorev_edit' gorev.uuid %}"
+                       class="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-edit mr-1"></i>
+                        Düzenle
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Sol Kolon -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Açıklama</label>
+                        <p class="mt-1 text-gray-900">{{ gorev.aciklama|default:"Açıklama eklenmemiş" }}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">Başlangıç Tarihi</label>
+                            <p class="mt-1 text-gray-900">
+                                {% if gorev.baslangic_tarihi %}
+                                    {{ gorev.baslangic_tarihi|date:"d.m.Y H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500">Bitiş Tarihi</label>
+                            <p class="mt-1 text-gray-900">
+                                {% if gorev.bitis_tarihi %}
+                                    {{ gorev.bitis_tarihi|date:"d.m.Y H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                      {% if gorev.gunluk_kontrol %}
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">İlgili Sorun Bildirimi</label>
+                        <div class="mt-1">
+                            <a href="{% url 'istakip:sorun_detay' gorev.gunluk_kontrol.uuid %}"
+                               class="text-blue-600 hover:text-blue-800 underline">
+                                {{ gorev.gunluk_kontrol.park.ad }} - {{ gorev.gunluk_kontrol.kontrol_tarihi|date:"d.m.Y" }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sağ Kolon -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Oluşturan</label>
+                        <p class="mt-1 text-gray-900">{{ gorev.olusturan.get_full_name|default:gorev.olusturan.username }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Atanan Personeller</label>
+                        <div class="mt-1 space-y-1">
+                            {% for atama in gorev.atamalar.all %}
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                <span class="text-gray-900">{{ atama.personel.ad }}</span>
+                                <span class="text-xs text-gray-500">({{ atama.gorev_rolu }})</span>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-500 italic">Henüz personel atanmamış</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- İlerleme Yüzdesi -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">İlerleme</label>
+                        <div class="mt-1">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                                         style="width: {{ ilerleme }}%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">{{ ilerleme }}%</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ asama_stats.tamamlanan }}/{{ asama_stats.toplam }} aşama tamamlandı
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sekme Sistemi -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <!-- Sekme Başlıkları -->
+        <div class="border-b border-gray-200">
+            <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                <button onclick="showTab('durum-tab')" 
+                        class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 border-green-500 font-medium text-sm text-green-600">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Durum Yönetimi
+                </button>
+                <button onclick="showTab('asamalar-tab')" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-tasks mr-2"></i>
+                    Aşamalar ({{ asama_stats.toplam }})
+                </button>
+                <button onclick="showTab('resimler-tab')" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-images mr-2"></i>
+                    Resimler
+                </button>
+                <button onclick="showTab('gecmis-tab')" 
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <i class="fas fa-history mr-2"></i>
+                    Geçmiş
+                </button>
+            </nav>
+        </div>
+        
+        <!-- Sekme İçerikleri -->
+        <div class="p-6">            <!-- Durum Yönetimi Sekmesi -->
+            <div id="durum-tab" class="tab-content">
+                <div id="gorev-durum-container" 
+                     hx-get="{% url 'istakip:gorev_durum_guncelle_htmx' gorev.uuid %}"
+                     hx-trigger="load"
+                     hx-swap="innerHTML">
+                    <!-- HTMX ile yüklenecek -->
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+                        <p class="text-gray-500 mt-2">Durum bilgileri yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Görev Aşamaları Sekmesi -->
+            <div id="asamalar-tab" class="tab-content hidden">
+                <div id="gorev-asamalar" 
+                     hx-get="{% url 'istakip:gorev_asamalar_htmx' gorev.uuid %}"
+                     hx-trigger="load delay:100ms"
+                     hx-swap="innerHTML">
+                    <!-- HTMX ile yüklenecek -->
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+                        <p class="text-gray-500 mt-2">Aşamalar yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resimler Sekmesi -->
+            <div id="resimler-tab" class="tab-content hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for resim in gorev.tamamlama_resimleri.all %}
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <img src="{{ resim.resim.url }}" alt="Görev resmi" 
+                             class="w-full h-48 object-cover">
+                        <div class="p-3">
+                            <p class="text-sm text-gray-600">{{ resim.aciklama|default:"Açıklama yok" }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ resim.yukleme_tarihi|date:"d.m.Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <i class="fas fa-images text-3xl mb-2"></i>
+                        <p>Henüz resim yüklenmemiş</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Geçmiş Sekmesi -->
+            <div id="gecmis-tab" class="tab-content hidden">
+                <div class="space-y-4">
+                    <!-- Görev oluşturulma -->
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-plus text-blue-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900">
+                                Görev <strong>{{ gorev.olusturan.get_full_name|default:gorev.olusturan.username }}</strong> 
+                                tarafından oluşturuldu
+                            </p>
+                            <p class="text-xs text-gray-500">{{ gorev.created_at|date:"d.m.Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Diğer aktiviteler buraya eklenebilir -->
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-history text-3xl mb-2"></i>
+                        <p>Daha fazla geçmiş kaydı yok</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabId) {
+    // Tüm sekmeleri gizle
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+    
+    // Tüm sekme butonlarını pasif yap
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active', 'border-green-500', 'text-green-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Seçilen sekmeyi göster
+    document.getElementById(tabId).classList.remove('hidden');
+    
+    // Seçilen sekme butonunu aktif yap
+    event.target.classList.add('active', 'border-green-500', 'text-green-600');
+    event.target.classList.remove('border-transparent', 'text-gray-500');
+    
+    // HTMX trigger'ını manuel olarak çalıştır
+    if (tabId === 'asamalar-tab') {
+        const content = document.querySelector('#gorev-asamalar[hx-get]');
+        if (content && !content.classList.contains('htmx-loaded')) {
+            htmx.process(content);
+            htmx.trigger(content, 'load');
+            content.classList.add('htmx-loaded');
+        }
+    }
+}
+
+// Sayfa yüklendiğinde durum sekmesini yükle
+document.addEventListener('DOMContentLoaded', function() {
+    // Durum sekmesi için HTMX trigger
+    const durumContent = document.querySelector('#gorev-durum-container[hx-get]');
+    if (durumContent) {
+        htmx.process(durumContent);
+        htmx.trigger(durumContent, 'load');
+    }
+});
+</script>
+{% endblock %}

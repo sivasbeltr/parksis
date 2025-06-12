@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import htmx_views, kullanici_views, mobil_views, views
+from . import htmx_views, mobil_views, views
 
 app_name = "istakip"
 
@@ -39,6 +39,31 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "mobil/gorevlerim/",
         mobil_views.MobilAtananGorevlerView.as_view(),
         name="mobil_atanan_gorevler",
+    ),
+    path(
+        "mobil/gorevlerim/<uuid:gorev_uuid>/",
+        mobil_views.MobilAtananGorevDetailView.as_view(),
+        name="mobil_atanan_gorev_detail",
+    ),
+    path(
+        "mobil/asama/ekle/",
+        mobil_views.mobil_asama_ekle,
+        name="mobil_asama_ekle",
+    ),
+    path(
+        "mobil/asama/<uuid:asama_uuid>/baslat/",
+        mobil_views.mobil_asama_baslat,
+        name="mobil_asama_baslat",
+    ),
+    path(
+        "mobil/asama/<uuid:asama_uuid>/tamamla/",
+        mobil_views.mobil_asama_tamamla,
+        name="mobil_asama_tamamla",
+    ),
+    path(
+        "mobil/gorev/<uuid:gorev_uuid>/tamamla/",
+        mobil_views.mobil_gorev_tamamla,
+        name="mobil_gorev_tamamla",
     ),
     path(
         "mobil/gunluk-rapor/",
@@ -118,12 +143,52 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "park-atama/<uuid:atama_uuid>/delete/",
         htmx_views.park_atama_sil_htmx,
         name="park_atama_sil_htmx",
-    ),
-    # Park personel yönetimi
+    ),  # Park personel yönetimi
     path("park-personel-ata/", views.park_personel_ata, name="park_personel_ata"),
     path(
         "park-personel/<uuid:atama_uuid>/kaldir/",
         views.park_personel_kaldir,
         name="park_personel_kaldir",
+    ),  # Sorun Bildirimleri ve Analiz
+    path("sorun-bildirimleri/", views.sorun_bildirimleri, name="sorun_bildirimleri"),
+    path("sorun-analiz/", views.sorun_analiz, name="sorun_analiz"),
+    path(
+        "sorun/<uuid:kontrol_uuid>/detay/",
+        views.sorun_detay,
+        name="sorun_detay",
+    ),
+    path(
+        "sorun/<uuid:kontrol_uuid>/gorev-donustur/",
+        views.sorun_gorev_donustur,
+        name="sorun_gorev_donustur",
+    ),
+    # Görev Yönetimi
+    path("gorevler/", views.gorev_list, name="gorev_list"),
+    path("gorevler/yeni/", views.gorev_create, name="gorev_create"),
+    path("gorevler/<uuid:gorev_uuid>/", views.gorev_detail, name="gorev_detail"),
+    path("gorevler/<uuid:gorev_uuid>/edit/", views.gorev_edit, name="gorev_edit"),
+    path("gorevler/planlama/", views.gorev_planlama, name="gorev_planlama"),
+    path("gorevler/rapor/", views.gorev_rapor, name="gorev_rapor"),
+    # HTMX Görev İşlemleri
+    path(
+        "gorevler/<uuid:gorev_uuid>/asamalar/",
+        htmx_views.gorev_asamalar_htmx,
+        name="gorev_asamalar_htmx",
+    ),
+    path(
+        "gorevler/<uuid:gorev_uuid>/durum-guncelle/",
+        htmx_views.gorev_durum_guncelle_htmx,
+        name="gorev_durum_guncelle_htmx",
+    ),
+    # Aşama İşlemleri
+    path(
+        "asamalar/<uuid:asama_uuid>/baslat/",
+        htmx_views.gorev_asama_baslat_htmx,
+        name="gorev_asama_baslat",
+    ),
+    path(
+        "asamalar/<uuid:asama_uuid>/tamamla/",
+        htmx_views.gorev_asama_tamamla_htmx,
+        name="gorev_asama_tamamla",
     ),
 ]

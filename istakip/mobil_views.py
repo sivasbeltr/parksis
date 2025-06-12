@@ -432,14 +432,287 @@ class MobilAtananGorevlerView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         try:
             personel = Personel.objects.get(user=self.request.user)
-            return (
+            qs = (
                 Gorev.objects.filter(atamalar__personel=personel)
-                .select_related("park", "gorev_tipi")
-                .prefetch_related("atamalar")
+                .select_related("park", "park__mahalle", "gorev_tipi")
+                .prefetch_related("atamalar__personel", "asamalar")
                 .order_by("-created_at")
             )
+
+            # Filtreleme
+            durum = self.request.GET.get("durum")
+            oncelik = self.request.GET.get("oncelik")
+            baslangic = self.request.GET.get("baslangic")
+            bitis = self.request.GET.get("bitis")
+
+            # Varsayılan olarak tamamlanmamış görevler
+            if not durum:
+                durum = "aktif"
+
+            if durum == "aktif":
+                qs = qs.exclude(durum__in=["tamamlandi", "iptal"])
+            elif durum != "":
+                qs = qs.filter(durum=durum)
+
+            if oncelik:
+                qs = qs.filter(oncelik=oncelik)
+
+            if baslangic:
+                try:
+                    baslangic_tarih = datetime.strptime(baslangic, "%Y-%m-%d")
+                    qs = qs.filter(created_at__gte=baslangic_tarih)
+                except ValueError:
+                    pass
+
+            if bitis:
+                try:
+                    bitis_tarih = datetime.strptime(bitis, "%Y-%m-%d")
+                    qs = qs.filter(created_at__lte=bitis_tarih)
+                except ValueError:
+                    pass
+
+            return qs
         except Personel.DoesNotExist:
             return Gorev.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Her görev için tamamlanan aşama sayısını hesapla
+        for gorev in context["gorevler"]:
+            tamamlanan_sayisi = gorev.asamalar.filter(durum="tamamlandi").count()
+            gorev.tamamlanan_asama_sayisi = tamamlanan_sayisi
+
+        return context
+
+
+class MobilAtananGorevDetailView(LoginRequiredMixin, TemplateView):
+    """
+    Atanan görev detay sayfası - aşamalar ve timeline ile
+    """
+
+    template_name = "istakip/mobil/atanan_gorev_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+            gorev_uuid = kwargs.get("gorev_uuid")
+
+            gorev = get_object_or_404(
+                Gorev.objects.filter(atamalar__personel=personel)
+                .select_related("park", "park__mahalle", "gorev_tipi")
+                .prefetch_related(
+                    "atamalar__personel", "asamalar", "tamamlama_resimleri"
+                ),
+                uuid=gorev_uuid,
+            )
+
+            # Aşamaları sıralı getir
+            asamalar = gorev.asamalar.all().order_by("created_at")
+
+            context.update(
+                {
+                    "gorev": gorev,
+                    "asamalar": asamalar,
+                    "personel": personel,
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["gorev"] = None
+            context["asamalar"] = []
+
+        return context
+
+
+@login_required
+def mobil_asama_ekle(request):
+    """
+    Mobil görev aşaması ekleme
+    """
+    if request.method == "POST":
+        try:
+            personel = Personel.objects.get(user=request.user)
+            gorev_uuid = request.POST.get("gorev_uuid")
+
+            # Görevin bu personele atanmış olduğunu kontrol et
+            gorev = get_object_or_404(
+                Gorev.objects.filter(atamalar__personel=personel), uuid=gorev_uuid
+            )
+
+            # Görev tamamlanmış veya iptal edilmişse aşama eklenemez
+            if gorev.durum in ["tamamlandi", "iptal"]:
+                return JsonResponse(
+                    {"success": False, "message": "Bu görev için aşama eklenemez."}
+                )
+
+            ad = request.POST.get("ad")
+            aciklama = request.POST.get("aciklama", "")
+            resim = request.FILES.get("resim")
+
+            if not ad:
+                return JsonResponse(
+                    {"success": False, "message": "Aşama adı zorunludur."}
+                )
+
+            # Aşama oluştur
+            asama = GorevAsama.objects.create(
+                gorev=gorev,
+                ad=ad,
+                aciklama=aciklama,
+                durum="baslamadi",
+                sorumlu=personel,
+            )
+
+            # Resim varsa kaydet
+            if resim:
+                asama.resim = resim
+                asama.save()
+
+            return JsonResponse(
+                {"success": True, "message": "Aşama başarıyla eklendi."}
+            )
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Geçersiz istek."})
+
+
+@login_required
+def mobil_asama_baslat(request, asama_uuid):
+    """
+    Mobil görev aşamasını başlatma
+    """
+    if request.method == "POST":
+        try:
+            personel = Personel.objects.get(user=request.user)
+
+            # Aşamayı bul ve kontrol et
+            asama = get_object_or_404(
+                GorevAsama.objects.filter(
+                    gorev__atamalar__personel=personel
+                ).select_related("gorev"),
+                uuid=asama_uuid,
+            )
+
+            if asama.durum != "baslamadi":
+                return JsonResponse(
+                    {"success": False, "message": "Bu aşama zaten başlatılmış."}
+                )
+
+            # Aşamayı başlat
+            asama.durum = "devam_ediyor"
+            asama.baslangic_tarihi = timezone.now()
+            asama.save()
+
+            # Ana görevi de devam ediyor yap (eğer planlanmış ise)
+            if asama.gorev.durum == "planlanmis":
+                asama.gorev.durum = "devam_ediyor"
+                asama.gorev.save()
+
+            return JsonResponse({"success": True, "message": "Aşama başlatıldı."})
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Geçersiz istek."})
+
+
+@login_required
+def mobil_asama_tamamla(request, asama_uuid):
+    """
+    Mobil görev aşamasını tamamlama
+    """
+    if request.method == "POST":
+        try:
+            personel = Personel.objects.get(user=request.user)
+
+            # Aşamayı bul ve kontrol et
+            asama = get_object_or_404(
+                GorevAsama.objects.filter(
+                    gorev__atamalar__personel=personel
+                ).select_related("gorev"),
+                uuid=asama_uuid,
+            )
+
+            if asama.durum != "devam_ediyor":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu aşama tamamlanabilir durumda değil.",
+                    }
+                )
+
+            # Aşamayı tamamla
+            asama.durum = "tamamlandi"
+            asama.tamamlanma_tarihi = timezone.now()
+            asama.save()
+
+            return JsonResponse({"success": True, "message": "Aşama tamamlandı."})
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Geçersiz istek."})
+
+
+@login_required
+def mobil_gorev_tamamla(request, gorev_uuid):
+    """
+    Mobil görev tamamlama
+    """
+    if request.method == "POST":
+        try:
+            personel = Personel.objects.get(user=request.user)
+
+            # Görevi bul ve kontrol et
+            gorev = get_object_or_404(
+                Gorev.objects.filter(atamalar__personel=personel), uuid=gorev_uuid
+            )
+
+            if gorev.durum in ["tamamlandi", "iptal"]:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu görev zaten tamamlanmış veya iptal edilmiş.",
+                    }
+                )
+
+            # Görevi tamamla
+            gorev.durum = "tamamlandi"
+            gorev.tamamlanma_tarihi = timezone.now()
+            gorev.save()
+
+            # Tüm aşamaları da tamamla
+            GorevAsama.objects.filter(
+                gorev=gorev, durum__in=["baslamadi", "devam_ediyor"]
+            ).update(durum="tamamlandi", tamamlanma_tarihi=timezone.now())
+
+            return JsonResponse({"success": True, "message": "Görev tamamlandı."})
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Geçersiz istek."})
 
 
 class MobilGunlukRaporView(LoginRequiredMixin, TemplateView):

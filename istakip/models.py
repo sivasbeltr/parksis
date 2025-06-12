@@ -458,6 +458,12 @@ class Gorev(models.Model):
         blank=True,
         null=True,
     )
+    tamamlanma_tarihi = models.DateTimeField(
+        _("Tamamlanma Tarihi"),
+        help_text=_("Görevin tamamlanma tarihini giriniz."),
+        blank=True,
+        null=True,
+    )
     atanan_personeller = models.ManyToManyField(
         Personel,
         through="GorevAtama",
@@ -568,6 +574,7 @@ class GorevAsama(models.Model):
     """
 
     class DurumChoices(models.TextChoices):
+        BEKLEMEDE = "beklemede", _("Beklemede")
         BASLAMADI = "baslamadi", _("Başlamadı")
         DEVAM_EDIYOR = "devam_ediyor", _("Devam Ediyor")
         TAMAMLANDI = "tamamlandi", _("Tamamlandı")
