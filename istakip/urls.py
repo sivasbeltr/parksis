@@ -49,7 +49,13 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "mobil/sorumlu-parklar/",
         mobil_views.MobilSorumluParklarView.as_view(),
         name="mobil_sorumlu_parklar",
-    ),  # Kullanıcı Yönetimi
+    ),
+    path(
+        "mobil/performans-istatistik/",
+        mobil_views.MobilPerformansIstatistikView.as_view(),
+        name="mobil_performans_istatistik",
+    ),
+    # Kullanıcı Yönetimi
     path("kullanicilar/", views.kullanici_list, name="kullanici_list"),
     path("kullanicilar/yeni/", views.kullanici_create, name="kullanici_create"),
     path(

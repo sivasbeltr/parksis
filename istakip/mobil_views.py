@@ -133,14 +133,66 @@ class MobilKontrolGonderildiView(LoginRequiredMixin, TemplateView):
         try:
             kontrol = get_object_or_404(
                 GunlukKontrol.objects.select_related(
-                    "park", "personel"
+                    "park",
+                    "park__mahalle",
+                    "park__mahalle__ilce",
+                    "park__park_tipi",
+                    "park__sulama_tipi",
+                    "personel",
                 ).prefetch_related("resimler"),
                 uuid=kontrol_uuid,
                 personel__user=self.request.user,
             )
             context["kontrol"] = kontrol
+
+            # İstatistik verilerini hesapla
+            personel = kontrol.personel
+            bugün = timezone.now().date()
+            hafta_başı = bugün - timedelta(days=bugün.weekday())
+            ay_başı = bugün.replace(day=1)
+
+            # Bugünkü kontroller
+            bugun_kontroller = GunlukKontrol.objects.filter(
+                personel=personel, kontrol_tarihi__date=bugün
+            )
+
+            # Bu haftaki kontroller
+            hafta_kontroller = GunlukKontrol.objects.filter(
+                personel=personel, kontrol_tarihi__date__gte=hafta_başı
+            )
+
+            # Bu ayki kontroller
+            ay_kontroller = GunlukKontrol.objects.filter(
+                personel=personel, kontrol_tarihi__date__gte=ay_başı
+            )
+
+            # Oranları hesapla
+            toplam_ay = ay_kontroller.count()
+            sorunsuz_ay = ay_kontroller.filter(durum="sorun_yok").count()
+            sorunlu_ay = ay_kontroller.filter(durum__in=["sorun_var", "acil"]).count()
+
+            sorunsuz_oran = round(
+                (sorunsuz_ay / toplam_ay * 100) if toplam_ay > 0 else 0
+            )
+            sorunlu_oran = round((sorunlu_ay / toplam_ay * 100) if toplam_ay > 0 else 0)
+
+            context["stats"] = {
+                "bugun_kontrol": bugun_kontroller.count(),
+                "hafta_kontrol": hafta_kontroller.count(),
+                "ay_kontrol": toplam_ay,
+                "sorunsuz_oran": sorunsuz_oran,
+                "sorunlu_oran": sorunlu_oran,
+            }
+
         except GunlukKontrol.DoesNotExist:
             context["kontrol"] = None
+            context["stats"] = {
+                "bugun_kontrol": 0,
+                "hafta_kontrol": 0,
+                "ay_kontrol": 0,
+                "sorunsuz_oran": 0,
+                "sorunlu_oran": 0,
+            }
 
         return context
 
@@ -503,5 +555,144 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
         except Personel.DoesNotExist:
             context["personel"] = None
             context["parklar_with_status"] = []
+
+        return context
+
+
+class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
+    """
+    Personelin detaylı performans istatistikleri
+    """
+
+    template_name = "istakip/mobil/performans_istatistik.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+
+            # Tarih hesaplamaları
+            bugün = timezone.now().date()
+            hafta_başı = bugün - timedelta(days=bugün.weekday())
+            hafta_sonu = hafta_başı + timedelta(days=6)
+            ay_başı = bugün.replace(day=1)
+
+            # Bugünkü kontroller
+            bugun_kontroller = GunlukKontrol.objects.filter(
+                personel=personel, kontrol_tarihi__date=bugün
+            )
+
+            # Haftalık kontroller
+            hafta_kontroller = GunlukKontrol.objects.filter(
+                personel=personel,
+                kontrol_tarihi__date__gte=hafta_başı,
+                kontrol_tarihi__date__lte=hafta_sonu,
+            )
+
+            # Aylık kontroller
+            ay_kontroller = GunlukKontrol.objects.filter(
+                personel=personel, kontrol_tarihi__date__gte=ay_başı
+            )
+
+            # Bugünkü istatistikler
+            bugun_kontrol = bugun_kontroller.count()
+            bugun_sorunsuz = bugun_kontroller.filter(durum="sorun_yok").count()
+            bugun_sorun_var = bugun_kontroller.filter(durum="sorun_var").count()
+            bugun_acil = bugun_kontroller.filter(durum="acil").count()
+
+            # Haftalık istatistikler
+            hafta_kontrol = hafta_kontroller.count()
+            hafta_sorunsuz = hafta_kontroller.filter(durum="sorun_yok").count()
+            hafta_sorunsuz_oran = round(
+                (hafta_sorunsuz / hafta_kontrol * 100) if hafta_kontrol > 0 else 0
+            )
+            hafta_ortalama = hafta_kontrol / 7
+
+            # Aylık istatistikler
+            ay_kontrol = ay_kontroller.count()
+            ay_sorunsuz = ay_kontroller.filter(durum="sorun_yok").count()
+            sorunsuz_oran = round(
+                (ay_sorunsuz / ay_kontrol * 100) if ay_kontrol > 0 else 0
+            )
+
+            # Sorumlu park sayısı
+            sorumlu_park_sayisi = Park.objects.filter(
+                park_personeller__personel=personel
+            ).count()
+
+            # Toplam resim sayısı (bu ay)
+            toplam_resim = KontrolResim.objects.filter(
+                gunluk_kontrol__personel=personel,
+                gunluk_kontrol__kontrol_tarihi__date__gte=ay_başı,
+            ).count()
+
+            # Son 7 günlük trend
+            gunluk_trend = []
+            max_kontrol = 0
+
+            for i in range(7):
+                gun = bugün - timedelta(days=6 - i)
+                gun_kontrol = GunlukKontrol.objects.filter(
+                    personel=personel, kontrol_tarihi__date=gun
+                ).count()
+
+                if gun_kontrol > max_kontrol:
+                    max_kontrol = gun_kontrol
+
+                gunluk_trend.append(
+                    {
+                        "gun": gun,
+                        "sayi": gun_kontrol,
+                        "yuzde": 0,
+                    }  # Bu daha sonra hesaplanacak
+                )
+
+            # Yüzdeleri hesapla
+            for gun_data in gunluk_trend:
+                if max_kontrol > 0:
+                    gun_data["yuzde"] = round((gun_data["sayi"] / max_kontrol) * 100)
+
+            # En aktif günü bul
+            gun_isimleri = [
+                "Pazartesi",
+                "Salı",
+                "Çarşamba",
+                "Perşembe",
+                "Cuma",
+                "Cumartesi",
+                "Pazar",
+            ]
+            en_aktif_gun_data = max(gunluk_trend, key=lambda x: x["sayi"])
+            en_aktif_gun = gun_isimleri[en_aktif_gun_data["gun"].weekday()]
+
+            context.update(
+                {
+                    "personel": personel,
+                    "hafta_baslangic": hafta_başı,
+                    "hafta_bitis": hafta_sonu,
+                    "ay_baslangic": ay_başı,
+                    "stats": {
+                        "bugun_kontrol": bugun_kontrol,
+                        "bugun_sorunsuz": bugun_sorunsuz,
+                        "bugun_sorun_var": bugun_sorun_var,
+                        "bugun_acil": bugun_acil,
+                        "hafta_kontrol": hafta_kontrol,
+                        "hafta_sorunsuz_oran": hafta_sorunsuz_oran,
+                        "hafta_ortalama": hafta_ortalama,
+                        "ay_kontrol": ay_kontrol,
+                        "sorunsuz_oran": sorunsuz_oran,
+                        "sorumlu_park_sayisi": sorumlu_park_sayisi,
+                        "ortalama_sure": 15,  # Sabit değer, gerçek hesaplama için zaman bilgisi gerekli
+                        "en_aktif_gun": en_aktif_gun,
+                        "toplam_resim": toplam_resim,
+                        "gunluk_trend": gunluk_trend,
+                    },
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["personel"] = None
+            context["stats"] = {}
 
         return context

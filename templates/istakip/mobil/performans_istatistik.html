@@ -1,0 +1,267 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}Performans İstatistikleri - Saha Personeli{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in p-4">
+    <!-- Başlık -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+            <i class="fas fa-chart-line text-indigo-600 mr-2"></i>
+            Performans İstatistikleri
+        </h2>
+        <p class="text-gray-600 text-sm">{{ user.get_full_name|default:user.username }} için detaylı performans analizi</p>
+    </div>
+
+    <!-- Bugünkü İstatistikler -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
+            Bugünkü Performans
+        </h3>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ stats.bugun_kontrol }}</div>
+                <div class="text-sm opacity-90">Toplam Kontrol</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ stats.bugun_sorunsuz }}</div>
+                <div class="text-sm opacity-90">Sorunsuz</div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ stats.bugun_sorun_var }}</div>
+                <div class="text-sm opacity-90">Sorun Var</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white text-center">
+                <div class="text-2xl font-bold">{{ stats.bugun_acil }}</div>
+                <div class="text-sm opacity-90">Acil Durum</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Haftalık İstatistikler -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-calendar-week text-purple-600 mr-2"></i>
+            Bu Hafta ({{ hafta_baslangic|date:"d.m" }} - {{ hafta_bitis|date:"d.m" }})
+        </h3>
+        
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 text-white text-center">
+                <div class="text-lg font-bold">{{ stats.hafta_kontrol }}</div>
+                <div class="text-xs opacity-80">Toplam</div>
+                <div class="text-xs opacity-60">Kontrol</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-xl p-3 text-white text-center">
+                <div class="text-lg font-bold">{{ stats.hafta_sorunsuz_oran }}%</div>
+                <div class="text-xs opacity-80">Başarı</div>
+                <div class="text-xs opacity-60">Oranı</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-3 text-white text-center">
+                <div class="text-lg font-bold">{{ stats.hafta_ortalama|floatformat:1 }}</div>
+                <div class="text-xs opacity-80">Günlük</div>
+                <div class="text-xs opacity-60">Ortalama</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aylık İstatistikler -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-calendar-alt text-orange-600 mr-2"></i>
+            Bu Ay ({{ ay_baslangic|date:"F Y" }})
+        </h3>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-indigo-600">{{ stats.ay_kontrol }}</div>
+                <div class="text-sm text-gray-500">Toplam Kontrol</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-park-green-600">{{ stats.sorunsuz_oran }}%</div>
+                <div class="text-sm text-gray-500">Başarı Oranı</div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="bg-gray-100 rounded-full h-3 mb-2">
+            <div class="bg-gradient-to-r from-park-green-500 to-park-green-600 h-3 rounded-full transition-all duration-500" style="width: {{ stats.sorunsuz_oran }}%"></div>
+        </div>
+        <div class="text-center">
+            <span class="text-xs text-gray-500">Genel Başarı Performansı</span>
+        </div>
+    </div>
+
+    <!-- Detaylı Analiz -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-analytics text-green-600 mr-2"></i>
+            Detaylı Analiz
+        </h3>
+        
+        <div class="space-y-4">
+            <!-- Park Sayısı -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-park-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-tree text-park-green-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Sorumlu Park Sayısı</div>
+                        <div class="text-sm text-gray-500">Atanmış park alanları</div>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-park-green-600">{{ stats.sorumlu_park_sayisi }}</div>
+            </div>
+
+            <!-- Ortalama Yanıt Süresi -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-blue-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Ortalama Kontrol Süresi</div>
+                        <div class="text-sm text-gray-500">Günlük kontrol başına</div>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-blue-600">{{ stats.ortalama_sure }}dk</div>
+            </div>
+
+            <!-- En Aktif Gün -->
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-star text-purple-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">En Aktif Gün</div>
+                        <div class="text-sm text-gray-500">En çok kontrol yapılan</div>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-purple-600">{{ stats.en_aktif_gun }}</div>
+            </div>
+
+            <!-- Toplam Resim -->
+            <div class="flex items-center justify-between py-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-images text-orange-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Yüklenen Resim</div>
+                        <div class="text-sm text-gray-500">Bu ay toplam</div>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-orange-600">{{ stats.toplam_resim }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son 7 Günlük Trend -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+            Son 7 Günlük Trend
+        </h3>
+        
+        <div class="space-y-3">
+            {% for gun_data in stats.gunluk_trend %}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-sm font-medium text-gray-900 w-16">{{ gun_data.gun|date:"d.m" }}</div>
+                    <div class="text-xs text-gray-500">{{ gun_data.gun|date:"l" }}</div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="bg-gray-200 rounded-full h-2 w-20">
+                        <div class="bg-gradient-to-r from-park-green-400 to-park-green-600 h-2 rounded-full" style="width: {{ gun_data.yuzde }}%"></div>
+                    </div>
+                    <span class="text-sm font-bold text-gray-900 w-8">{{ gun_data.sayi }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Başarı Rozetleri -->
+    <div class="bg-white rounded-2xl shadow-soft p-6">
+        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-medal text-yellow-600 mr-2"></i>
+            Başarı Rozetleri
+        </h3>
+        
+        <div class="grid grid-cols-2 gap-4">
+            {% if stats.sorunsuz_oran >= 90 %}
+            <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl p-4 text-white text-center">
+                <i class="fas fa-crown text-2xl mb-2"></i>
+                <div class="font-bold">Mükemmel Performans</div>
+                <div class="text-xs opacity-90">%90+ Başarı Oranı</div>
+            </div>
+            {% endif %}
+            
+            {% if stats.hafta_kontrol >= 10 %}
+            <div class="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 text-white text-center">
+                <i class="fas fa-bolt text-2xl mb-2"></i>
+                <div class="font-bold">Süper Aktif</div>
+                <div class="text-xs opacity-90">Haftalık 10+ Kontrol</div>
+            </div>
+            {% endif %}
+            
+            {% if stats.bugun_kontrol >= 5 %}
+            <div class="bg-gradient-to-br from-green-400 to-green-500 rounded-xl p-4 text-white text-center">
+                <i class="fas fa-fire text-2xl mb-2"></i>
+                <div class="font-bold">Günlük Kahraman</div>
+                <div class="text-xs opacity-90">Bugün 5+ Kontrol</div>
+            </div>
+            {% endif %}
+            
+            {% if stats.toplam_resim >= 20 %}
+            <div class="bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl p-4 text-white text-center">
+                <i class="fas fa-camera text-2xl mb-2"></i>
+                <div class="font-bold">Fotoğraf Ustası</div>
+                <div class="text-xs opacity-90">20+ Resim Yükledi</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sayfa yüklendiğinde animasyon
+    const elements = document.querySelectorAll('.animate-fade-in');
+    elements.forEach((el, index) => {
+        setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Progress bar animasyonu
+    setTimeout(() => {
+        const progressBars = document.querySelectorAll('[style*="width:"]');
+        progressBars.forEach(bar => {
+            bar.style.transition = 'width 1s ease-out';
+        });
+    }, 500);
+});
+</script>
+
+<style>
+.animate-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+</style>
+{% endblock %}

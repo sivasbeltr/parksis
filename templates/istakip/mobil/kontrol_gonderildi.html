@@ -8,125 +8,173 @@
     <!-- Başarı Mesajı -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 animate-fade-in">
         <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-soft">
-                <i class="fas fa-check text-white text-2xl"></i>
+            <div class="w-20 h-20 bg-gradient-to-br from-park-green-500 to-park-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-soft shadow-lg">
+                <i class="fas fa-check text-white text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-gray-900 mb-2">Kontrol Gönderildi!</h2>
-            <p class="text-gray-600">Raporunuz başarıyla kaydedildi.</p>
-        </div>
-        
-        <!-- Kontrol Detayları -->
-        <div class="bg-gray-50 rounded-xl p-4 mb-6">
-            <h3 class="font-bold text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-info-circle text-park-green-600 mr-2"></i>
-                Kontrol Detayları
-            </h3>
-            
-            <div class="space-y-3">
-                <!-- Park Bilgisi -->
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-park-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-tree text-park-green-600 text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900">{{ kontrol.park.ad }}</div>
-                        <div class="text-sm text-gray-500">
-                            {% if kontrol.park.mahalle %}{{ kontrol.park.mahalle.ad }}{% endif %}
-                            {% if kontrol.park.park_tipi %} • {{ kontrol.park.park_tipi.ad }}{% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Durum -->
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        {% if kontrol.durum == 'sorun_yok' %}
-                            <i class="fas fa-check-circle text-park-green-600 text-sm"></i>
-                        {% elif kontrol.durum == 'sorun_var' %}
-                            <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
-                        {% elif kontrol.durum == 'acil' %}
-                            <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
-                        {% endif %}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900">{{ kontrol.get_durum_display }}</div>
-                        <div class="text-sm text-gray-500">
-                            {{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Açıklama -->
-                {% if kontrol.aciklama %}
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-comment text-blue-600 text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900">Açıklama</div>
-                        <div class="text-sm text-gray-600 break-words">{{ kontrol.aciklama }}</div>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Personel -->
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-user text-purple-600 text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900">{{ kontrol.personel.ad }}</div>
-                        <div class="text-sm text-gray-500">
-                            {% if kontrol.personel.pozisyon %}{{ kontrol.personel.pozisyon }}{% endif %}
-                        </div>
-                    </div>
-                </div>
+            <p class="text-gray-600">Raporunuz başarıyla kaydedildi ve sisteme alındı.</p>
+            <div class="mt-3 text-xs text-gray-500">
+                <i class="fas fa-clock mr-1"></i>
+                {{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}
             </div>
         </div>
+        
+        <!-- Kontrol Özeti Kartı -->
+        <div class="bg-gradient-to-r from-park-green-50 to-blue-50 rounded-xl p-4 mb-6 border border-park-green-200">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-clipboard-check text-park-green-600 mr-2"></i>
+                    Kontrol Özeti
+                </h3>
+                <div class="flex items-center space-x-2">
+                    {% if kontrol.durum == 'sorun_yok' %}
+                        <span class="bg-park-green-100 text-park-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Sorunsuz
+                        </span>
+                    {% elif kontrol.durum == 'sorun_var' %}
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Sorun Var
+                        </span>
+                    {% elif kontrol.durum == 'acil' %}
+                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Acil
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Kontrol Bilgileri Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Sol Kolon -->
+                <div class="space-y-3">
+                    <!-- Park Bilgisi -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-park-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-tree text-park-green-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900">{{ kontrol.park.ad }}</div>
+                            <div class="text-sm text-gray-500 flex items-center mt-1">
+                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                {% if kontrol.park.mahalle %}{{ kontrol.park.mahalle.ad }}{% endif %}
+                            </div>
+                            {% if kontrol.park.park_tipi %}
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ kontrol.park.park_tipi.ad }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Personel Bilgisi -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-purple-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900">{{ kontrol.personel.ad }}</div>
+                            <div class="text-sm text-gray-500">
+                                {% if kontrol.personel.pozisyon %}{{ kontrol.personel.pozisyon }}{% endif %}
+                            </div>
+                            {% if kontrol.personel.telefon %}
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-phone mr-1"></i>
+                                {{ kontrol.personel.telefon }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sağ Kolon -->
+                <div class="space-y-3">
+                    <!-- Kontrol Tipi -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-search text-blue-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900">{{ kontrol.get_kontrol_tipi_display }}</div>
+                            <div class="text-sm text-gray-500">
+                                {{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-calendar mr-1"></i>
+                                {{ kontrol.kontrol_tarihi|timesince }} önce
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Konum Bilgisi -->
+                    {% if kontrol.geom %}
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-crosshairs text-orange-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900">Konum Kaydedildi</div>
+                            <div class="text-sm text-gray-500">
+                                {{ kontrol.geom.y|floatformat:6 }}, {{ kontrol.geom.x|floatformat:6 }}
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-satellite-dish mr-1"></i>
+                                GPS Koordinatları
+                            </div>
+                        </div>
+                    </div>                    {% endif %}
+                </div>
+            </div>
+        </div>          <!-- Açıklama Bölümü -->
+        {% if kontrol.aciklama %}
+        <div class="bg-white rounded-xl shadow-soft p-4 mb-6">
+            <h3 class="font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-comment-alt text-blue-600 mr-2"></i>
+                Sorun Açıklaması
+            </h3>
+            <div class="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-400">
+                <p class="text-gray-700 text-sm leading-relaxed">{{ kontrol.aciklama }}</p>
+            </div>
+        </div>
+        {% endif %}
         
         <!-- Resimler -->
         {% if kontrol.resimler.exists %}
-        <div class="mb-6">
+        <div class="bg-white rounded-xl shadow-soft p-4 mb-6">
             <h3 class="font-bold text-gray-900 mb-3 flex items-center">
                 <i class="fas fa-images text-orange-600 mr-2"></i>
                 Eklenen Resimler ({{ kontrol.resimler.count }})
             </h3>
             
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-2">
                 {% for resim in kontrol.resimler.all %}
-                <div class="bg-white rounded-lg overflow-hidden shadow-soft">
-                    <div class="aspect-square">
-                        <img src="{{ resim.resim.url }}" alt="Kontrol Resmi" class="w-full h-full object-cover">
-                    </div>
-                    {% if resim.aciklama %}
-                    <div class="p-2">
-                        <p class="text-xs text-gray-600">{{ resim.aciklama }}</p>
-                    </div>
-                    {% endif %}
+                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:"Kontrol Resmi" }}', '{{ resim.created_at|date:"d.m.Y H:i" }}')">
+                    <img src="{{ resim.resim.url }}" alt="{{ resim.aciklama }}" class="w-full h-full object-cover">
                 </div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
-        
         <!-- Aksiyon Butonları -->
         <div class="space-y-3">
-            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="w-full bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center block mobile-button">
+            <a href="{% url 'istakip:mobil_sorun_bildir' %}" class="w-full bg-gradient-to-r from-park-green-600 to-park-green-700 hover:from-park-green-700 hover:to-park-green-800 text-white font-medium py-3 px-4 rounded-lg transition-all text-center block mobile-button shadow-lg">
                 <i class="fas fa-plus mr-2"></i>
                 Yeni Kontrol Raporu
             </a>
             
             <div class="grid grid-cols-2 gap-3">
-                <a href="{% url 'istakip:mobil_sorumlu_parklar' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center text-sm mobile-button">
+                <a href="{% url 'istakip:mobil_sorumlu_parklar' %}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-4 rounded-lg transition-all text-center text-sm mobile-button shadow-lg">
                     <i class="fas fa-tree mr-1"></i>
                     Sorumlu Parklarım
                 </a>
                 
-                <a href="{% url 'istakip:mobil_kontrol_listesi' %}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center text-sm mobile-button">
+                <a href="{% url 'istakip:mobil_kontrol_listesi' %}" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-3 px-4 rounded-lg transition-all text-center text-sm mobile-button shadow-lg">
                     <i class="fas fa-list-check mr-1"></i>
-                    Günlük Kontrollerim
-                </a>
-            </div>
+                    Günlük Kontrollerim                </a>
+            </div>            
         </div>
     </div>
     
@@ -143,9 +191,27 @@
             <i class="fas fa-plus mr-2"></i>
             Yeni Kontrol Raporu
         </a>
-    </div>
-    {% endif %}
+    </div>    {% endif %}
 </div>
+
+<!-- Resim Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl max-h-full overflow-hidden">
+        <div class="flex items-center justify-between p-4 border-b">
+            <div>
+                <h3 class="font-bold text-gray-900" id="modal-title">Kontrol Resmi</h3>
+                <p class="text-sm text-gray-500" id="modal-date"></p>
+            </div>
+            <button onclick="closeImageModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <img id="modal-image" src="" alt="Büyük Resim" class="w-full h-auto max-h-96 object-contain rounded-lg">
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -159,6 +225,41 @@ document.addEventListener('DOMContentLoaded', function() {
             el.style.transform = 'translateY(0)';
         }, index * 200);
     });
+});
+
+// Resim modal fonksiyonları
+function openImageModal(imageUrl, title, date) {
+    const modal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDate = document.getElementById('modal-date');
+    
+    modalImage.src = imageUrl;
+    modalTitle.textContent = title;
+    modalDate.textContent = date;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('image-modal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Modal dışına tıklandığında kapat
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// ESC tuşu ile kapat
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
 });
 </script>
 
