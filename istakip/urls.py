@@ -161,14 +161,29 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "sorun/<uuid:kontrol_uuid>/gorev-donustur/",
         views.sorun_gorev_donustur,
         name="sorun_gorev_donustur",
-    ),
-    # Görev Yönetimi
+    ),  # Görev Yönetimi
     path("gorevler/", views.gorev_list, name="gorev_list"),
     path("gorevler/yeni/", views.gorev_create, name="gorev_create"),
     path("gorevler/<uuid:gorev_uuid>/", views.gorev_detail, name="gorev_detail"),
     path("gorevler/<uuid:gorev_uuid>/edit/", views.gorev_edit, name="gorev_edit"),
     path("gorevler/planlama/", views.gorev_planlama, name="gorev_planlama"),
     path("gorevler/rapor/", views.gorev_rapor, name="gorev_rapor"),
+    # Görev Durum ve Aşama İşlemleri
+    path(
+        "gorevler/<uuid:gorev_uuid>/durum-degistir/",
+        views.gorev_durum_degistir,
+        name="gorev_durum_degistir",
+    ),
+    path(
+        "gorevler/<uuid:gorev_uuid>/asama-ekle/",
+        views.gorev_asama_ekle,
+        name="gorev_asama_ekle",
+    ),
+    path(
+        "asamalar/<uuid:asama_uuid>/durum-degistir/",
+        views.gorev_asama_durum_degistir,
+        name="gorev_asama_durum_degistir",
+    ),
     # HTMX Görev İşlemleri
     path(
         "gorevler/<uuid:gorev_uuid>/asamalar/",

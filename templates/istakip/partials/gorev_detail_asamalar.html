@@ -1,0 +1,131 @@
+            <div id="asamalar-tab" class="tab-content">
+    <div class="space-y-4">
+        <!-- Mevcut Aşamalar -->
+        {% for asama in gorev.asamalar.all %}
+        <div class="bg-gradient-to-r 
+            {% if asama.durum == 'tamamlandi' %}
+                from-green-50 to-emerald-50 border-green-200
+            {% elif asama.durum == 'devam_ediyor' %}
+                from-blue-50 to-cyan-50 border-blue-200
+            {% elif asama.durum == 'beklemede' %}
+                from-yellow-50 to-amber-50 border-yellow-200
+            {% else %}
+                from-gray-50 to-gray-100 border-gray-200
+            {% endif %}
+            border rounded-xl p-5 hover:shadow-md transition-all duration-200">
+            
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-3">
+                        <!-- Numaralı Badge -->
+                        <div class="w-8 h-8 
+                            {% if asama.durum == 'tamamlandi' %}
+                                bg-green-500 text-white
+                            {% elif asama.durum == 'devam_ediyor' %}
+                                bg-blue-500 text-white
+                            {% elif asama.durum == 'beklemede' %}
+                                bg-yellow-500 text-white
+                            {% else %}
+                                bg-gray-400 text-white
+                            {% endif %}
+                            rounded-full flex items-center justify-center text-sm font-bold">
+                            {{ forloop.counter }}
+                        </div>
+                        
+                        <h4 class="font-semibold text-gray-900 text-lg">{{ asama.ad }}</h4>
+                        
+                        <!-- Modern Durum Badge -->
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                            {% if asama.durum == 'tamamlandi' %}
+                                bg-green-100 text-green-800 border border-green-200
+                            {% elif asama.durum == 'devam_ediyor' %}
+                                bg-blue-100 text-blue-800 border border-blue-200
+                            {% elif asama.durum == 'beklemede' %}
+                                bg-yellow-100 text-yellow-800 border border-yellow-200
+                            {% else %}
+                                bg-gray-100 text-gray-800 border border-gray-200
+                            {% endif %}">
+                            {% if asama.durum == 'tamamlandi' %}
+                                <i class="fas fa-check mr-1"></i>
+                            {% elif asama.durum == 'devam_ediyor' %}
+                                <i class="fas fa-play mr-1"></i>
+                            {% elif asama.durum == 'beklemede' %}
+                                <i class="fas fa-clock mr-1"></i>
+                            {% else %}
+                                <i class="fas fa-pause mr-1"></i>
+                            {% endif %}
+                            {{ asama.get_durum_display }}
+                        </span>
+                    </div>
+                    
+                    {% if asama.aciklama %}
+                    <p class="text-gray-700 mb-3 ml-11 bg-white/50 p-3 rounded-lg">{{ asama.aciklama }}</p>
+                    {% endif %}
+                    
+                    <div class="ml-11 flex flex-wrap items-center gap-4 text-sm">
+                        {% if asama.sorumlu %}
+                        <div class="flex items-center gap-1 text-gray-600">
+                            <i class="fas fa-user text-emerald-500"></i>
+                            <span class="font-medium">{{ asama.sorumlu.ad }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if asama.baslangic_tarihi %}
+                        <div class="flex items-center gap-1 text-gray-600">
+                            <i class="fas fa-calendar-plus text-blue-500"></i>
+                            <span>{{ asama.baslangic_tarihi|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if asama.tamamlanma_tarihi %}
+                        <div class="flex items-center gap-1 text-gray-600">
+                            <i class="fas fa-calendar-check text-green-500"></i>
+                            <span>{{ asama.tamamlanma_tarihi|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Durum Değiştir Dropdown -->
+                <div class="flex items-center gap-2">
+                    <form method="post" action="{% url 'istakip:gorev_asama_durum_degistir' asama.uuid %}" class="inline">
+                        {% csrf_token %}
+                        <select name="durum" onchange="this.form.submit()" 
+                                class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white">
+                            <option value="beklemede" {% if asama.durum == 'beklemede' %}selected{% endif %}>⏳ Beklemede</option>
+                            <option value="baslamadi" {% if asama.durum == 'baslamadi' %}selected{% endif %}>⏸️ Başlamadı</option>
+                            <option value="devam_ediyor" {% if asama.durum == 'devam_ediyor' %}selected{% endif %}>🔄 Devam Ediyor</option>
+                            <option value="tamamlandi" {% if asama.durum == 'tamamlandi' %}selected{% endif %}>✅ Tamamlandı</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 text-gray-500">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-tasks text-2xl text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Henüz aşama eklenmemiş</h3>
+            <p class="text-gray-600 mb-4">Görevinizi aşamalara bölerek takip etmeyi kolaylaştırın</p>
+            <button onclick="openAsamaModal()"
+                    class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                İlk Aşamayı Ekle
+            </button>
+        </div>
+        {% endfor %}
+        
+        <!-- Yeni Aşama Ekleme Butonu -->
+        {% if gorev.asamalar.all %}
+        <div class="border-t border-gray-200 pt-6">
+            <button onclick="openAsamaModal()" 
+                    class="w-full py-4 px-6 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">
+                <i class="fas fa-plus mr-2"></i>
+                Yeni Aşama Ekle
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+            

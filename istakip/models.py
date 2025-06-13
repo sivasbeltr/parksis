@@ -132,6 +132,7 @@ class GunlukKontrol(models.Model):
         ACIL = "acil", _("Acil Müdahale Gerekli")
         GOZDEN_GECIRILDI = "gozden_gecirildi", _("Gözden Geçirildi")
         ISE_DONUSTURULDU = "ise_donusturuldu", _("İşe Dönüştürüldü")
+        COZULDU = "cozuldu", _("Çözüldü")
 
     class KontrolTipiChoices(models.TextChoices):
         RUTIN = "rutin", _("Rutin Kontrol")

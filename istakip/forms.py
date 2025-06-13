@@ -314,3 +314,108 @@ class ParkPersonelAtamaForm(forms.Form):
                 "mahalle", "mahalle__ilce", "park_tipi"
             ).order_by("mahalle__ad", "ad")
             self.fields["parklar"].initial = atanmis_parklar
+
+
+class GorevAsamaForm(forms.ModelForm):
+    """
+    Görev aşaması oluşturma ve düzenleme formu
+    """
+
+    class Meta:
+        model = GorevAsama
+        fields = ["ad", "aciklama", "sorumlu"]
+        widgets = {
+            "ad": forms.TextInput(
+                attrs={
+                    "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                    "placeholder": "Aşama adını giriniz (örn. Hazırlık, Uygulama, Kontrol)",
+                }
+            ),
+            "aciklama": forms.Textarea(
+                attrs={
+                    "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base resize-none focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                    "rows": 3,
+                    "placeholder": "Aşama hakkında detaylı açıklama giriniz...",
+                }
+            ),
+            "sorumlu": forms.Select(
+                attrs={
+                    "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                }
+            ),
+        }
+        labels = {
+            "ad": _("Aşama Adı"),
+            "aciklama": _("Açıklama"),
+            "sorumlu": _("Sorumlu Personel"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        gorev = kwargs.pop("gorev", None)
+        super().__init__(*args, **kwargs)
+
+        # Sadece aktif personelleri göster
+        self.fields["sorumlu"].queryset = Personel.objects.filter(aktif=True).order_by(
+            "ad"
+        )
+        self.fields["sorumlu"].empty_label = "Sorumlu personel seçiniz"
+
+        # Eğer görev varsa, görevdeki atanmış personelleri öncelikli göster
+        if gorev:
+            atanan_personeller = gorev.atamalar.values_list("personel_id", flat=True)
+            if atanan_personeller:
+                self.fields["sorumlu"].queryset = Personel.objects.filter(
+                    aktif=True
+                ).order_by("-id__in=" + ",".join(map(str, atanan_personeller)), "ad")
+
+
+class GorevDurumForm(forms.ModelForm):
+    """
+    Görev durum değişikliği formu
+    """
+
+    not_text = forms.CharField(
+        label=_("Not"),
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base resize-none focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                "rows": 3,
+                "placeholder": "Durum değişikliği ile ilgili notlarınızı yazabilirsiniz...",
+            }
+        ),
+    )
+
+    class Meta:
+        model = Gorev
+        fields = ["durum"]
+        widgets = {
+            "durum": forms.Select(
+                attrs={
+                    "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                }
+            ),
+        }
+        labels = {
+            "durum": _("Yeni Durum"),
+        }
+
+
+class GorevAsamaDurumForm(forms.ModelForm):
+    """
+    Görev aşama durum değişikliği formu
+    """
+
+    class Meta:
+        model = GorevAsama
+        fields = ["durum"]
+        widgets = {
+            "durum": forms.Select(
+                attrs={
+                    "class": "px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                }
+            ),
+        }
+        labels = {
+            "durum": _("Durum"),
+        }

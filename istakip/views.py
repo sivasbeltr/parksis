@@ -21,6 +21,7 @@ from .models import (
     GorevAsama,
     GorevAtama,
     GorevTamamlamaResim,
+    GorevTipi,
     GunlukKontrol,
     KontrolResim,
     ParkPersonel,
@@ -784,50 +785,6 @@ def sorun_detay(request, kontrol_uuid):
 
 
 @login_required
-def sorun_detay(request, kontrol_uuid):
-    """Sorun bildirimi detay sayfası"""
-
-    kontrol = get_object_or_404(
-        GunlukKontrol.objects.select_related(
-            "park", "park__mahalle", "park__park_tipi", "personel"
-        ).prefetch_related("resimler", "ilgili_gorevler__atamalar__personel"),
-        uuid=kontrol_uuid,
-    )
-
-    # İlgili görevler varsa detaylarını getir
-    ilgili_gorevler = kontrol.ilgili_gorevler.all()
-
-    # Sorun için istatistikler
-    ayni_parkta_sorunlar = (
-        GunlukKontrol.objects.filter(
-            park=kontrol.park,
-            durum__in=["sorun_var", "acil", "ise_donusturuldu", "cozuldu"],
-        )
-        .exclude(uuid=kontrol_uuid)
-        .order_by("-kontrol_tarihi")[:5]
-    )
-
-    # Aynı personelin son bildirimleri
-    personel_son_bildirimleri = (
-        GunlukKontrol.objects.filter(
-            personel=kontrol.personel,
-            durum__in=["sorun_var", "acil", "ise_donusturuldu", "cozuldu"],
-        )
-        .exclude(uuid=kontrol_uuid)
-        .order_by("-kontrol_tarihi")[:5]
-    )
-
-    context = {
-        "kontrol": kontrol,
-        "ilgili_gorevler": ilgili_gorevler,
-        "ayni_parkta_sorunlar": ayni_parkta_sorunlar,
-        "personel_son_bildirimleri": personel_son_bildirimleri,
-    }
-
-    return render(request, "istakip/sorun_detay.html", context)
-
-
-@login_required
 @require_http_methods(["GET", "POST"])
 def sorun_gorev_donustur(request, kontrol_uuid):
     """Sorun bildirimini göreve dönüştür"""
@@ -917,15 +874,13 @@ def gorev_list(request):
     oncelik_filter = request.GET.get("oncelik", "")
     park_filter = request.GET.get("park", "")
     personel_filter = request.GET.get("personel", "")
-    gorev_tipi_filter = request.GET.get("gorev_tipi", "")
-    tarih_filter = request.GET.get("tarih", "")
-    sort_by = request.GET.get("sort", "baslangic_tarihi")
+    sort_by = request.GET.get("sort", "created_at")
     sort_direction = request.GET.get("direction", "desc")
 
     # Temel queryset
     gorevler = Gorev.objects.select_related(
-        "park", "gorev_tipi", "olusturan"
-    ).prefetch_related("atamalar__personel", "asamalar")
+        "park", "park__mahalle", "gorev_tipi", "olusturan"
+    ).prefetch_related("atamalar__personel")
 
     # Arama
     if search_query:
@@ -943,46 +898,25 @@ def gorev_list(request):
         gorevler = gorevler.filter(oncelik=oncelik_filter)
 
     if park_filter:
-        gorevler = gorevler.filter(park__uuid=park_filter)
+        gorevler = gorevler.filter(park_id=park_filter)
 
     if personel_filter:
-        gorevler = gorevler.filter(atamalar__personel__uuid=personel_filter).distinct()
-
-    if gorev_tipi_filter:
-        gorevler = gorevler.filter(gorev_tipi__uuid=gorev_tipi_filter)
-
-    # Tarih filtresi
-    if tarih_filter:
-        try:
-            if tarih_filter == "bugun":
-                gorevler = gorevler.filter(baslangic_tarihi__date=timezone.now().date())
-            elif tarih_filter == "bu_hafta":
-                bugun = timezone.now().date()
-                hafta_baslangic = bugun - timedelta(days=bugun.weekday())
-                gorevler = gorevler.filter(baslangic_tarihi__date__gte=hafta_baslangic)
-            elif tarih_filter == "bu_ay":
-                bugun = timezone.now().date()
-                ay_baslangic = bugun.replace(day=1)
-                gorevler = gorevler.filter(baslangic_tarihi__date__gte=ay_baslangic)
-        except:
-            pass
+        gorevler = gorevler.filter(atamalar__personel_id=personel_filter)
 
     # Sıralama
     if sort_direction == "desc":
         sort_by = f"-{sort_by}"
 
-    valid_sorts = ["baslangic_tarihi", "bitis_tarihi", "baslik", "oncelik", "durum"]
+    valid_sorts = ["baslik", "created_at", "baslangic_tarihi", "durum", "oncelik"]
     if sort_by.lstrip("-") in valid_sorts:
         gorevler = gorevler.order_by(sort_by)
     else:
-        gorevler = gorevler.order_by("-baslangic_tarihi")
+        gorevler = gorevler.order_by("-created_at")
 
     # Sayfalama
     per_page = request.GET.get("per_page", 20)
     try:
         per_page = int(per_page)
-        if per_page not in [10, 20, 30, 50]:
-            per_page = 20
     except (ValueError, TypeError):
         per_page = 20
 
@@ -990,38 +924,23 @@ def gorev_list(request):
     page_number = request.GET.get("page")
     gorevler_page = paginator.get_page(page_number)
 
-    # İstatistikler
-    stats = {
-        "toplam_gorev": gorevler.count(),
-        "planlanmis": gorevler.filter(durum="planlanmis").count(),
-        "devam_ediyor": gorevler.filter(durum="devam_ediyor").count(),
-        "tamamlandi": gorevler.filter(durum="tamamlandi").count(),
-        "acil": gorevler.filter(oncelik="acil").count(),
-    }
-
     # Filtre seçenekleri
-    from .models import GorevTipi
-
-    personeller = Personel.objects.filter(aktif=True).order_by("ad")
     parklar = Park.objects.select_related("mahalle").order_by("ad")[:100]
-    gorev_tipleri = GorevTipi.objects.order_by("ad")
+    personeller = Personel.objects.filter(aktif=True).order_by("ad")
 
     context = {
         "gorevler": gorevler_page,
-        "stats": stats,
         "search_query": search_query,
         "durum_filter": durum_filter,
         "oncelik_filter": oncelik_filter,
         "park_filter": park_filter,
         "personel_filter": personel_filter,
-        "gorev_tipi_filter": gorev_tipi_filter,
-        "tarih_filter": tarih_filter,
-        "sort_by": request.GET.get("sort", "baslangic_tarihi"),
+        "sort_by": request.GET.get("sort", "created_at"),
         "sort_direction": sort_direction,
         "per_page": per_page,
-        "personeller": personeller,
         "parklar": parklar,
-        "gorev_tipleri": gorev_tipleri,
+        "personeller": personeller,
+        "total_gorevler": gorevler.count(),
     }
 
     return render(request, "istakip/gorev_list.html", context)
@@ -1034,116 +953,62 @@ def gorev_create(request):
 
     if request.method == "POST":
         try:
+            baslik = request.POST.get("baslik")
+            aciklama = request.POST.get("aciklama", "")
+            park_id = request.POST.get("park")
+            gorev_tipi_id = request.POST.get("gorev_tipi")
+            oncelik = request.POST.get("oncelik", "normal")
+            baslangic_tarihi = request.POST.get("baslangic_tarihi")
+            bitis_tarihi = request.POST.get("bitis_tarihi")
+            personeller = request.POST.getlist("personeller")
+
+            if not baslik or not park_id:
+                messages.error(request, "Başlık ve park seçimi zorunludur.")
+                return redirect("istakip:gorev_create")
+
+            park = get_object_or_404(Park, id=park_id)
+            gorev_tipi = None
+            if gorev_tipi_id:
+                gorev_tipi = get_object_or_404(GorevTipi, id=gorev_tipi_id)
+
             with transaction.atomic():
-                # Form verilerini al
-                park_uuid = request.POST.get("park")
-                gorev_tipi_uuid = request.POST.get("gorev_tipi")
-                baslik = request.POST.get("baslik")
-                aciklama = request.POST.get("aciklama", "")
-                oncelik = request.POST.get("oncelik", "normal")
-                baslangic_tarihi = request.POST.get("baslangic_tarihi")
-                bitis_tarihi = request.POST.get("bitis_tarihi")
-                tekrar_tipi = request.POST.get("tekrar_tipi", "yok")
-                atanan_personeller = request.POST.getlist("atanan_personeller")
-
-                # Gerekli alanları kontrol et
-                if not all([park_uuid, baslik, baslangic_tarihi]):
-                    messages.error(
-                        request, "Park, başlık ve başlangıç tarihi zorunludur."
-                    )
-                    return redirect("istakip:gorev_create")
-
-                # İlişkili modelleri getir
-                park = get_object_or_404(Park, uuid=park_uuid)
-                gorev_tipi = None
-                if gorev_tipi_uuid:
-                    try:
-                        from .models import GorevTipi
-
-                        gorev_tipi = GorevTipi.objects.get(uuid=gorev_tipi_uuid)
-                    except GorevTipi.DoesNotExist:
-                        pass
-
-                # Görev oluştur
                 gorev = Gorev.objects.create(
-                    park=park,
-                    gorev_tipi=gorev_tipi,
                     baslik=baslik,
                     aciklama=aciklama,
+                    park=park,
+                    gorev_tipi=gorev_tipi,
                     oncelik=oncelik,
-                    baslangic_tarihi=baslangic_tarihi,
+                    baslangic_tarihi=baslangic_tarihi if baslangic_tarihi else None,
                     bitis_tarihi=bitis_tarihi if bitis_tarihi else None,
-                    tekrar_tipi=tekrar_tipi,
                     olusturan=request.user,
                     durum="planlanmis",
                 )
 
-                # Personel atamalarını yap
-                for personel_uuid in atanan_personeller:
-                    try:
-                        personel = Personel.objects.get(uuid=personel_uuid)
-                        GorevAtama.objects.create(
-                            gorev=gorev, personel=personel, gorev_rolu="Yürütücü"
-                        )
-                    except Personel.DoesNotExist:
-                        continue
+                # Personel atamalarını oluştur
+                for personel_id in personeller:
+                    personel = get_object_or_404(Personel, id=personel_id)
+                    GorevAtama.objects.create(
+                        gorev=gorev, personel=personel, gorev_rolu="Yürütücü"
+                    )
 
-                messages.success(
-                    request, f"Görev başarıyla oluşturuldu: {gorev.baslik}"
-                )
-                return redirect("istakip:gorev_detail", gorev_uuid=gorev.uuid)
+            messages.success(request, f"'{baslik}' görevi başarıyla oluşturuldu.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev.uuid)
 
         except Exception as e:
-            messages.error(request, f"Görev oluşturulurken hata: {str(e)}")
+            messages.error(request, f"Görev oluşturma sırasında hata: {str(e)}")
 
     # GET request - Form göster
-    from .models import GorevTipi
-
     parklar = Park.objects.select_related("mahalle").order_by("ad")
-    personeller = Personel.objects.filter(aktif=True).order_by("ad")
     gorev_tipleri = GorevTipi.objects.order_by("ad")
+    personeller = Personel.objects.filter(aktif=True).order_by("ad")
 
     context = {
         "parklar": parklar,
-        "personeller": personeller,
         "gorev_tipleri": gorev_tipleri,
+        "personeller": personeller,
     }
 
     return render(request, "istakip/gorev_create.html", context)
-
-
-@login_required
-def gorev_detail(request, gorev_uuid):
-    """Görev detay sayfası"""
-
-    gorev = get_object_or_404(
-        Gorev.objects.select_related(
-            "park", "gorev_tipi", "olusturan", "gunluk_kontrol"
-        ).prefetch_related(
-            "atamalar__personel", "asamalar", "tamamlama_resimleri", "denetim_kayitlari"
-        ),
-        uuid=gorev_uuid,
-    )
-
-    # Aşama istatistikleri
-    asama_stats = {
-        "toplam": gorev.asamalar.count(),
-        "tamamlanan": gorev.asamalar.filter(durum="tamamlandi").count(),
-        "devam_eden": gorev.asamalar.filter(durum="devam_ediyor").count(),
-    }
-
-    # İlerleme yüzdesi
-    ilerleme = 0
-    if asama_stats["toplam"] > 0:
-        ilerleme = (asama_stats["tamamlanan"] / asama_stats["toplam"]) * 100
-
-    context = {
-        "gorev": gorev,
-        "asama_stats": asama_stats,
-        "ilerleme": round(ilerleme, 1),
-    }
-
-    return render(request, "istakip/gorev_detail.html", context)
 
 
 @login_required
@@ -1155,107 +1020,106 @@ def gorev_edit(request, gorev_uuid):
 
     if request.method == "POST":
         try:
-            with transaction.atomic():
-                # Form verilerini al ve güncelle
-                gorev.baslik = request.POST.get("baslik", gorev.baslik)
-                gorev.aciklama = request.POST.get("aciklama", gorev.aciklama)
-                gorev.oncelik = request.POST.get("oncelik", gorev.oncelik)
-                gorev.durum = request.POST.get("durum", gorev.durum)
+            gorev.baslik = request.POST.get("baslik", gorev.baslik)
+            gorev.aciklama = request.POST.get("aciklama", "")
 
-                baslangic_tarihi = request.POST.get("baslangic_tarihi")
-                if baslangic_tarihi:
-                    gorev.baslangic_tarihi = baslangic_tarihi
+            park_id = request.POST.get("park")
+            if park_id:
+                gorev.park = get_object_or_404(Park, id=park_id)
 
-                bitis_tarihi = request.POST.get("bitis_tarihi")
-                if bitis_tarihi:
-                    gorev.bitis_tarihi = bitis_tarihi
+            gorev_tipi_id = request.POST.get("gorev_tipi")
+            if gorev_tipi_id:
+                gorev.gorev_tipi = get_object_or_404(GorevTipi, id=gorev_tipi_id)
 
-                gorev.save()
+            gorev.oncelik = request.POST.get("oncelik", gorev.oncelik)
 
-                # Personel atamalarını güncelle
-                atanan_personeller = request.POST.getlist("atanan_personeller")
-                # Mevcut atamaları sil
-                gorev.atamalar.all().delete()
+            baslangic_tarihi = request.POST.get("baslangic_tarihi")
+            if baslangic_tarihi:
+                gorev.baslangic_tarihi = baslangic_tarihi
 
-                # Yeni atamaları ekle
-                for personel_uuid in atanan_personeller:
-                    try:
-                        personel = Personel.objects.get(uuid=personel_uuid)
-                        GorevAtama.objects.create(
-                            gorev=gorev, personel=personel, gorev_rolu="Yürütücü"
-                        )
-                    except Personel.DoesNotExist:
-                        continue
+            bitis_tarihi = request.POST.get("bitis_tarihi")
+            if bitis_tarihi:
+                gorev.bitis_tarihi = bitis_tarihi
 
-                messages.success(request, "Görev başarıyla güncellendi.")
-                return redirect("istakip:gorev_detail", gorev_uuid=gorev.uuid)
+            gorev.save()
+
+            messages.success(request, "Görev başarıyla güncellendi.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev.uuid)
 
         except Exception as e:
-            messages.error(request, f"Görev güncellenirken hata: {str(e)}")
+            messages.error(request, f"Görev güncelleme sırasında hata: {str(e)}")
 
-    # GET request - Form göster
-    from .models import GorevTipi
-
+    # GET request
     parklar = Park.objects.select_related("mahalle").order_by("ad")
-    personeller = Personel.objects.filter(aktif=True).order_by("ad")
     gorev_tipleri = GorevTipi.objects.order_by("ad")
-
-    # Mevcut atamalar
-    atanan_personeller = [atama.personel.uuid for atama in gorev.atamalar.all()]
 
     context = {
         "gorev": gorev,
         "parklar": parklar,
-        "personeller": personeller,
         "gorev_tipleri": gorev_tipleri,
-        "atanan_personeller": atanan_personeller,
-        "is_edit": True,
     }
 
-    return render(request, "istakip/gorev_create.html", context)
+    return render(request, "istakip/gorev_edit.html", context)
+
+
+@login_required
+def gorev_detail(request, gorev_uuid):
+    """Görev detay sayfası"""
+
+    gorev = get_object_or_404(
+        Gorev.objects.select_related(
+            "park", "park__mahalle", "gorev_tipi", "olusturan", "gunluk_kontrol"
+        ).prefetch_related("atamalar__personel", "asamalar", "tamamlama_resimleri"),
+        uuid=gorev_uuid,
+    )
+
+    # Aşama istatistikleri
+    asamalar = gorev.asamalar.all()
+    asama_stats = {
+        "toplam": asamalar.count(),
+        "tamamlanan": asamalar.filter(durum="tamamlandi").count(),
+        "devam_eden": asamalar.filter(durum="devam_ediyor").count(),
+        "bekleyen": asamalar.filter(durum="beklemede").count(),
+    }
+
+    # İlerleme yüzdesi
+    ilerleme = 0
+    if asama_stats["toplam"] > 0:
+        ilerleme = int((asama_stats["tamamlanan"] / asama_stats["toplam"]) * 100)
+
+    context = {
+        "gorev": gorev,
+        "asama_stats": asama_stats,
+        "ilerleme": round(ilerleme, 1),
+    }
+
+    return render(request, "istakip/gorev_detail.html", context)
 
 
 @login_required
 def gorev_planlama(request):
-    """Görev planlama takvimi"""
+    """Görev planlama ve takvim görünümü"""
 
-    # Aktif görevleri getir
-    gorevler = (
-        Gorev.objects.filter(durum__in=["planlanmis", "devam_ediyor"])
-        .select_related("park", "gorev_tipi")
-        .prefetch_related("atamalar__personel")
-        .order_by("baslangic_tarihi")
+    # Planlama sayfası için temel görevler
+    gorevler = Gorev.objects.select_related("park", "gorev_tipi").prefetch_related(
+        "atamalar__personel"
     )
 
-    # Takvim için görevleri hazırla
-    takvim_gorevler = []
-    for gorev in gorevler:
-        takvim_gorevler.append(
-            {
-                "id": str(gorev.uuid),
-                "title": gorev.baslik,
-                "start": (
-                    gorev.baslangic_tarihi.isoformat()
-                    if gorev.baslangic_tarihi
-                    else None
-                ),
-                "end": gorev.bitis_tarihi.isoformat() if gorev.bitis_tarihi else None,
-                "color": {
-                    "acil": "#ef4444",
-                    "yuksek": "#f97316",
-                    "normal": "#10b981",
-                    "dusuk": "#6b7280",
-                }.get(gorev.oncelik, "#10b981"),
-                "description": gorev.aciklama or "",
-                "park": gorev.park.ad,
-                "durum": gorev.get_durum_display(),
-                "oncelik": gorev.get_oncelik_display(),
-            }
-        )
+    # Bugünkü görevler
+    bugun = timezone.now().date()
+    bugun_gorevler = gorevler.filter(baslangic_tarihi__date=bugun)
+
+    # Bu haftaki görevler
+    hafta_baslangic = bugun - timedelta(days=bugun.weekday())
+    hafta_bitis = hafta_baslangic + timedelta(days=6)
+    hafta_gorevler = gorevler.filter(
+        baslangic_tarihi__date__range=[hafta_baslangic, hafta_bitis]
+    )
 
     context = {
-        "gorevler": gorevler,
-        "takvim_gorevler": takvim_gorevler,
+        "bugun_gorevler": bugun_gorevler,
+        "hafta_gorevler": hafta_gorevler,
+        "bugun": bugun,
     }
 
     return render(request, "istakip/gorev_planlama.html", context)
@@ -1263,94 +1127,189 @@ def gorev_planlama(request):
 
 @login_required
 def gorev_rapor(request):
-    """Görev raporları ve analizleri"""
+    """Görev raporları ve analiz"""
 
     # Tarih aralığı
     bugun = timezone.now().date()
     gecen_ay = bugun - timedelta(days=30)
-    gecen_hafta = bugun - timedelta(days=7)
 
     # Temel istatistikler
-    tum_gorevler = Gorev.objects.all()
+    gorevler = Gorev.objects.all()
 
-    # Durum bazlı analiz
-    durum_stats = {
-        "planlanmis": tum_gorevler.filter(durum="planlanmis").count(),
-        "devam_ediyor": tum_gorevler.filter(durum="devam_ediyor").count(),
-        "tamamlandi": tum_gorevler.filter(durum="tamamlandi").count(),
-        "iptal": tum_gorevler.filter(durum="iptal").count(),
-        "toplam": tum_gorevler.count(),
+    stats = {
+        "toplam": gorevler.count(),
+        "tamamlanan": gorevler.filter(durum="tamamlandi").count(),
+        "devam_eden": gorevler.filter(durum="devam_ediyor").count(),
+        "planlanmis": gorevler.filter(durum="planlanmis").count(),
+        "iptal": gorevler.filter(durum="iptal").count(),
     }
 
     # Öncelik bazlı analiz
     oncelik_stats = {
-        "acil": tum_gorevler.filter(oncelik="acil").count(),
-        "yuksek": tum_gorevler.filter(oncelik="yuksek").count(),
-        "normal": tum_gorevler.filter(oncelik="normal").count(),
-        "dusuk": tum_gorevler.filter(oncelik="dusuk").count(),
+        "acil": gorevler.filter(oncelik="acil").count(),
+        "yuksek": gorevler.filter(oncelik="yuksek").count(),
+        "normal": gorevler.filter(oncelik="normal").count(),
+        "dusuk": gorevler.filter(oncelik="dusuk").count(),
     }
 
     # Park bazlı analiz
     park_stats = (
-        tum_gorevler.values("park__ad", "park__uuid")
-        .annotate(
-            gorev_sayisi=Count("id"),
-            tamamlanan=Count("id", filter=Q(durum="tamamlandi")),
-        )
+        gorevler.values("park__ad")
+        .annotate(gorev_sayisi=Count("id"))
         .order_by("-gorev_sayisi")[:10]
     )
 
-    # Personel bazlı analiz
-    personel_stats = (
-        GorevAtama.objects.values("personel__ad", "personel__uuid")
-        .annotate(
-            atanan_gorev=Count("id"),
-            tamamlanan=Count("id", filter=Q(gorev__durum="tamamlandi")),
-        )
-        .order_by("-atanan_gorev")[:10]
-    )
-
-    # Aylık trend analizi
-    aylik_trend = []
-    for i in range(12):
-        ay_oncesi = bugun.replace(day=1) - timedelta(days=30 * i)
-        ay_baslangic = ay_oncesi.replace(day=1)
-        ay_bitis = (
-            ay_baslangic.replace(month=ay_baslangic.month % 12 + 1)
-            if ay_baslangic.month < 12
-            else ay_baslangic.replace(year=ay_baslangic.year + 1, month=1)
-        ) - timedelta(days=1)
-
-        ay_gorevler = tum_gorevler.filter(
-            baslangic_tarihi__date__gte=ay_baslangic,
-            baslangic_tarihi__date__lte=ay_bitis,
-        ).count()
-
-        aylik_trend.append(
-            {"ay": ay_baslangic.strftime("%m/%Y"), "gorev_sayisi": ay_gorevler}
-        )
-    aylik_trend.reverse()
-
-    # Tamamlanma oranları
-    tamamlanma_orani = (
-        (durum_stats["tamamlandi"] / durum_stats["toplam"] * 100)
-        if durum_stats["toplam"] > 0
-        else 0
-    )
-
     context = {
-        "durum_stats": durum_stats,
+        "stats": stats,
         "oncelik_stats": oncelik_stats,
         "park_stats": park_stats,
-        "personel_stats": personel_stats,
-        "aylik_trend": aylik_trend,
-        "tamamlanma_orani": round(tamamlanma_orani, 1),
-        "gecen_hafta_gorev": tum_gorevler.filter(
-            baslangic_tarihi__date__gte=gecen_hafta
-        ).count(),
-        "gecen_ay_gorev": tum_gorevler.filter(
-            baslangic_tarihi__date__gte=gecen_ay
-        ).count(),
     }
 
     return render(request, "istakip/gorev_rapor.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_durum_degistir(request, gorev_uuid):
+    """Görev durumu değiştirme"""
+
+    gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+    try:
+        yeni_durum = request.POST.get("durum")
+        not_text = request.POST.get("not", "")
+
+        if not yeni_durum:
+            messages.error(request, "Durum seçimi zorunludur.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+        valid_durumlar = ["planlanmis", "devam_ediyor", "tamamlandi", "iptal"]
+        if yeni_durum not in valid_durumlar:
+            messages.error(request, "Geçersiz durum.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+        # Tamamlandı durumuna geçmek için kontrol
+        if yeni_durum == "tamamlandi":
+            # Tüm aşamalar tamamlanmış mı kontrol et
+            tum_asamalar = gorev.asamalar.all()
+            if tum_asamalar.exists():
+                tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+                if tum_asamalar.count() != tamamlanan_asamalar.count():
+                    messages.error(
+                        request,
+                        "Görevi tamamlamak için önce tüm aşamaların tamamlanmış olması gerekir.",
+                    )
+                    return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+        eski_durum = gorev.durum
+        gorev.durum = yeni_durum
+
+        if yeni_durum == "tamamlandi" and not gorev.tamamlanma_tarihi:
+            gorev.tamamlanma_tarihi = timezone.now()
+
+        gorev.save()
+
+        # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+        if gorev.gunluk_kontrol:
+            if yeni_durum == "tamamlandi":
+                gorev.gunluk_kontrol.durum = "cozuldu"
+            elif yeni_durum in ["devam_ediyor", "planlanmis"]:
+                gorev.gunluk_kontrol.durum = "ise_donusturuldu"
+            gorev.gunluk_kontrol.save()
+
+        messages.success(
+            request, f"Görev durumu '{gorev.get_durum_display()}' olarak güncellendi."
+        )
+
+    except Exception as e:
+        messages.error(request, f"Durum güncelleme sırasında hata: {str(e)}")
+
+    return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_asama_ekle(request, gorev_uuid):
+    """Yeni görev aşaması ekleme"""
+
+    gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+    try:
+        ad = request.POST.get("ad")
+        aciklama = request.POST.get("aciklama", "")
+        sorumlu_id = request.POST.get("sorumlu")
+
+        if not ad:
+            messages.error(request, "Aşama adı zorunludur.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+        sorumlu = None
+        if sorumlu_id:
+            sorumlu = get_object_or_404(Personel, id=sorumlu_id)
+
+        GorevAsama.objects.create(
+            gorev=gorev, ad=ad, aciklama=aciklama, sorumlu=sorumlu, durum="beklemede"
+        )
+
+        messages.success(request, f"'{ad}' aşaması başarıyla eklendi.")
+
+    except Exception as e:
+        messages.error(request, f"Aşama ekleme sırasında hata: {str(e)}")
+
+    return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_asama_durum_degistir(request, asama_uuid):
+    """Görev aşama durumu değiştirme"""
+
+    asama = get_object_or_404(GorevAsama, uuid=asama_uuid)
+
+    try:
+        yeni_durum = request.POST.get("durum")
+
+        if not yeni_durum:
+            messages.error(request, "Durum seçimi zorunludur.")
+            return redirect("istakip:gorev_detail", gorev_uuid=asama.gorev.uuid)
+
+        valid_durumlar = ["beklemede", "baslamadi", "devam_ediyor", "tamamlandi"]
+        if yeni_durum not in valid_durumlar:
+            messages.error(request, "Geçersiz durum.")
+            return redirect("istakip:gorev_detail", gorev_uuid=asama.gorev.uuid)
+
+        eski_durum = asama.durum
+        asama.durum = yeni_durum
+
+        if yeni_durum == "devam_ediyor" and not asama.baslangic_tarihi:
+            asama.baslangic_tarihi = timezone.now()
+        elif yeni_durum == "tamamlandi" and not asama.tamamlanma_tarihi:
+            asama.tamamlanma_tarihi = timezone.now()
+
+        asama.save()
+
+        # Ana görevi de güncelle
+        if yeni_durum == "devam_ediyor" and asama.gorev.durum == "planlanmis":
+            asama.gorev.durum = "devam_ediyor"
+            asama.gorev.save()
+
+        # Tüm aşamalar tamamlandı mı kontrol et
+        tum_asamalar = asama.gorev.asamalar.all()
+        tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+        if (
+            tum_asamalar.count() > 0
+            and tum_asamalar.count() == tamamlanan_asamalar.count()
+        ):
+            asama.gorev.durum = "tamamlandi"
+            asama.gorev.tamamlanma_tarihi = timezone.now()
+            asama.gorev.save()
+
+        messages.success(
+            request,
+            f"'{asama.ad}' aşaması '{asama.get_durum_display()}' olarak güncellendi.",
+        )
+
+    except Exception as e:
+        messages.error(request, f"Aşama durum güncelleme sırasında hata: {str(e)}")
+
+    return redirect("istakip:gorev_detail", gorev_uuid=asama.gorev.uuid)
