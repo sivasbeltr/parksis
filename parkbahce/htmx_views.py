@@ -586,65 +586,59 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
 
     park = get_object_or_404(Park, uuid=park_uuid)
 
-    # Filtreleme parametreleri
-    durum_filter = request.GET.get("durum", "")
-    baslangic_tarihi = request.GET.get("baslangic_tarihi", "")
-    bitis_tarihi = request.GET.get("bitis_tarihi", "")
-
-    # Günlük kontrolleri getir
+    # Son 30 günlük timeline oluştur
     from datetime import datetime, timedelta
+
+    from django.db.models import Count
 
     from istakip.models import GunlukKontrol
 
-    # Son 30 gün varsayılan
-    if not baslangic_tarihi:
-        baslangic_tarihi = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not bitis_tarihi:
-        bitis_tarihi = datetime.now().strftime("%Y-%m-%d")
+    # Son 30 günün tarih listesini oluştur
+    bugun = datetime.now().date()
+    baslangic_tarihi = bugun - timedelta(days=29)  # 30 gün (bugün dahil)
 
+    # Tüm günleri listele (bugünden geriye doğru)
+    gun_listesi = []
+    for i in range(30):
+        tarih = bugun - timedelta(days=i)
+        gun_listesi.append(tarih)
+
+    # Bu tarihlerdeki kontrolleri al
     kontroller = (
-        GunlukKontrol.objects.filter(park=park)
+        GunlukKontrol.objects.filter(
+            park=park,
+            kontrol_tarihi__date__gte=baslangic_tarihi,
+            kontrol_tarihi__date__lte=bugun,
+        )
         .select_related("personel")
         .prefetch_related("resimler")
         .order_by("-kontrol_tarihi")
     )
 
-    # Tarih filtresi
-    if baslangic_tarihi:
-        try:
-            baslangic_date = datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
-            kontroller = kontroller.filter(kontrol_tarihi__date__gte=baslangic_date)
-        except ValueError:
-            pass
+    # Tarihe göre gruplama
+    from collections import defaultdict
 
-    if bitis_tarihi:
-        try:
-            bitis_date = datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
-            kontroller = kontroller.filter(kontrol_tarihi__date__lte=bitis_date)
-        except ValueError:
-            pass
+    tarih_gruplar = defaultdict(list)
+    for kontrol in kontroller:
+        tarih_gruplar[kontrol.kontrol_tarihi.date()].append(kontrol)
 
-    # Durum filtresi
-    if durum_filter:
-        kontroller = kontroller.filter(durum=durum_filter)
+    # Timeline verisi oluştur (tüm günler için)
+    gunluk_kontrol_timeline = []
+    for tarih in gun_listesi:
+        gunluk_kontrol_timeline.append(
+            {
+                "tarih": tarih,
+                "kontroller": tarih_gruplar[
+                    tarih
+                ],  # Eğer o gün kontrol yoksa boş liste
+            }
+        )
 
-    # Son 15 kayıt
-    kontroller = kontroller[:15]
-
-    # Durum istatistikleri - filtrelenmiş tarihlere göre
-    from django.db.models import Count
-
-    try:
-        filter_start = datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
-        filter_end = datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
-    except ValueError:
-        filter_start = datetime.now().date() - timedelta(days=30)
-        filter_end = datetime.now().date()
-
+    # Durum istatistikleri - son 30 günlük
     durum_stats_query = GunlukKontrol.objects.filter(
         park=park,
-        kontrol_tarihi__date__gte=filter_start,
-        kontrol_tarihi__date__lte=filter_end,
+        kontrol_tarihi__date__gte=baslangic_tarihi,
+        kontrol_tarihi__date__lte=bugun,
     )
 
     # Tüm durumlar için sayıları hesapla
@@ -662,12 +656,11 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
 
     context = {
         "park": park,
-        "kontroller": kontroller,
+        "gunluk_kontrol_timeline": gunluk_kontrol_timeline,
         "durum_stats": durum_stats,
         "toplam_kontrol": toplam_kontrol,
-        "durum_filter": durum_filter,
         "baslangic_tarihi": baslangic_tarihi,
-        "bitis_tarihi": bitis_tarihi,
+        "bitis_tarihi": bugun,
     }
 
     return render(request, "parkbahce/tabs/park_sorun_gecmisi_tab.html", context)

@@ -1,19 +1,154 @@
 <div id="gecmis-tab" class="tab-content hidden">
-    <div class="space-y-2">
-        <div class="flex items-start gap-2">
-            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-plus text-blue-600 text-xs"></i>
-            </div>
-            <div class="flex-1">
-                <p class="text-xs text-gray-900">
-                    Görev <strong>{{ gorev.olusturan.get_full_name|default:gorev.olusturan.username }}</strong> tarafından oluşturuldu
-                </p>
-                <p class="text-xs text-gray-400">{{ gorev.created_at|date:"d.m.Y H:i" }}</p>
+    <div class="space-y-3">
+        <!-- Görev Oluşturma Kaydı -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-plus text-white text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Görev Oluşturuldu</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            <i class="fas fa-calendar mr-1"></i>Başlangıç
+                        </span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs mb-1">
+                        Görev <strong>{{ gorev.olusturan.get_full_name|default:gorev.olusturan.username }}</strong> tarafından oluşturuldu
+                    </p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-clock text-blue-500"></i>
+                            {{ gorev.created_at|date:"d.m.Y H:i" }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-user text-gray-400"></i>
+                            {{ gorev.olusturan.get_full_name|default:gorev.olusturan.username }}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="text-center py-4 text-gray-500">
-            <i class="fas fa-history text-xl mb-1"></i>
-            <p class="text-xs">Daha fazla geçmiş kaydı yok</p>
+
+        <!-- Durum Değişiklikleri (Varsayılan kayıtlar) -->
+        {% if gorev.durum == 'devam_ediyor' or gorev.durum == 'tamamlandi' %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-play text-white text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Görev Başlatıldı</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            <i class="fas fa-play mr-1"></i>Başlatma
+                        </span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs mb-1">
+                        Görev çalışmaya başladı ve aktif olarak yürütülüyor
+                    </p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-clock text-green-500"></i>
+                            {% if gorev.baslangic_tarihi %}{{ gorev.baslangic_tarihi|date:"d.m.Y H:i" }}{% else %}{{ gorev.updated_at|date:"d.m.Y H:i" }}{% endif %}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-cog text-gray-400"></i>
+                            Sistem
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
+        {% endif %}
+
+        {% if gorev.durum == 'tamamlandi' %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-check text-white text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Görev Tamamlandı</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            <i class="fas fa-check-circle mr-1"></i>Tamamlama
+                        </span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 text-xs mb-1">
+                        Görev başarıyla tamamlandı ve kapatıldı
+                    </p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-clock text-emerald-500"></i>
+                            {% if gorev.tamamlanma_tarihi %}{{ gorev.tamamlanma_tarihi|date:"d.m.Y H:i" }}{% else %}{{ gorev.updated_at|date:"d.m.Y H:i" }}{% endif %}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-cog text-gray-400"></i>
+                            Sistem
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Aşama Aktiviteleri -->
+        {% if gorev.asamalar.all %}
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <i class="fas fa-tasks text-emerald-600 mr-2"></i>
+                Aşama Aktiviteleri
+            </h3>
+            <div class="space-y-2">
+                {% for asama in gorev.asamalar.all %}
+                {% if asama.baslangic_tarihi or asama.tamamlanma_tarihi %}
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 
+                            {% if asama.durum == 'tamamlandi' %}bg-green-500{% elif asama.durum == 'devam_ediyor' %}bg-blue-500{% else %}bg-gray-400{% endif %} 
+                            rounded-full flex items-center justify-center text-white text-xs font-bold">
+                            {{ forloop.counter }}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-900 dark:text-white text-xs">{{ asama.ad }}</h4>
+                            <div class="mt-1 space-y-1">
+                                {% if asama.baslangic_tarihi %}
+                                <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-play text-blue-500"></i>
+                                    <span>Başladı: {{ asama.baslangic_tarihi|date:"d.m.Y H:i" }}</span>
+                                    {% if asama.sorumlu %}
+                                    <span class="text-gray-500">• {{ asama.sorumlu.ad }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                {% if asama.tamamlanma_tarihi %}
+                                <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check text-green-500"></i>
+                                    <span>Tamamlandı: {{ asama.tamamlanma_tarihi|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Boş Durum -->
+        {% if not gorev.asamalar.all or not gorev.asamalar.all.0.baslangic_tarihi %}
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div class="text-center py-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
+                    <i class="fas fa-history text-white text-sm"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Detaylı geçmiş kaydı yok</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-xs">Görev aktiviteleri başladıkça daha detaylı geçmiş kayıtları burada görünecek</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>

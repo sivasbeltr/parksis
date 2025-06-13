@@ -3,399 +3,598 @@
 
 {% block title %}{{ kontrol.park.ad }} - Sorun Detayı{% endblock %}
 
-{% block page_title %}
-<div class="flex items-center justify-between">
-    <div class="flex items-center gap-3">
-        <a href="{% url 'istakip:sorun_bildirimleri' %}" 
-           class="text-gray-600 hover:text-gray-900 transition-colors">
-            <i class="fas fa-arrow-left text-lg"></i>
-        </a>
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>
+{% block content %}
+<!-- Başlık Alanı -->
+<div class="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 rounded-xl shadow-soft p-4 mb-6 border border-red-100">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'istakip:sorun_bildirimleri' %}" class="text-red-600 hover:text-red-700 transition-colors">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </a>
+            <h1 class="text-xl font-bold text-gray-900 flex items-center">
+                {% if kontrol.durum == 'acil' %}
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                {% else %}
+                    <i class="fas fa-exclamation-circle mr-2 text-orange-600"></i>
+                {% endif %}
                 Sorun Detayı
             </h1>
-            <p class="text-gray-600 dark:text-gray-400">
-                <i class="fas fa-map-marker-alt mr-1"></i>
-                {{ kontrol.park.ad }} - {{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}
-            </p>
+        </div>
+        
+        <!-- Action buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openSorunDurumModal()" 
+                    class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                <i class="fas fa-edit mr-2"></i>Durum Değiştir
+            </button>
+            
+            {% if kontrol.durum in 'sorun_var,acil' and not kontrol.ilgili_gorevler.exists %}
+                <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}"
+                   class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    <i class="fas fa-plus-circle mr-2"></i>Göreve Dönüştür
+                </a>
+            {% elif kontrol.ilgili_gorevler.exists %}
+                <span class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                    <i class="fas fa-check mr-2"></i>Göreve Dönüştürüldü
+                </span>
+            {% elif kontrol.durum == 'cozuldu' %}
+                <span class="inline-flex items-center px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
+                    <i class="fas fa-check-circle mr-2"></i>Sorun Çözüldü
+                </span>
+            {% endif %}
+            
+            <a href="{% url 'parkbahce:park_detail' kontrol.park.uuid %}"
+               class="inline-flex items-center px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-map-marker-alt mr-2"></i>Park
+            </a>
         </div>
     </div>
-    
-    <div class="flex items-center gap-3">
-        <!-- Durum Etiketi -->
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-            {% if kontrol.durum == 'acil' %}
-                bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
-            {% elif kontrol.durum == 'sorun_var' %}
-                bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300
-            {% elif kontrol.durum == 'ise_donusturuldu' %}
-                bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300
-            {% elif kontrol.durum == 'cozuldu' %}
-                bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300
-            {% else %}
-                bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300
-            {% endif %}">
-            {% if kontrol.durum == 'acil' %}
-                <i class="fas fa-exclamation-triangle mr-2"></i>ACİL
-            {% elif kontrol.durum == 'sorun_var' %}
-                <i class="fas fa-exclamation-circle mr-2"></i>SORUN VAR
-            {% elif kontrol.durum == 'ise_donusturuldu' %}
-                <i class="fas fa-arrow-right mr-2"></i>İŞE DÖNÜŞTÜRÜLDİ
-            {% elif kontrol.durum == 'cozuldu' %}
-                <i class="fas fa-check-circle mr-2"></i>ÇÖZÜLDÜ
-            {% endif %}
-        </span>
-        
-        <!-- Aksiyonlar -->
-        {% if kontrol.durum in 'sorun_var,acil' and not kontrol.ilgili_gorevler.exists %}
-            <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}"
-               class="px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg transition-colors">
-                <i class="fas fa-plus-circle mr-2"></i>
-                Göreve Dönüştür
-            </a>
-        {% endif %}
-    </div>
 </div>
-{% endblock %}
-
-{% block content %}
-<div class="space-y-6">    <!-- Ana Bilgiler Kartı -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft
-        {% if kontrol.durum == 'acil' %}
-            bg-gradient-to-br from-red-50/50 via-white to-red-50/30 dark:from-red-900/10 dark:via-gray-800 dark:to-red-900/5 border-red-200/30 dark:border-red-700/30
-        {% elif kontrol.durum == 'sorun_var' %}
-            bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-amber-900/10 dark:via-gray-800 dark:to-amber-900/5 border-amber-200/30 dark:border-amber-700/30
-        {% elif kontrol.durum == 'ise_donusturuldu' %}
-            bg-gradient-to-br from-blue-50/50 via-white to-blue-50/30 dark:from-blue-900/10 dark:via-gray-800 dark:to-blue-900/5 border-blue-200/30 dark:border-blue-700/30
-        {% elif kontrol.durum == 'cozuldu' %}
-            bg-gradient-to-br from-green-50/50 via-white to-green-50/30 dark:from-green-900/10 dark:via-gray-800 dark:to-green-900/5 border-green-200/30 dark:border-green-700/30
-        {% endif %}">
-        <div class="px-6 py-4 bg-gradient-to-r 
-            {% if kontrol.durum == 'acil' %}
-                from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20
-            {% elif kontrol.durum == 'sorun_var' %}
-                from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20
-            {% elif kontrol.durum == 'ise_donusturuldu' %}
-                from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20
-            {% elif kontrol.durum == 'cozuldu' %}
-                from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20
-            {% else %}
-                from-park-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800
-            {% endif %} border-b border-gray-200/60 dark:border-gray-700/60">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 
-                    {% if kontrol.durum == 'acil' %}
-                        bg-red-100 dark:bg-red-900/30
-                    {% elif kontrol.durum == 'sorun_var' %}
-                        bg-amber-100 dark:bg-amber-900/30
-                    {% elif kontrol.durum == 'ise_donusturuldu' %}
-                        bg-blue-100 dark:bg-blue-900/30
-                    {% elif kontrol.durum == 'cozuldu' %}
-                        bg-green-100 dark:bg-green-900/30
-                    {% else %}
-                        bg-park-green-100 dark:bg-park-green-900/30
-                    {% endif %} rounded-xl flex items-center justify-center">
-                    <i class="fas fa-info-circle 
-                        {% if kontrol.durum == 'acil' %}
-                            text-red-600 dark:text-red-400
-                        {% elif kontrol.durum == 'sorun_var' %}
-                            text-amber-600 dark:text-amber-400
-                        {% elif kontrol.durum == 'ise_donusturuldu' %}
-                            text-blue-600 dark:text-blue-400
-                        {% elif kontrol.durum == 'cozuldu' %}
-                            text-green-600 dark:text-green-400
-                        {% else %}
-                            text-park-green-600 dark:text-park-green-400
-                        {% endif %} text-xl"></i>
+<div class="space-y-6">    <!-- Sorun Özeti Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Park Bilgisi -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-park-green-100 dark:bg-park-green-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tree text-park-green-600 dark:text-park-green-400"></i>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Bildirim Bilgileri</h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Sorun bildirimi detay bilgileri</p>
+                <div class="ml-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Park</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.park.ad|truncatechars:20 }}</p>
                 </div>
             </div>
         </div>
-        
-        <div class="p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Sol Kolon -->
-                <div class="space-y-6">
-                    <!-- Park Bilgileri -->
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Park Bilgileri</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-map-marker-alt text-park-green-600 w-4"></i>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ kontrol.park.ad }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-building text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.park.mahalle.ad }}, {{ kontrol.park.mahalle.ilce.ad }}</span>
-                            </div>
-                            {% if kontrol.park.park_tipi %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-tag text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.park.park_tipi.ad }}</span>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Personel Bilgileri -->
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Bildiren Personel</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-user text-blue-600 w-4"></i>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ kontrol.personel.ad }}</span>
-                            </div>
-                            {% if kontrol.personel.telefon %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-phone text-gray-500 w-4"></i>
-                                <a href="tel:{{ kontrol.personel.telefon }}" class="text-blue-600 hover:text-blue-800">{{ kontrol.personel.telefon }}</a>
-                            </div>
-                            {% endif %}
-                            {% if kontrol.personel.pozisyon %}
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-briefcase text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.personel.pozisyon }}</span>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
+
+        <!-- Durum -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+                <div class="w-10 h-10 {% if kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif kontrol.durum == 'sorun_var' %}bg-orange-100 dark:bg-orange-900/30{% elif kontrol.durum == 'cozuldu' %}bg-green-100 dark:bg-green-900/30{% else %}bg-blue-100 dark:bg-blue-900/30{% endif %} rounded-lg flex items-center justify-center">
+                    {% if kontrol.durum == 'acil' %}
+                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                    {% elif kontrol.durum == 'sorun_var' %}
+                        <i class="fas fa-exclamation-circle text-orange-600 dark:text-orange-400"></i>
+                    {% elif kontrol.durum == 'cozuldu' %}
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                    {% else %}
+                        <i class="fas fa-arrow-right text-blue-600 dark:text-blue-400"></i>
+                    {% endif %}
                 </div>
-                  <!-- Sağ Kolon -->
-                <div class="space-y-6">
-                    <!-- Sorun Durumu -->
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Sorun Durumu</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                {% if kontrol.durum == 'acil' %}
-                                    <i class="fas fa-exclamation-triangle text-red-600 w-4"></i>
-                                    <span class="font-medium text-red-800 dark:text-red-300">Acil Müdahale Gerekli</span>
-                                {% elif kontrol.durum == 'sorun_var' %}
-                                    <i class="fas fa-exclamation-circle text-amber-600 w-4"></i>
-                                    <span class="font-medium text-amber-800 dark:text-amber-300">Sorun Var</span>
-                                {% elif kontrol.durum == 'ise_donusturuldu' %}
-                                    <i class="fas fa-arrow-right text-blue-600 w-4"></i>
-                                    <span class="font-medium text-blue-800 dark:text-blue-300">İşe Dönüştürüldü</span>
-                                {% elif kontrol.durum == 'cozuldu' %}
-                                    <i class="fas fa-check-circle text-green-600 w-4"></i>
-                                    <span class="font-medium text-green-800 dark:text-green-300">Çözüldü</span>
-                                {% elif kontrol.durum == 'gozden_gecirildi' %}
-                                    <i class="fas fa-eye text-purple-600 w-4"></i>
-                                    <span class="font-medium text-purple-800 dark:text-purple-300">Gözden Geçirildi</span>
-                                {% else %}
-                                    <i class="fas fa-question-circle text-gray-600 w-4"></i>
-                                    <span class="font-medium text-gray-800 dark:text-gray-300">{{ kontrol.get_durum_display }}</span>
+                <div class="ml-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.get_durum_display }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bildiren Personel -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Bildiren</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.personel.ad|truncatechars:15 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bildirim Zamanı -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tarih</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.kontrol_tarihi|timesince }} önce</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ana İçerik - 2 Kolon -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sol Kolon - Detay Bilgileri -->
+        <div class="lg:col-span-2 space-y-6">            <!-- Sorun Detayları -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
+                        Sorun Detayları
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Park Bilgileri -->
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                                <i class="fas fa-map-marker-alt text-park-green-600 mr-2"></i>Konum Bilgileri
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-tree text-park-green-600 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Park: </span>
+                                        <a href="{% url 'parkbahce:park_detail' kontrol.park.uuid %}" class="font-medium text-park-green-600 hover:text-park-green-700 hover:underline">{{ kontrol.park.ad }}</a>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-building text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Mahalle: </span>
+                                        <a href="{% url 'parkbahce:mahalle_detail' kontrol.park.mahalle.uuid %}" class="text-gray-700 dark:text-gray-300 hover:text-park-green-600 hover:underline">{{ kontrol.park.mahalle.ad }}, {{ kontrol.park.mahalle.ilce.ad }}</a>
+                                    </div>
+                                </div>
+                                {% if kontrol.park.park_tipi %}
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-tag text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Tip: </span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ kontrol.park.park_tipi.ad }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if geom %}
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-location-dot text-red-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Konum: </span>
+                                        <a href="https://maps.google.com/?q={{ geom.y|stringformat:'.6f' }},{{ geom.x|stringformat:'.6f' }}" 
+                                           target="_blank" 
+                                           class="text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center">
+                                            Google Maps'te Görüntüle <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                                        </a>
+                                    </div>
+                                </div>
                                 {% endif %}
                             </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-list-alt text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.get_kontrol_tipi_display }}</span>
+                        </div>                        <!-- Sorun Bilgileri -->
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                                <i class="fas fa-info-circle text-blue-600 mr-2"></i>Bildirim Bilgileri
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-list-alt text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Kontrol Tipi: </span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ kontrol.get_kontrol_tipi_display }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-calendar-alt text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Bildirim Tarihi: </span>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-history text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Geçen Süre: </span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ kontrol.kontrol_tarihi|timesince }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-user text-blue-600 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Bildiren: </span>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ kontrol.personel.ad }}</span>
+                                        {% if kontrol.personel.pozisyon %}
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">({{ kontrol.personel.pozisyon }})</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if kontrol.personel.telefon %}
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-phone text-gray-500 w-5 mr-3"></i>
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Telefon: </span>
+                                        <a href="tel:{{ kontrol.personel.telefon }}" class="text-blue-600 hover:text-blue-700 hover:underline">{{ kontrol.personel.telefon }}</a>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tarih Bilgileri -->
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Zaman Bilgileri</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-calendar-alt text-amber-600 w-4"></i>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ kontrol.kontrol_tarihi|date:"d.m.Y" }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-clock text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.kontrol_tarihi|date:"H:i" }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-history text-gray-500 w-4"></i>
-                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.kontrol_tarihi|timesince }} önce</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Sorun Açıklaması -->
+                    <!-- Açıklama -->
                     {% if kontrol.aciklama %}
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Sorun Açıklaması</h3>
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                            <i class="fas fa-comment-alt text-amber-600 mr-2"></i>Sorun Açıklaması
+                        </h3>
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                             <p class="text-gray-800 dark:text-gray-200 leading-relaxed">{{ kontrol.aciklama }}</p>
                         </div>
                     </div>
                     {% endif %}
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Resimler -->
-    {% if kontrol.resimler.exists %}
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200/60 dark:border-gray-700/60">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-camera text-blue-600 dark:text-blue-400 text-xl"></i>
+            </div>            <!-- Resimler -->
+            {% if kontrol.resimler.exists %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-soft overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-camera text-blue-600 mr-2"></i>Sorun Fotoğrafları ({{ kontrol.resimler.count }})
+                    </h2>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sorun Resimleri</h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ kontrol.resimler.count }} resim</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for resim in kontrol.resimler.all %}
-                <div class="group relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
-                    <div class="aspect-w-16 aspect-h-9">
-                        <img src="{{ resim.resim.url }}" 
-                             alt="Sorun resmi" 
-                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200">
-                    </div>
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                        <a href="{{ resim.resim.url }}" target="_blank"
-                           class="opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium transition-opacity duration-200">
-                            <i class="fas fa-expand mr-1"></i>
-                            Büyüt
-                        </a>
-                    </div>
-                    {% if resim.aciklama %}
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ resim.aciklama }}</p>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    <!-- İlgili Görevler -->
-    {% if ilgili_gorevler %}
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft">
-        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200/60 dark:border-gray-700/60">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-tasks text-green-600 dark:text-green-400 text-xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">İlgili Görevler</h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Bu sorundan oluşturulan görevler</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="p-6">
-            <div class="space-y-4">
-                {% for gorev in ilgili_gorevler %}
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h4 class="font-medium text-gray-900 dark:text-white">{{ gorev.baslik }}</h4>
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                    {% if gorev.durum == 'tamamlandi' %}
-                                        bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300
-                                    {% elif gorev.durum == 'devam_ediyor' %}
-                                        bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300
-                                    {% elif gorev.durum == 'planlanmis' %}
-                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300
-                                    {% else %}
-                                        bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
-                                    {% endif %}">
-                                    {{ gorev.get_durum_display }}
+                <div class="p-5">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {% for resim in kontrol.resimler.all %}
+                        <div class="relative rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden group bg-gray-50 dark:bg-gray-700">
+                            <img src="{{ resim.resim.url }}" 
+                                 alt="Sorun resmi" 
+                                 class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                 onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:'Sorun fotoğrafı' }}')">
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors duration-200">
+                                <span class="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 px-3 py-1 rounded text-sm transition-opacity">
+                                    <i class="fas fa-search-plus mr-1"></i>Büyüt
                                 </span>
                             </div>
-                            
-                            {% if gorev.aciklama %}
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ gorev.aciklama|truncatewords:15 }}</p>
-                            {% endif %}
-                            
-                            <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span><i class="fas fa-calendar mr-1"></i>{{ gorev.baslangic_tarihi|date:"d.m.Y" }}</span>
-                                {% if gorev.atamalar.exists %}
-                                <span><i class="fas fa-user mr-1"></i>{{ gorev.atamalar.count }} personel</span>
-                                {% endif %}
+                            {% if resim.aciklama %}
+                            <div class="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2">
+                                <p class="text-xs truncate">{{ resim.aciklama }}</p>
                             </div>
+                            {% endif %}
                         </div>
-                        
-                        <div class="flex items-center gap-2">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}            <!-- İlgili Görevler -->
+            {% if ilgili_gorevler %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-soft overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-tasks text-green-600 mr-2"></i>İlgili Görevler ({{ ilgili_gorevler|length }})
+                        </span>
+                        {% if kontrol.durum in 'sorun_var,acil' and not kontrol.ilgili_gorevler.exists %}
+                        <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}"
+                           class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            <i class="fas fa-plus mr-1"></i>Görev Oluştur
+                        </a>
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="p-5 space-y-3">
+                    {% for gorev in ilgili_gorevler %}
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ gorev.baslik }}</h4>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                        {% if gorev.durum == 'tamamlandi' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300
+                                        {% elif gorev.durum == 'devam_ediyor' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300
+                                        {% elif gorev.durum == 'planlanmis' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300
+                                        {% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+                                        {{ gorev.get_durum_display }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-calendar mr-1"></i>{{ gorev.baslangic_tarihi|date:"d.m.Y" }}
+                                    </span>
+                                    {% if gorev.atamalar.exists %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-users mr-1"></i>{{ gorev.atamalar.count }} personel
+                                    </span>
+                                    {% endif %}
+                                    {% if gorev.oncelik %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-flag mr-1"></i>{{ gorev.get_oncelik_display }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
                             <a href="{% url 'istakip:gorev_detail' gorev.uuid %}"
-                               class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors">
-                                <i class="fas fa-eye mr-1"></i>
-                                Görevi Görüntüle
+                               class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-sm transition-colors whitespace-nowrap">
+                                <i class="fas fa-eye mr-1"></i>Görüntüle
                             </a>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endif %}
         </div>
-    </div>
-    {% endif %}
-    
-    <!-- İlgili Bilgiler (Sidebar) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Aynı Parktaki Diğer Sorunlar -->
-        {% if ayni_parkta_sorunlar %}
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft">
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200/60 dark:border-gray-700/60">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    <i class="fas fa-map-marker-alt text-park-green-600 mr-2"></i>
-                    Aynı Parktaki Diğer Sorunlar
-                </h3>
-            </div>
-            
-            <div class="p-6">
-                <div class="space-y-3">
+
+        <!-- Sağ Kolon - Sidebar -->
+        <div class="space-y-6">            <!-- Aynı Parktaki Sorunlar -->
+            {% if ayni_parkta_sorunlar %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-soft overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-park-green-50 to-green-50 dark:from-park-green-900/20 dark:to-green-900/20">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-map-marker-alt text-park-green-600 mr-2"></i>Aynı Parktaki Sorunlar
+                    </h3>
+                </div>
+                <div class="p-5 space-y-3">
                     {% for sorun in ayni_parkta_sorunlar %}
-                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm">
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ sorun.kontrol_tarihi|date:"d.m.Y" }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ sorun.get_durum_display }} • {{ sorun.personel.ad }}</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ sorun.kontrol_tarihi|date:"d.m.Y" }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs
+                                    {% if sorun.durum == 'acil' %}bg-red-100 text-red-800
+                                    {% elif sorun.durum == 'sorun_var' %}bg-orange-100 text-orange-800
+                                    {% elif sorun.durum == 'cozuldu' %}bg-green-100 text-green-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ sorun.get_durum_display }}
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ sorun.personel.ad }}</span>
+                            </div>
                         </div>
-                        <a href="{% url 'istakip:sorun_detay' sorun.uuid %}"
-                           class="text-blue-600 hover:text-blue-800 text-sm">
+                        <a href="{% url 'istakip:sorun_detay' sorun.uuid %}" class="text-blue-600 hover:text-blue-800 ml-2">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-        </div>
-        {% endif %}
-        
-        <!-- Personelin Son Bildirimleri -->
-        {% if personel_son_bildirimleri %}
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft">
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200/60 dark:border-gray-700/60">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    <i class="fas fa-user text-blue-600 mr-2"></i>
-                    {{ kontrol.personel.ad }}'in Son Bildirimleri
-                </h3>
-            </div>
-            
-            <div class="p-6">
-                <div class="space-y-3">
+            {% endif %}            <!-- Personel Son Bildirimleri -->
+            {% if personel_son_bildirimleri %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-soft overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-user text-blue-600 mr-2"></i>{{ kontrol.personel.ad }}'in Son Bildirimleri
+                    </h3>
+                </div>
+                <div class="p-5 space-y-3">
                     {% for bildirim in personel_son_bildirimleri %}
-                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm">
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ bildirim.park.ad }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ bildirim.kontrol_tarihi|date:"d.m.Y" }} • {{ bildirim.get_durum_display }}</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ bildirim.park.ad|truncatechars:25 }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ bildirim.kontrol_tarihi|date:"d.m.Y" }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs
+                                    {% if bildirim.durum == 'acil' %}bg-red-100 text-red-800
+                                    {% elif bildirim.durum == 'sorun_var' %}bg-orange-100 text-orange-800
+                                    {% elif bildirim.durum == 'cozuldu' %}bg-green-100 text-green-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ bildirim.get_durum_display }}
+                                </span>
+                            </div>
                         </div>
-                        <a href="{% url 'istakip:sorun_detay' bildirim.uuid %}"
-                           class="text-blue-600 hover:text-blue-800 text-sm">
+                        <a href="{% url 'istakip:sorun_detay' bildirim.uuid %}" class="text-blue-600 hover:text-blue-800 ml-2">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
+
+<!-- Sorun Durum Değiştirme Modal -->
+<div id="sorunDurumModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999] hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Sorun Durumu Değiştir</h3>
+                    <button onclick="closeSorunDurumModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- Mevcut Durum Gösterimi -->
+                <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mevcut Durum:</div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                            {% if kontrol.durum == 'acil' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
+                            {% elif kontrol.durum == 'sorun_var' %}bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300
+                            {% elif kontrol.durum == 'ise_donusturuldu' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300
+                            {% elif kontrol.durum == 'cozuldu' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300
+                            {% elif kontrol.durum == 'gozden_gecirildi' %}bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300
+                            {% else %}bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300{% endif %}">
+                            {% if kontrol.durum == 'acil' %}
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Acil Müdahale
+                            {% elif kontrol.durum == 'sorun_var' %}
+                                <i class="fas fa-exclamation-circle mr-1"></i>Sorun Var
+                            {% elif kontrol.durum == 'ise_donusturuldu' %}
+                                <i class="fas fa-arrow-right mr-1"></i>İşe Dönüştürüldü
+                            {% elif kontrol.durum == 'cozuldu' %}
+                                <i class="fas fa-check-circle mr-1"></i>Çözüldü
+                            {% elif kontrol.durum == 'gozden_gecirildi' %}
+                                <i class="fas fa-eye mr-1"></i>Gözden Geçirildi
+                            {% else %}
+                                <i class="fas fa-question-circle mr-1"></i>Belirsiz
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <form method="post" action="{% url 'istakip:sorun_durum_degistir' kontrol.uuid %}">
+                    {% csrf_token %}
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Yeni Durum</label>
+                            <div class="space-y-2">
+                                <button type="button" onclick="selectSorunDurum('sorun_var')" 
+                                        class="sorun-durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-orange-500 rounded-full mr-3"></div>
+                                    <span class="font-medium">Sorun Var</span>
+                                    <i class="fas fa-exclamation-circle ml-auto text-orange-500"></i>
+                                </button>
+                                
+                                <button type="button" onclick="selectSorunDurum('acil')" 
+                                        class="sorun-durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                                    <span class="font-medium">Acil Müdahale</span>
+                                    <i class="fas fa-exclamation-triangle ml-auto text-red-500"></i>
+                                </button>
+                                
+                                <button type="button" onclick="selectSorunDurum('gozden_gecirildi')" 
+                                        class="sorun-durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                                    <span class="font-medium">Gözden Geçirildi</span>
+                                    <i class="fas fa-eye ml-auto text-purple-500"></i>
+                                </button>
+                                
+                                <button type="button" onclick="selectSorunDurum('ise_donusturuldu')" 
+                                        class="sorun-durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                                    <span class="font-medium">İşe Dönüştürüldü</span>
+                                    <i class="fas fa-arrow-right ml-auto text-blue-500"></i>
+                                </button>
+                                
+                                <button type="button" onclick="selectSorunDurum('cozuldu')" 
+                                        class="sorun-durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                    <span class="font-medium">Çözüldü</span>
+                                    <i class="fas fa-check-circle ml-auto text-green-500"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="durum" id="selectedSorunDurum">
+                    
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" onclick="closeSorunDurumModal()"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" id="sorunDurumSubmitBtn" disabled
+                                class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <i class="fas fa-save mr-2"></i>Değiştir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resim Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+    <div class="flex items-center justify-center h-full p-4">
+        <div class="relative max-w-4xl max-h-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+            <div class="relative">
+                <img id="modal-image" src="" alt="" class="max-w-full max-h-[80vh] object-contain">
+                <button onclick="closeImageModal()" class="absolute top-4 right-4 w-10 h-10 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full flex items-center justify-center text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-caption" class="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                <p class="text-gray-900 dark:text-white font-medium"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sorun durum modal functions
+function openSorunDurumModal() {
+    document.getElementById('sorunDurumModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSorunDurumModal() {
+    document.getElementById('sorunDurumModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    // Reset seçimleri
+    document.querySelectorAll('.sorun-durum-option').forEach(option => {
+        option.classList.remove('border-orange-500', 'bg-orange-50', 'border-red-500', 'bg-red-50', 'border-purple-500', 'bg-purple-50', 'border-blue-500', 'bg-blue-50', 'border-green-500', 'bg-green-50');
+    });
+    document.getElementById('selectedSorunDurum').value = '';
+    document.getElementById('sorunDurumSubmitBtn').disabled = true;
+}
+
+function selectSorunDurum(durum) {
+    // Mevcut durumla aynıysa işlem yapma
+    const mevcutDurum = '{{ kontrol.durum }}';
+    if (durum === mevcutDurum) {
+        return;
+    }
+    
+    // Tüm seçenekleri reset et
+    document.querySelectorAll('.sorun-durum-option').forEach(option => {
+        option.classList.remove('border-orange-500', 'bg-orange-50', 'border-red-500', 'bg-red-50', 'border-purple-500', 'bg-purple-50', 'border-blue-500', 'bg-blue-50', 'border-green-500', 'bg-green-50');
+    });
+    
+    // Seçilen seçeneği highlight et
+    const selectedOption = event.target.closest('.sorun-durum-option');
+    if (selectedOption) {
+        const colorClass = {
+            'sorun_var': ['border-orange-500', 'bg-orange-50'],
+            'acil': ['border-red-500', 'bg-red-50'],
+            'gozden_gecirildi': ['border-purple-500', 'bg-purple-50'],
+            'ise_donusturuldu': ['border-blue-500', 'bg-blue-50'],
+            'cozuldu': ['border-green-500', 'bg-green-50']
+        };
+        
+        selectedOption.classList.add(...colorClass[durum]);
+        
+        // Hidden input'u güncelle ve submit butonunu aktif et
+        document.getElementById('selectedSorunDurum').value = durum;
+        document.getElementById('sorunDurumSubmitBtn').disabled = false;
+    }
+}
+
+function openImageModal(src, caption) {
+    document.getElementById('modal-image').src = src;
+    document.getElementById('modal-caption').querySelector('p').textContent = caption;
+    document.getElementById('image-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    document.getElementById('image-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// Modal dışına tıklayınca kapat
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Sorun durum modal backdrop click
+document.getElementById('sorunDurumModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSorunDurumModal();
+    }
+});
+
+// ESC tuşu ile kapat
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('image-modal').classList.contains('hidden')) {
+            closeImageModal();
+        }
+        if (!document.getElementById('sorunDurumModal').classList.contains('hidden')) {
+            closeSorunDurumModal();
+        }
+    }
+});
+</script>
 {% endblock %}

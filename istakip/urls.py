@@ -161,6 +161,11 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "sorun/<uuid:kontrol_uuid>/gorev-donustur/",
         views.sorun_gorev_donustur,
         name="sorun_gorev_donustur",
+    ),
+    path(
+        "sorunlar/<uuid:kontrol_uuid>/durum-degistir/",
+        views.sorun_durum_degistir,
+        name="sorun_durum_degistir",
     ),  # Görev Yönetimi
     path("gorevler/", views.gorev_list, name="gorev_list"),
     path("gorevler/yeni/", views.gorev_create, name="gorev_create"),

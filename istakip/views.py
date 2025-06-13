@@ -434,7 +434,7 @@ def kullanici_deactivate(request, personel_uuid):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-# bu metod deactivate metodundan biraz farklı. Onay istemiyor ve aktif hale getiriyor. sonra da kullanıcı detayına yönlendiriyor. Herhangi bir şablon render etmiyor
+# bu metod deactivate metodından biraz farklı. Onay istemiyor ve aktif hale getiriyor. sonra da kullanıcı detayına yönlendiriyor. Herhangi bir şablon render etmiyor
 def kullanici_activate(request, personel_uuid):
     """Kullanıcı hesabını aktif hale getirme"""
     personel = get_object_or_404(Personel, uuid=personel_uuid)
@@ -830,11 +830,17 @@ def sorun_detay(request, kontrol_uuid):
         .order_by("-kontrol_tarihi")[:5]
     )
 
+    geom = None
+    # geom 5256 dan 4326 çevir
+    if kontrol.geom:
+        geom = kontrol.geom.transform(4326, clone=True)
+
     context = {
         "kontrol": kontrol,
         "ilgili_gorevler": ilgili_gorevler,
         "ayni_parkta_sorunlar": ayni_parkta_sorunlar,
         "personel_son_bildirimleri": personel_son_bildirimleri,
+        "geom": geom,
     }
 
     return render(request, "istakip/sorun_detay.html", context)
@@ -1520,3 +1526,52 @@ def gorev_asama_durum_degistir(request, asama_uuid):
         messages.error(request, f"Aşama durum güncelleme sırasında hata: {str(e)}")
 
     return redirect("istakip:gorev_detail", gorev_uuid=asama.gorev.uuid)
+
+
+@login_required
+@require_http_methods(["POST"])
+def sorun_durum_degistir(request, kontrol_uuid):
+    """Sorun durumu değiştirme"""
+
+    kontrol = get_object_or_404(GunlukKontrol, uuid=kontrol_uuid)
+
+    try:
+        yeni_durum = request.POST.get("durum")
+
+        if not yeni_durum:
+            messages.error(request, "Durum seçimi zorunludur.")
+            return redirect("istakip:sorun_detay", kontrol_uuid=kontrol_uuid)
+
+        valid_durumlar = [
+            "sorun_var",
+            "acil",
+            "gozden_gecirildi",
+            "ise_donusturuldu",
+            "cozuldu",
+        ]
+        if yeni_durum not in valid_durumlar:
+            messages.error(request, "Geçersiz durum.")
+            return redirect("istakip:sorun_detay", kontrol_uuid=kontrol_uuid)
+
+        eski_durum = kontrol.durum
+        kontrol.durum = yeni_durum
+        kontrol.save()
+
+        # Durum değişikliği mesajı
+        durum_mesajlari = {
+            "sorun_var": "Sorun Var",
+            "acil": "Acil Müdahale",
+            "gozden_gecirildi": "Gözden Geçirildi",
+            "ise_donusturuldu": "İşe Dönüştürüldü",
+            "cozuldu": "Çözüldü",
+        }
+
+        messages.success(
+            request,
+            f"Sorun durumu '{durum_mesajlari.get(yeni_durum, yeni_durum)}' olarak güncellendi.",
+        )
+
+    except Exception as e:
+        messages.error(request, f"Durum güncelleme sırasında hata: {str(e)}")
+
+    return redirect("istakip:sorun_detay", kontrol_uuid=kontrol_uuid)

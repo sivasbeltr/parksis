@@ -90,210 +90,198 @@
             </div>
             <div class="text-xs text-gray-600 dark:text-gray-400 font-medium">Çözüldü</div>
         </div>
-    </div>
-
-    <!-- Filtreleme Formu -->
-    <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-        <form hx-get="{% url 'parkbahce:park_sorun_gecmisi_tab_htmx' park.uuid %}" 
-              hx-target="#tab-content" 
-              hx-trigger="change, submit"
-              hx-indicator="#filter-loading"
-              class="space-y-3">
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <!-- Başlangıç Tarihi -->
-                <div>
-                    <label for="baslangic_tarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        <i class="fas fa-calendar mr-1 text-gray-500"></i>Başlangıç
-                    </label>
-                    <input type="date" 
-                           id="baslangic_tarihi" 
-                           name="baslangic_tarihi" 
-                           value="{{ baslangic_tarihi }}" 
-                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
-                </div>
-
-                <!-- Bitiş Tarihi -->
-                <div>
-                    <label for="bitis_tarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        <i class="fas fa-calendar mr-1 text-gray-500"></i>Bitiş
-                    </label>
-                    <input type="date" 
-                           id="bitis_tarihi" 
-                           name="bitis_tarihi" 
-                           value="{{ bitis_tarihi }}" 
-                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
-                </div>
-
-                <!-- Durum Filtresi -->
-                <div>
-                    <label for="durum" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        <i class="fas fa-filter mr-1 text-gray-500"></i>Durum
-                    </label>
-                    <select id="durum" 
-                            name="durum" 
-                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
-                        <option value="">Tüm Durumlar</option>
-                        <option value="sorun_yok" {% if durum_filter == 'sorun_yok' %}selected{% endif %}>Sorun Yok</option>
-                        <option value="sorun_var" {% if durum_filter == 'sorun_var' %}selected{% endif %}>Sorun Var</option>
-                        <option value="acil" {% if durum_filter == 'acil' %}selected{% endif %}>Acil</option>
-                        <option value="gozden_gecirildi" {% if durum_filter == 'gozden_gecirildi' %}selected{% endif %}>Gözden Geçirildi</option>
-                        <option value="ise_donusturuldu" {% if durum_filter == 'ise_donusturuldu' %}selected{% endif %}>İşe Dönüştürüldü</option>
-                        <option value="cozuldu" {% if durum_filter == 'cozuldu' %}selected{% endif %}>Çözüldü</option>
-                    </select>
-                </div>
-
-                <!-- Temizle Butonu -->
-                <div class="flex items-end">
-                    <button type="button" 
-                            onclick="clearFilters()" 
-                            class="w-full px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors">
-                        <i class="fas fa-eraser mr-1"></i>Temizle
-                    </button>
-                </div>
+    </div>    <!-- Son 30 Gün Bilgisi -->
+    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+        <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center space-x-2 text-blue-700 dark:text-blue-300">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="font-medium">Son 30 günlük kontrol geçmişi gösteriliyor</span>
             </div>
-
-            <!-- Loading Indicator -->
-            <div id="filter-loading" class="htmx-indicator flex items-center justify-center py-2">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
-                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Filtreleniyor...</span>
+            <div class="text-blue-600 dark:text-blue-400 text-xs">
+                {{ baslangic_tarihi|date:"d.m.Y" }} - {{ bitis_tarihi|date:"d.m.Y" }}
             </div>
-        </form>
-    </div>    <!-- Kontrol Kayıtları -->
-    <div class="space-y-3">
-        {% for kontrol in kontroller %}
-        <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-300 
-                    {% if kontrol.durum == 'sorun_yok' %}hover:border-green-300 dark:hover:border-green-600{% elif kontrol.durum == 'sorun_var' %}hover:border-yellow-300 dark:hover:border-yellow-600{% elif kontrol.durum == 'acil' %}hover:border-red-300 dark:hover:border-red-600{% else %}hover:border-blue-300 dark:hover:border-blue-600{% endif %}">
-            <div class="p-4">
+        </div>
+    </div>    <!-- Kontrol Kayıtları Timeline - Son 30 Gün -->
+    <div class="space-y-2">
+        {% for gunluk_kayit in gunluk_kontrol_timeline %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200">
+            <div class="p-3">
+                <!-- Tarih ve İçerik -->
                 <div class="flex items-start space-x-3">
-                    <!-- Durum İkonu -->
-                    <div class="w-10 h-10 {% if kontrol.durum == 'sorun_yok' %}bg-green-100 dark:bg-green-900/30{% elif kontrol.durum == 'sorun_var' %}bg-yellow-100 dark:bg-yellow-900/30{% elif kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif kontrol.durum == 'gozden_gecirildi' %}bg-blue-100 dark:bg-blue-900/30{% elif kontrol.durum == 'ise_donusturuldu' %}bg-purple-100 dark:bg-purple-900/30{% else %}bg-emerald-100 dark:bg-emerald-900/30{% endif %} rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                        {% if kontrol.durum == 'sorun_yok' %}
-                            <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
-                        {% elif kontrol.durum == 'sorun_var' %}
-                            <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
-                        {% elif kontrol.durum == 'acil' %}
-                            <i class="fas fa-fire text-red-600 dark:text-red-400"></i>
-                        {% elif kontrol.durum == 'gozden_gecirildi' %}
-                            <i class="fas fa-eye text-blue-600 dark:text-blue-400"></i>
-                        {% elif kontrol.durum == 'ise_donusturuldu' %}
-                            <i class="fas fa-arrow-right text-purple-600 dark:text-purple-400"></i>
-                        {% else %}
-                            <i class="fas fa-check-double text-emerald-600 dark:text-emerald-400"></i>
-                        {% endif %}
+                    <!-- Kompakt Tarih Başlığı -->
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 
+                                    {% if gunluk_kayit.tarih|date:'w' == '0' %}bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-800/30 border-orange-200 dark:border-orange-700
+                                    {% elif gunluk_kayit.tarih|date:'w' == '6' %}bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-800/30 border-purple-200 dark:border-purple-700
+                                    {% else %}bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-700{% endif %} 
+                                    rounded-lg flex flex-col items-center justify-center border shadow-sm">
+                            <div class="text-sm font-bold 
+                                        {% if gunluk_kayit.tarih|date:'w' == '0' %}text-orange-600 dark:text-orange-400
+                                        {% elif gunluk_kayit.tarih|date:'w' == '6' %}text-purple-600 dark:text-purple-400
+                                        {% else %}text-blue-600 dark:text-blue-400{% endif %}">
+                                {{ gunluk_kayit.tarih|date:"d" }}
+                            </div>
+                            <div class="text-xs 
+                                        {% if gunluk_kayit.tarih|date:'w' == '0' %}text-orange-500 dark:text-orange-400
+                                        {% elif gunluk_kayit.tarih|date:'w' == '6' %}text-purple-500 dark:text-purple-400
+                                        {% else %}text-blue-500 dark:text-blue-400{% endif %} 
+                                        uppercase font-medium">
+                                {{ gunluk_kayit.tarih|date:"M" }}
+                            </div>
+                        </div>
+                        <!-- Kompakt durum göstergesi -->
+                        <div class="flex justify-center mt-1">
+                            {% if gunluk_kayit.kontroller %}
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            {% else %}
+                                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            {% endif %}
+                        </div>
                     </div>
-                    
-                    <!-- Kontrol Bilgileri -->
+
+                    <!-- Kompakt İçerik Alanı -->
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex-1">
-                                <h5 class="text-sm font-bold text-gray-900 dark:text-white mb-1">
-                                    {{ kontrol.get_durum_display }}
-                                </h5>
-                                <div class="flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-user mr-1"></i>
-                                        <span>{{ kontrol.personel.ad }}</span>
+                        <!-- Kompakt Gün Başlığı -->
+                        <div class="mb-2">
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
+                                <span>{{ gunluk_kayit.tarih|date:"d M Y" }}</span>
+                                <span class="text-xs 
+                                            {% if gunluk_kayit.tarih|date:'w' == '0' %}text-orange-500 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/20 px-1.5 py-0.5 rounded
+                                            {% elif gunluk_kayit.tarih|date:'w' == '6' %}text-purple-500 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/20 px-1.5 py-0.5 rounded
+                                            {% else %}text-gray-500 dark:text-gray-400{% endif %}">
+                                    {{ gunluk_kayit.tarih|date:"l" }}
+                                </span>
+                            </h4>
+                            {% if gunluk_kayit.kontroller %}
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ gunluk_kayit.kontroller|length }} kontrol kaydı
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Kontrol Kayıtları veya Kompakt Boş Mesajı -->
+                        {% if gunluk_kayit.kontroller %}
+                            <div class="space-y-2">
+                                {% for kontrol in gunluk_kayit.kontroller %}
+                                <div class="group bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-l-4 
+                                            {% if kontrol.durum == 'sorun_yok' %}border-green-500 
+                                            {% elif kontrol.durum == 'sorun_var' %}border-yellow-500 
+                                            {% elif kontrol.durum == 'acil' %}border-red-500 
+                                            {% elif kontrol.durum == 'gozden_gecirildi' %}border-blue-500 
+                                            {% elif kontrol.durum == 'ise_donusturuldu' %}border-purple-500 
+                                            {% else %}border-emerald-500{% endif %}"
+                                     onclick="window.location.href='{% url 'istakip:sorun_detay' kontrol.uuid %}'">
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <!-- Kontrol Bilgileri -->
+                                        <div class="flex items-center space-x-2 flex-1">
+                                            <!-- Kompakt Durum İkonu -->
+                                            <div class="w-6 h-6 flex items-center justify-center rounded 
+                                                        {% if kontrol.durum == 'sorun_yok' %}bg-green-100 dark:bg-green-900/30
+                                                        {% elif kontrol.durum == 'sorun_var' %}bg-yellow-100 dark:bg-yellow-900/30
+                                                        {% elif kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30
+                                                        {% elif kontrol.durum == 'gozden_gecirildi' %}bg-blue-100 dark:bg-blue-900/30
+                                                        {% elif kontrol.durum == 'ise_donusturuldu' %}bg-purple-100 dark:bg-purple-900/30
+                                                        {% else %}bg-emerald-100 dark:bg-emerald-900/30{% endif %}">
+                                                {% if kontrol.durum == 'sorun_yok' %}
+                                                    <i class="fas fa-check text-green-600 dark:text-green-400 text-xs"></i>
+                                                {% elif kontrol.durum == 'sorun_var' %}
+                                                    <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-xs"></i>
+                                                {% elif kontrol.durum == 'acil' %}
+                                                    <i class="fas fa-fire text-red-600 dark:text-red-400 text-xs"></i>
+                                                {% elif kontrol.durum == 'gozden_gecirildi' %}
+                                                    <i class="fas fa-eye text-blue-600 dark:text-blue-400 text-xs"></i>
+                                                {% elif kontrol.durum == 'ise_donusturuldu' %}
+                                                    <i class="fas fa-arrow-right text-purple-600 dark:text-purple-400 text-xs"></i>
+                                                {% else %}
+                                                    <i class="fas fa-check-double text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Kompakt Kontrol Detayları -->
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center space-x-2 text-xs">
+                                                    <span class="font-medium text-gray-900 dark:text-white">
+                                                        {{ kontrol.get_durum_display }}
+                                                    </span>
+                                                    <span class="text-gray-400">•</span>
+                                                    <span class="text-gray-600 dark:text-gray-400">
+                                                        {{ kontrol.personel.ad }}
+                                                    </span>
+                                                    <span class="text-gray-400">•</span>
+                                                    <span class="text-gray-600 dark:text-gray-400">
+                                                        {{ kontrol.kontrol_tarihi|date:"H:i" }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <!-- Kompakt Açıklama -->
+                                                {% if kontrol.aciklama %}
+                                                <div class="mt-1 text-xs text-gray-700 dark:text-gray-300">
+                                                    {% if kontrol.aciklama|length > 80 %}
+                                                        {{ kontrol.aciklama|slice:":80" }}...
+                                                    {% else %}
+                                                        {{ kontrol.aciklama }}
+                                                    {% endif %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sağ Taraf - Resim ve Ok -->
+                                        <div class="flex items-center space-x-2">
+                                            {% if kontrol.resimler.all %}
+                                            <div class="flex items-center text-gray-400 dark:text-gray-500">
+                                                <i class="fas fa-image text-xs"></i>
+                                                <span class="ml-1 text-xs">{{ kontrol.resimler.count }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <div class="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        <span>{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <!-- Kompakt Boş Gün Mesajı -->
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 border border-dashed border-gray-300 dark:border-gray-600">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                        <i class="fas fa-calendar-times text-gray-400 text-xs"></i>
                                     </div>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-tag mr-1"></i>
-                                        <span>{{ kontrol.get_kontrol_tipi_display }}</span>
+                                    <div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Denetim kaydı yok</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">Kontrol işlemi gerçekleştirilmemiş</p>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Durum Badge -->
-                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                        {% if kontrol.durum == 'sorun_yok' %}bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300
-                                        {% elif kontrol.durum == 'sorun_var' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300
-                                        {% elif kontrol.durum == 'acil' %}bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300
-                                        {% elif kontrol.durum == 'gozden_gecirildi' %}bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300
-                                        {% elif kontrol.durum == 'ise_donusturuldu' %}bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300
-                                        {% else %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300{% endif %}">
-                                {{ kontrol.get_durum_display }}
-                            </div>
-                        </div>
-                        
-                        <!-- Açıklama -->
-                        {% if kontrol.aciklama %}
-                        <div class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-3">
-                            {{ kontrol.aciklama }}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Resimler -->
-                        {% if kontrol.resimler.all %}
-                        <div class="flex space-x-2 mt-3">
-                            {% for resim in kontrol.resimler.all %}
-                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                                <img src="{{ resim.resim.url }}" 
-                                     alt="{{ resim.aciklama|default:'Kontrol resmi' }}"
-                                     class="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                     onclick="showImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:"Kontrol resmi" }}')">
-                            </div>
-                            {% endfor %}
-                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="text-center py-12 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-clipboard-check text-gray-400 text-2xl"></i>
+        <div class="text-center py-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+            <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-calendar-check text-gray-400 text-lg"></i>
             </div>
-            <h4 class="text-lg font-bold text-gray-500 dark:text-gray-400 mb-1">Kontrol kaydı bulunamadı</h4>
-            <p class="text-gray-400 dark:text-gray-500 text-sm">Belirtilen tarih aralığında ve kriterlerde kontrol kaydı bulunmuyor.</p>
+            <h4 class="text-base font-semibold text-gray-500 dark:text-gray-400 mb-1">Henüz kontrol kaydı yok</h4>
+            <p class="text-gray-400 dark:text-gray-500 text-sm">Son 30 günde herhangi bir kontrol kaydı bulunmuyor.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Resim Modal -->
-<dialog id="image-modal" class="backdrop:bg-black backdrop:bg-opacity-75 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-    <div class="bg-white dark:bg-gray-800 p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 id="image-title" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
-            <button onclick="closeImageModal()" 
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div class="flex justify-center">
-            <img id="modal-image" src="" alt="" class="max-w-full max-h-[70vh] object-contain rounded-lg">
-        </div>
-    </div>
-</dialog>
-
 <script>
-    function showImageModal(imageUrl, title) {
-        const modal = document.getElementById('image-modal');
-        const modalImage = document.getElementById('modal-image');
-        const imageTitle = document.getElementById('image-title');
-        
-        modalImage.src = imageUrl;
-        modalImage.alt = title;
-        imageTitle.textContent = title;
-        
-        modal.showModal();
-    }
-    
-    function closeImageModal() {
-        const modal = document.getElementById('image-modal');
-        modal.close();
-    }
-    
-    function clearFilters() {
-        document.getElementById('baslangic_tarihi').value = '';
-        document.getElementById('bitis_tarihi').value = '';
-        document.getElementById('durum').value = '';
-        
-        // HTMX ile formu gönder
-        htmx.trigger(document.querySelector('form'), 'submit');
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prevent event bubbling for click events on form elements
+        const clickableElements = document.querySelectorAll('[onclick]');
+        clickableElements.forEach(element => {
+            element.addEventListener('click', function(e) {
+                // Bu elementi tıklanabilir yapmak için hiçbir şey yapmıyoruz
+                // Onclick attribute zaten işi yapıyor
+            });
+        });
+    });
 </script>
