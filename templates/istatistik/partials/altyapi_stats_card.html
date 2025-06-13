@@ -39,6 +39,23 @@
             </div>
         </div>
 
+        <!-- Toplam Abone -->
+        <div class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-purple-100 dark:bg-purple-800 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-plug text-purple-600 text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Toplam Abone</span>
+                    <div class="text-xs text-gray-500">Tüm hizmet abonelikleri</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-purple-600">{{ altyapi_stats.toplam_abone }}</span>
+                <span class="text-xs text-gray-500 ml-1">abone</span>
+            </div>
+        </div>
+
         <!-- Elektrik Abonelikleri -->
         <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
             <div class="flex items-center space-x-3">
@@ -91,74 +108,26 @@
         </div>
     </div>
 
-    <!-- Altyapı Durumu -->
+    <!-- Altyapı Kapsama Oranları -->
+    {% if park_stats.toplam_park > 0 %}
     <div class="mb-6">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Altyapı Kapsama Oranları</h4>
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Kapsama Oranları</h4>
         <div class="space-y-3">
             <!-- Sulama Kapsama -->
             <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600 dark:text-gray-400">Sulama Sistemi</span>
                 <div class="flex items-center space-x-2">
                     <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if park_stats.toplam_park > 0 %}
                         <div class="bg-blue-500 h-2 rounded-full" style="width: {% widthratio altyapi_stats.sulama_sistemli_park park_stats.toplam_park 100 %}%"></div>
-                        {% else %}
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
-                        {% endif %}
                     </div>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {% if park_stats.toplam_park > 0 %}
-                            {% widthratio altyapi_stats.sulama_sistemli_park park_stats.toplam_park 100 %}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Elektrik Kapsama -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Elektrik Bağlantısı</span>
-                <div class="flex items-center space-x-2">
-                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if park_stats.toplam_park > 0 %}
-                        <div class="bg-yellow-500 h-2 rounded-full" style="width: {% widthratio altyapi_stats.elektrik_abonesi park_stats.toplam_park 100 %}%"></div>
-                        {% else %}
-                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
-                        {% endif %}
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {% if park_stats.toplam_park > 0 %}
-                            {% widthratio altyapi_stats.elektrik_abonesi park_stats.toplam_park 100 %}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Su Kapsama -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Su Bağlantısı</span>
-                <div class="flex items-center space-x-2">
-                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if park_stats.toplam_park > 0 %}
-                        <div class="bg-cyan-500 h-2 rounded-full" style="width: {% widthratio altyapi_stats.su_abonesi park_stats.toplam_park 100 %}%"></div>
-                        {% else %}
-                        <div class="bg-cyan-500 h-2 rounded-full" style="width: 0%"></div>
-                        {% endif %}
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {% if park_stats.toplam_park > 0 %}
-                            {% widthratio altyapi_stats.su_abonesi park_stats.toplam_park 100 %}%
-                        {% else %}
-                            0%
-                        {% endif %}
+                        {% widthratio altyapi_stats.sulama_sistemli_park park_stats.toplam_park 100 %}%
                     </span>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Aksiyon Butonları -->
     <div class="flex space-x-2">
@@ -168,7 +137,7 @@
         </a>
         <a href="#" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
             <i class="fas fa-tools mr-2"></i>
-            Bakım Planı
+            Abonelikleri Gör
         </a>
     </div>
 </div>

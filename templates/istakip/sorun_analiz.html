@@ -20,58 +20,82 @@
                 </p>
             </div>
         </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Problems -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft animate-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+    </div>    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <!-- Normal Kontroller -->
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-green-100">Sorun Yok</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.sorun_yok }}</p>
                 </div>
-                <div class="ml-4">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Sorun</h3>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ durum_stats.toplam }}</p>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-white text-lg"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Critical Problems -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft animate-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-fire text-red-600 dark:text-red-400 text-xl"></i>
+        <!-- Normal Sorunlar -->
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-amber-100">Sorun Var</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.sorun_var }}</p>
                 </div>
-                <div class="ml-4">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Acil Sorunlar</h3>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ durum_stats.acil }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Solution Rate -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft animate-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Çözüm Oranı</h3>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">%{{ cozum_orani }}</p>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-white text-lg"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Problems -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft animate-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-clock text-blue-600 dark:text-blue-400 text-xl"></i>
+        <!-- Acil Sorunlar -->
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-red-100">Acil</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.acil }}</p>
                 </div>
-                <div class="ml-4">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Bu Hafta</h3>
-                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ gecen_hafta_sorun }}</p>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-fire text-white text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- İşe Dönüştürülen -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-blue-100">İşe Dönüştürülen</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.ise_donusturuldu }}</p>
+                </div>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-arrow-right text-white text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Çözülen -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-emerald-100">Çözülen</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.cozuldu }}</p>
+                </div>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-double text-white text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toplam -->
+        <div class="bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-medium text-gray-100">Toplam Kontrol</h3>
+                    <p class="text-2xl font-bold mt-1">{{ durum_stats.toplam }}</p>
+                </div>
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clipboard-list text-white text-lg"></i>
                 </div>
             </div>
         </div>
@@ -80,25 +104,47 @@
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Daily Trend Chart -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 <i class="fas fa-line-chart text-blue-500 mr-2"></i>
                 Günlük Sorun Trendi (Son 30 Gün)
             </h3>
+            {% if gunluk_trend %}
             <div class="h-64">
                 <canvas id="dailyTrendChart"></canvas>
             </div>
+            {% else %}
+            <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chart-line text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz veri yok</p>
+                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Sorun bildirimleri geldiğinde trend grafiği burada görünecek</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Status Distribution -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 <i class="fas fa-pie-chart text-amber-500 mr-2"></i>
                 Durum Dağılımı
             </h3>
+            {% if durum_stats.toplam > 0 %}
             <div class="h-64">
                 <canvas id="statusChart"></canvas>
             </div>
+            {% else %}
+            <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pie-chart text-amber-500 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz sorun verisi yok</p>
+                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Sorun bildirimleri geldiğinde dağılım grafiği burada görünecek</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -111,26 +157,49 @@
                     <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
                     En Çok Sorun Bildirilen Parklar
                 </h3>
-            </div>
-            <div class="p-6">
+            </div>            <div class="p-6">
                 <div class="space-y-3">
                     {% for park in park_stats %}
-                    <div class="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg">
+                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-300">
                         <div class="flex-1">
-                            <h4 class="font-medium text-gray-900 dark:text-white">{{ park.park__ad }}</h4>
-                            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                <span>{{ park.sorun_sayisi }} sorun</span>
-                                {% if park.acil_sayisi > 0 %}
-                                <span class="text-red-500">• {{ park.acil_sayisi }} acil</span>
-                                {% endif %}
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-tree text-red-600 dark:text-red-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ park.park__ad }}</h4>
+                                    <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+                                        <span><i class="fas fa-exclamation-circle mr-1"></i>{{ park.sorun_sayisi }} sorun</span>
+                                        {% if park.acil_sayisi > 0 %}
+                                        <span class="text-red-500 font-medium"><i class="fas fa-fire mr-1"></i>{{ park.acil_sayisi }} acil</span>
+                                        {% endif %}
+                                        {% if park.cozulen_sayisi > 0 %}
+                                        <span class="text-green-500 font-medium"><i class="fas fa-check mr-1"></i>{{ park.cozulen_sayisi }} çözülen</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold text-red-600 dark:text-red-400">{{ park.sorun_sayisi }}</div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ park.sorun_sayisi }}</div>
+                                <div class="text-xs text-gray-500">toplam sorun</div>
+                            </div>
+                            <a href="{% url 'parkbahce:park_detail' park.park__uuid %}" 
+                               class="px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 rounded-md text-sm font-medium transition-colors">
+                                <i class="fas fa-external-link-alt mr-1"></i>
+                                Park Detay
+                            </a>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">Veri bulunamadı</p>
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-chart-bar text-gray-400 text-2xl"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz sorun bildirimi yok</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Veriler mevcut olduğunda burada görünecek</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -143,122 +212,434 @@
                     <i class="fas fa-user-shield text-blue-500 mr-2"></i>
                     En Aktif Bildirimci Personeller
                 </h3>
-            </div>
-            <div class="p-6">
+            </div>            <div class="p-6">
                 <div class="space-y-3">
                     {% for personel in personel_stats %}
-                    <div class="flex items-center justify-between p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg">
+                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800 hover:shadow-md transition-all duration-300">
                         <div class="flex-1">
-                            <h4 class="font-medium text-gray-900 dark:text-white">{{ personel.personel__ad }}</h4>
-                            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                <span>{{ personel.bildirilen_sorun }} bildirim</span>
-                                {% if personel.acil_bildirilen > 0 %}
-                                <span class="text-red-500">• {{ personel.acil_bildirilen }} acil</span>
-                                {% endif %}
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ personel.personel__ad }}</h4>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                        <span><i class="fas fa-clipboard-list mr-1"></i>{{ personel.bildirilen_sorun }} bildirim</span>
+                                        {% if personel.acil_bildirilen > 0 %}
+                                        <span class="text-red-500 font-medium"><i class="fas fa-fire mr-1"></i>{{ personel.acil_bildirilen }} acil</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ personel.bildirilen_sorun }}</div>
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ personel.bildirilen_sorun }}</div>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">Veri bulunamadı</p>
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-blue-500 text-2xl"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz personel bildirimi yok</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Veriler mevcut olduğunda burada görünecek</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Neighborhood Analysis -->
+    </div>    <!-- Neighborhood Analysis -->
     {% if mahalle_stats %}
     <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
-        <div class="px-6 py-4 bg-gray-50/80 dark:bg-gray-700/80 border-b border-gray-200/60 dark:border-gray-600/60">
+        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200/60 dark:border-gray-600/60">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 <i class="fas fa-building text-green-500 mr-2"></i>
                 Mahalle Bazlı Sorun Dağılımı
             </h3>
-        </div>
-        <div class="p-6">
+        </div>        <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for mahalle in mahalle_stats %}
-                <div class="bg-gray-50/80 dark:bg-gray-700/80 rounded-lg p-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-medium text-gray-900 dark:text-white">{{ mahalle.park__mahalle__ad }}</h4>
-                        <span class="text-lg font-bold text-amber-600 dark:text-amber-400">{{ mahalle.sorun_sayisi }}</span>
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4 border border-green-100 dark:border-green-800 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-white">{{ mahalle.park__mahalle__ad }}</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ mahalle.park_sayisi }} park</p>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ mahalle.sorun_sayisi }}</span>
+                    </div>
+                    
+                    <!-- Sorun Detayları -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Toplam Sorun:</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ mahalle.sorun_sayisi }}</span>
+                        </div>
+                        {% if mahalle.acil_sayisi > 0 %}
+                        <div class="flex justify-between text-sm">
+                            <span class="text-red-600 dark:text-red-400">Acil:</span>
+                            <span class="font-medium text-red-800 dark:text-red-300">{{ mahalle.acil_sayisi }}</span>
+                        </div>
+                        {% endif %}
+                        {% if mahalle.cozulen_sayisi > 0 %}
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600 dark:text-green-400">Çözülen:</span>
+                            <span class="font-medium text-green-800 dark:text-green-300">{{ mahalle.cozulen_sayisi }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Mahalle Detay Butonu -->
+                    <div class="mt-3">
+                        <a href="#" onclick="showMahalleDetail('{{ mahalle.park__mahalle__uuid }}')" 
+                           class="inline-flex items-center px-3 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            Detay Görüntüle
+                        </a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200/60 dark:border-gray-600/60">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <i class="fas fa-building text-green-500 mr-2"></i>
+                Mahalle Bazlı Sorun Dağılımı
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-building text-green-500 text-2xl"></i>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400 font-medium">Henüz mahalle verisi yok</p>
+                <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Sorun bildirimleri geldiğinde mahalle dağılımı burada görünecek</p>
+            </div>
+        </div>
+    </div>
     {% endif %}
+
+    <!-- Problemli ve Başarılı Parklar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- En Problemli Parklar -->
+        {% if problemli_parklar %}
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-b border-gray-200/60 dark:border-gray-600/60">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    En Problemli Parklar (Çözülmemiş)
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    {% for park in problemli_parklar %}
+                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/10 dark:to-orange-900/10 rounded-lg border border-red-100 dark:border-red-800 hover:shadow-md transition-all duration-300">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-red-600 dark:text-red-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ park.park__ad }}</h4>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span>{{ park.bekleyen_sorun }} bekleyen</span>
+                                        {% if park.acil_sorun > 0 %}
+                                        <span class="text-red-500 font-medium">• {{ park.acil_sorun }} acil</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-lg font-bold text-red-600 dark:text-red-400">{{ park.bekleyen_sorun }}</div>
+                            <a href="{% url 'parkbahce:park_detail' park.park__uuid %}" 
+                               class="px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 rounded text-xs font-medium transition-colors">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- En Başarılı Parklar -->
+        {% if basarili_parklar %}
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-b border-gray-200/60 dark:border-gray-600/60">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-star text-green-500 mr-2"></i>
+                    En Başarılı Parklar (Düşük Sorun Oranı)
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    {% for park in basarili_parklar %}
+                    <div class="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-lg border border-green-100 dark:border-green-800 hover:shadow-md transition-all duration-300">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-star text-green-600 dark:text-green-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ park.park__ad }}</h4>
+                                    <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span>{{ park.toplam_kontrol }} kontrol</span>
+                                        <span>• {{ park.sorun_kontrol }} sorun</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600 dark:text-green-400">%{{ park.sorun_orani }}</div>
+                                <div class="text-xs text-gray-500">sorun oranı</div>
+                            </div>
+                            <a href="{% url 'parkbahce:park_detail' park.park__uuid %}" 
+                               class="px-2 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 rounded text-xs font-medium transition-colors">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Çözüm Oranları ve Trend Analizi -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Çözüm Performansı -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200/60 dark:border-gray-600/60">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-chart-pie text-blue-500 mr-2"></i>
+                    Çözüm Performansı
+                </h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">%{{ cozum_orani }}</div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Genel Çözüm Oranı</p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Çözülen:</span>
+                        <span class="font-medium text-green-600 dark:text-green-400">{{ durum_stats.cozuldu }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">İşe Dönüştürülen:</span>
+                        <span class="font-medium text-blue-600 dark:text-blue-400">{{ durum_stats.ise_donusturuldu }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Bekleyen:</span>
+                        <span class="font-medium text-amber-600 dark:text-amber-400">{{ durum_stats.sorun_var }}</span>
+                    </div>
+                </div>
+                
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {{ cozum_orani }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zaman Bazlı Analiz -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-b border-gray-200/60 dark:border-gray-600/60">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-clock text-purple-500 mr-2"></i>
+                    Zaman Bazlı Analiz
+                </h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Bu Hafta</p>
+                        <p class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ gecen_hafta_sorun }}</p>
+                    </div>
+                    <i class="fas fa-calendar-week text-purple-500 text-xl"></i>
+                </div>
+                
+                <div class="flex justify-between items-center p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Bu Ay</p>
+                        <p class="text-lg font-bold text-pink-600 dark:text-pink-400">{{ gecen_ay_sorun }}</p>
+                    </div>
+                    <i class="fas fa-calendar-alt text-pink-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hızlı Aksiyonlar -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-b border-gray-200/60 dark:border-gray-600/60">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-bolt text-orange-500 mr-2"></i>
+                    Hızlı Aksiyonlar
+                </h3>
+            </div>
+            <div class="p-6 space-y-3">
+                <a href="{% url 'istakip:sorun_bildirimleri' %}?durum=acil" 
+                   class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-fire text-red-500"></i>
+                        <span class="font-medium text-gray-900 dark:text-white">Acil Sorunlar</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-red-600 dark:text-red-400 font-bold">{{ durum_stats.acil }}</span>
+                        <i class="fas fa-arrow-right text-red-500 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+                
+                <a href="{% url 'istakip:sorun_bildirimleri' %}?durum=sorun_var" 
+                   class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-exclamation-circle text-amber-500"></i>
+                        <span class="font-medium text-gray-900 dark:text-white">Bekleyen</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-600 dark:text-amber-400 font-bold">{{ durum_stats.sorun_var }}</span>
+                        <i class="fas fa-arrow-right text-amber-500 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+                
+                <a href="{% url 'istakip:gorev_list' %}?durum=devam_ediyor" 
+                   class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-tasks text-blue-500"></i>
+                        <span class="font-medium text-gray-900 dark:text-white">Görevler</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-blue-600 dark:text-blue-400 font-bold">{{ durum_stats.ise_donusturuldu }}</span>
+                        <i class="fas fa-arrow-right text-blue-500 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Daily Trend Chart
-    const dailyCtx = document.getElementById('dailyTrendChart').getContext('2d');
-    new Chart(dailyCtx, {
-        type: 'line',
-        data: {
-            labels: [{% for day in gunluk_trend %}'{{ day.tarih }}'{% if not forloop.last %},{% endif %}{% endfor %}],
-            datasets: [{
-                label: 'Günlük Sorun Sayısı',
-                data: [{% for day in gunluk_trend %}{{ day.sorun_sayisi }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                borderColor: 'rgb(239, 68, 68)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    // Daily Trend Chart - sadece veri varsa oluştur
+    {% if gunluk_trend %}
+    const dailyCtx = document.getElementById('dailyTrendChart');
+    if (dailyCtx) {
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: [{% for day in gunluk_trend %}'{{ day.tarih }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Günlük Sorun Sayısı',
+                    data: [{% for day in gunluk_trend %}{{ day.sorun_sayisi }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'rgb(239, 68, 68)',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverRadius: 8
                     }
                 }
             }
-        }
-    });
-
-    // Status Distribution Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Sorun Var', 'Acil'],
-            datasets: [{
-                data: [{{ durum_stats.sorun_var }}, {{ durum_stats.acil }}],
-                backgroundColor: [
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(239, 68, 68, 0.8)'
-                ],
-                borderColor: [
-                    'rgb(245, 158, 11)',
-                    'rgb(239, 68, 68)'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+        });
+    }
+    {% endif %}    // Status Distribution Chart - sadece veri varsa oluştur
+    {% if durum_stats.toplam > 0 %}
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sorun Yok', 'Sorun Var', 'Acil', 'İşe Dönüştürüldü', 'Çözüldü'],
+                datasets: [{
+                    data: [
+                        {{ durum_stats.sorun_yok }}, 
+                        {{ durum_stats.sorun_var }}, 
+                        {{ durum_stats.acil }}, 
+                        {{ durum_stats.ise_donusturuldu }}, 
+                        {{ durum_stats.cozuldu }}
+                    ],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',    // Yeşil - Sorun Yok
+                        'rgba(245, 158, 11, 0.8)',   // Amber - Sorun Var
+                        'rgba(239, 68, 68, 0.8)',    // Kırmızı - Acil
+                        'rgba(59, 130, 246, 0.8)',   // Mavi - İşe Dönüştürüldü
+                        'rgba(16, 185, 129, 0.8)'    // Emerald - Çözüldü
+                    ],
+                    borderColor: [
+                        'rgb(34, 197, 94)',
+                        'rgb(245, 158, 11)',
+                        'rgb(239, 68, 68)',
+                        'rgb(59, 130, 246)',
+                        'rgb(16, 185, 129)'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                cutout: '70%'
             }
-        }
-    });
+        });
+    }
+    {% endif %}
 });
+
+function showMahalleDetail(mahalleUuid) {
+    // Mahalle detay sayfasına yönlendirme
+    window.location.href = `/ortak/mahalle/${mahalleUuid}/`;
+}
 </script>
 {% endblock %}

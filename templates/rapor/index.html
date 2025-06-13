@@ -99,28 +99,14 @@
                         <i class="fas fa-chevron-down"></i>
                     </button>
                 </div>
-            </div>
-
-            <!-- Raporlar Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+            </div>            <!-- Raporlar Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 hidden" id="kategori-{{ forloop.counter }}">
                 {% for rapor in kategori.raporlar %}
-                <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 p-5 rounded-xl border border-gray-200/60 dark:border-gray-600/60 hover:shadow-lg transition-all duration-300 group cursor-pointer">
+                <div class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 p-5 rounded-xl border border-gray-200/60 dark:border-gray-600/60 hover:shadow-lg transition-all duration-300 group">
                     <!-- Rapor Header -->
                     <div class="flex items-start justify-between mb-4">
                         <div class="w-10 h-10 bg-{{ kategori.renk }}-100 dark:bg-{{ kategori.renk }}-900/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="{{ rapor.icon }} text-{{ kategori.renk }}-600 dark:text-{{ kategori.renk }}-400 text-sm"></i>
-                        </div>
-                        <div class="flex items-center space-x-1">
-                            {% if rapor.durum == 'hazir' %}
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span class="text-xs text-green-600 dark:text-green-400 font-medium">Hazır</span>
-                            {% elif rapor.durum == 'gelistiriliyor' %}
-                            <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                            <span class="text-xs text-orange-600 dark:text-orange-400 font-medium">Geliştiriliyor</span>
-                            {% else %}
-                            <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                            <span class="text-xs text-gray-500 font-medium">Planlanıyor</span>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -133,36 +119,12 @@
                             {{ rapor.aciklama }}
                         </p>
 
-                        <!-- Format Badges -->
-                        <div class="flex items-center space-x-2">
-                            {% for format in rapor.format %}
-                            <span class="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs font-medium">
-                                {{ format }}
-                            </span>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center space-x-2 pt-2">
-                            {% if rapor.durum == 'hazir' %}
-                            <button class="flex-1 bg-{{ kategori.renk }}-500 hover:bg-{{ kategori.renk }}-600 text-white text-xs py-2 px-3 rounded-lg font-medium transition-colors flex items-center justify-center">
-                                <i class="fas fa-download mr-1"></i>
-                                İndir
+                        <!-- Action Button -->
+                        <div class="pt-2">
+                            <button class="w-full bg-{{ kategori.renk }}-500 hover:bg-{{ kategori.renk }}-600 text-white text-xs py-2 px-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                                <i class="fas fa-play mr-2"></i>
+                                Çalıştır
                             </button>
-                            <button class="p-2 text-gray-400 hover:text-{{ kategori.renk }}-600 transition-colors">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            {% elif rapor.durum == 'gelistiriliyor' %}
-                            <button class="flex-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs py-2 px-3 rounded-lg font-medium cursor-not-allowed" disabled>
-                                <i class="fas fa-clock mr-1"></i>
-                                Geliştiriliyor
-                            </button>
-                            {% else %}
-                            <button class="flex-1 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-xs py-2 px-3 rounded-lg font-medium cursor-not-allowed" disabled>
-                                <i class="fas fa-calendar mr-1"></i>
-                                Planlanıyor
-                            </button>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -197,35 +159,36 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Kategori toggle functionality
-    document.querySelectorAll('.glass-card button').forEach(button => {
-        if (button.querySelector('.fa-chevron-down')) {
-            button.addEventListener('click', function() {
-                const icon = this.querySelector('.fa-chevron-down');
-                const grid = this.closest('.glass-card').querySelector('.grid');
-                
-                if (grid.style.display === 'none') {
-                    grid.style.display = 'grid';
-                    icon.style.transform = 'rotate(0deg)';
-                } else {
-                    grid.style.display = 'none';
-                    icon.style.transform = 'rotate(-90deg)';
-                }
-            });
-        }
+    document.querySelectorAll('.glass-card .fa-chevron-down').forEach(icon => {
+        const button = icon.closest('button');
+        const grid = button.closest('.glass-card').querySelector('.grid');
+        
+        // Başlangıçta tüm kategoriler collapsed (kapalı)
+        grid.classList.add('hidden');
+        icon.style.transform = 'rotate(-90deg)';
+        
+        button.addEventListener('click', function() {
+            if (grid.classList.contains('hidden')) {
+                grid.classList.remove('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                grid.classList.add('hidden');
+                icon.style.transform = 'rotate(-90deg)';
+            }
+        });
     });
 
-    // Rapor kartlarına click eventi
-    document.querySelectorAll('.bg-gradient-to-br.cursor-pointer').forEach(card => {
-        card.addEventListener('click', function() {
-            const downloadBtn = this.querySelector('button:not(:disabled)');
-            if (downloadBtn && downloadBtn.textContent.includes('İndir')) {
-                // Rapor indirme işlemi
-                console.log('Rapor indiriliyor...');
+    // Rapor çalıştır butonları
+    document.querySelectorAll('button').forEach(button => {
+        if (button.textContent.includes('Çalıştır')) {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log('Rapor çalıştırılıyor...');
                 
                 // Başarı mesajı göster
                 const toast = document.createElement('div');
                 toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform';
-                toast.innerHTML = '<i class="fas fa-check mr-2"></i>Rapor indirme başlatıldı';
+                toast.innerHTML = '<i class="fas fa-check mr-2"></i>Rapor çalıştırılıyor...';
                 document.body.appendChild(toast);
                 
                 setTimeout(() => {
@@ -233,13 +196,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 100);
                 
                 setTimeout(() => {
-                    toast.style.transform = 'translateX(full)';
+                    toast.style.transform = 'translateX(100%)';
                     setTimeout(() => {
                         document.body.removeChild(toast);
                     }, 300);
                 }, 3000);
-            }
-        });
+            });
+        }
     });
 
     // Hover efektleri

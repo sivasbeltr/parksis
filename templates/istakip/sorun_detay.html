@@ -60,13 +60,54 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Ana Bilgiler Kartı -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft">
-        <div class="px-6 py-4 bg-gradient-to-r from-park-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200/60 dark:border-gray-700/60">
+<div class="space-y-6">    <!-- Ana Bilgiler Kartı -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden shadow-soft
+        {% if kontrol.durum == 'acil' %}
+            bg-gradient-to-br from-red-50/50 via-white to-red-50/30 dark:from-red-900/10 dark:via-gray-800 dark:to-red-900/5 border-red-200/30 dark:border-red-700/30
+        {% elif kontrol.durum == 'sorun_var' %}
+            bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-amber-900/10 dark:via-gray-800 dark:to-amber-900/5 border-amber-200/30 dark:border-amber-700/30
+        {% elif kontrol.durum == 'ise_donusturuldu' %}
+            bg-gradient-to-br from-blue-50/50 via-white to-blue-50/30 dark:from-blue-900/10 dark:via-gray-800 dark:to-blue-900/5 border-blue-200/30 dark:border-blue-700/30
+        {% elif kontrol.durum == 'cozuldu' %}
+            bg-gradient-to-br from-green-50/50 via-white to-green-50/30 dark:from-green-900/10 dark:via-gray-800 dark:to-green-900/5 border-green-200/30 dark:border-green-700/30
+        {% endif %}">
+        <div class="px-6 py-4 bg-gradient-to-r 
+            {% if kontrol.durum == 'acil' %}
+                from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20
+            {% elif kontrol.durum == 'sorun_var' %}
+                from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20
+            {% elif kontrol.durum == 'ise_donusturuldu' %}
+                from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20
+            {% elif kontrol.durum == 'cozuldu' %}
+                from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20
+            {% else %}
+                from-park-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800
+            {% endif %} border-b border-gray-200/60 dark:border-gray-700/60">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-park-green-100 dark:bg-park-green-900/30 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-info-circle text-park-green-600 dark:text-park-green-400 text-xl"></i>
+                <div class="w-12 h-12 
+                    {% if kontrol.durum == 'acil' %}
+                        bg-red-100 dark:bg-red-900/30
+                    {% elif kontrol.durum == 'sorun_var' %}
+                        bg-amber-100 dark:bg-amber-900/30
+                    {% elif kontrol.durum == 'ise_donusturuldu' %}
+                        bg-blue-100 dark:bg-blue-900/30
+                    {% elif kontrol.durum == 'cozuldu' %}
+                        bg-green-100 dark:bg-green-900/30
+                    {% else %}
+                        bg-park-green-100 dark:bg-park-green-900/30
+                    {% endif %} rounded-xl flex items-center justify-center">
+                    <i class="fas fa-info-circle 
+                        {% if kontrol.durum == 'acil' %}
+                            text-red-600 dark:text-red-400
+                        {% elif kontrol.durum == 'sorun_var' %}
+                            text-amber-600 dark:text-amber-400
+                        {% elif kontrol.durum == 'ise_donusturuldu' %}
+                            text-blue-600 dark:text-blue-400
+                        {% elif kontrol.durum == 'cozuldu' %}
+                            text-green-600 dark:text-green-400
+                        {% else %}
+                            text-park-green-600 dark:text-park-green-400
+                        {% endif %} text-xl"></i>
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Bildirim Bilgileri</h2>
@@ -123,9 +164,40 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Sağ Kolon -->
+                  <!-- Sağ Kolon -->
                 <div class="space-y-6">
+                    <!-- Sorun Durumu -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Sorun Durumu</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                {% if kontrol.durum == 'acil' %}
+                                    <i class="fas fa-exclamation-triangle text-red-600 w-4"></i>
+                                    <span class="font-medium text-red-800 dark:text-red-300">Acil Müdahale Gerekli</span>
+                                {% elif kontrol.durum == 'sorun_var' %}
+                                    <i class="fas fa-exclamation-circle text-amber-600 w-4"></i>
+                                    <span class="font-medium text-amber-800 dark:text-amber-300">Sorun Var</span>
+                                {% elif kontrol.durum == 'ise_donusturuldu' %}
+                                    <i class="fas fa-arrow-right text-blue-600 w-4"></i>
+                                    <span class="font-medium text-blue-800 dark:text-blue-300">İşe Dönüştürüldü</span>
+                                {% elif kontrol.durum == 'cozuldu' %}
+                                    <i class="fas fa-check-circle text-green-600 w-4"></i>
+                                    <span class="font-medium text-green-800 dark:text-green-300">Çözüldü</span>
+                                {% elif kontrol.durum == 'gozden_gecirildi' %}
+                                    <i class="fas fa-eye text-purple-600 w-4"></i>
+                                    <span class="font-medium text-purple-800 dark:text-purple-300">Gözden Geçirildi</span>
+                                {% else %}
+                                    <i class="fas fa-question-circle text-gray-600 w-4"></i>
+                                    <span class="font-medium text-gray-800 dark:text-gray-300">{{ kontrol.get_durum_display }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-list-alt text-gray-500 w-4"></i>
+                                <span class="text-gray-600 dark:text-gray-400">{{ kontrol.get_kontrol_tipi_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tarih Bilgileri -->
                     <div class="space-y-3">
                         <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Zaman Bilgileri</h3>
@@ -144,7 +216,6 @@
                             </div>
                         </div>
                     </div>
-                    
                     <!-- Sorun Açıklaması -->
                     {% if kontrol.aciklama %}
                     <div class="space-y-3">

@@ -1,53 +1,46 @@
-            <div id="resimler-tab" class="tab-content hidden">
-    <div class="space-y-6">
-        <!-- Görev Tamamlama Resimleri -->
+<div id="resimler-tab" class="tab-content hidden">
+    <div class="space-y-3">
         {% if gorev.tamamlama_resimleri.all %}
         <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                Tamamlama Resimleri
+            <h3 class="text-base font-medium text-gray-900 mb-2 flex items-center">
+                <i class="fas fa-check-circle text-green-600 mr-1"></i> Tamamlama Resimleri
             </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {% for resim in gorev.tamamlama_resimleri.all %}
                 <div class="group cursor-pointer" onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:"Tamamlama resmi" }}')">
-                    <div class="relative overflow-hidden rounded-lg border border-gray-200 hover:shadow-lg transition-all">
-                        <img src="{{ resim.resim.url }}" alt="Tamamlama resmi" 
-                             class="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-lg"></i>
+                    <div class="relative overflow-hidden rounded border border-gray-200 hover:shadow transition">
+                        <img src="{{ resim.resim.url }}" alt="Tamamlama resmi" class="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition flex items-center justify-center">
+                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-base"></i>
                         </div>
                     </div>
-                    <div class="p-2">
+                    <div class="p-1">
                         <p class="text-xs text-gray-600 truncate">{{ resim.aciklama|default:"Açıklama yok" }}</p>
-                        <p class="text-xs text-gray-500">{{ resim.created_at|date:"d.m.Y H:i" }}</p>
+                        <p class="text-xs text-gray-400">{{ resim.created_at|date:"d.m.Y H:i" }}</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
-        
-        <!-- Aşama Resimleri -->
         {% if gorev.asamalar.all %}
         <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-tasks text-blue-600 mr-2"></i>
-                Aşama Resimleri
+            <h3 class="text-base font-medium text-gray-900 mb-2 flex items-center">
+                <i class="fas fa-tasks text-blue-600 mr-1"></i> Aşama Resimleri
             </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {% for asama in gorev.asamalar.all %}
                 {% if asama.resim %}
                 <div class="group cursor-pointer" onclick="openImageModal('{{ asama.resim.url }}', '{{ asama.ad }} - Aşama resmi')">
-                    <div class="relative overflow-hidden rounded-lg border border-gray-200 hover:shadow-lg transition-all">
-                        <img src="{{ asama.resim.url }}" alt="Aşama resmi" 
-                             class="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-lg"></i>
+                    <div class="relative overflow-hidden rounded border border-gray-200 hover:shadow transition">
+                        <img src="{{ asama.resim.url }}" alt="Aşama resmi" class="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition flex items-center justify-center">
+                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-base"></i>
                         </div>
                     </div>
-                    <div class="p-2">
+                    <div class="p-1">
                         <p class="text-xs text-gray-600 font-medium">{{ asama.ad }}</p>
-                        <p class="text-xs text-gray-500">{{ asama.updated_at|date:"d.m.Y H:i" }}</p>
+                        <p class="text-xs text-gray-400">{{ asama.updated_at|date:"d.m.Y H:i" }}</p>
                     </div>
                 </div>
                 {% endif %}
@@ -55,42 +48,36 @@
             </div>
         </div>
         {% endif %}
-        
-        <!-- Sorun Bildirimi Resimleri -->
         {% if gorev.gunluk_kontrol and gorev.gunluk_kontrol.resimler.all %}
         <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-exclamation-triangle text-amber-600 mr-2"></i>
-                Sorun Bildirimi Resimleri
+            <h3 class="text-base font-medium text-gray-900 mb-2 flex items-center">
+                <i class="fas fa-exclamation-triangle text-amber-600 mr-1"></i> Sorun Bildirimi Resimleri
             </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {% for resim in gorev.gunluk_kontrol.resimler.all %}
                 <div class="group cursor-pointer" onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:"Sorun bildirimi resmi" }}')">
-                    <div class="relative overflow-hidden rounded-lg border border-gray-200 hover:shadow-lg transition-all">
-                        <img src="{{ resim.resim.url }}" alt="Sorun resmi" 
-                             class="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-lg"></i>
+                    <div class="relative overflow-hidden rounded border border-gray-200 hover:shadow transition">
+                        <img src="{{ resim.resim.url }}" alt="Sorun resmi" class="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition flex items-center justify-center">
+                            <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-base"></i>
                         </div>
                     </div>
-                    <div class="p-2">
+                    <div class="p-1">
                         <p class="text-xs text-gray-600 truncate">{{ resim.aciklama|default:"Açıklama yok" }}</p>
-                        <p class="text-xs text-gray-500">{{ resim.created_at|date:"d.m.Y H:i" }}</p>
+                        <p class="text-xs text-gray-400">{{ resim.created_at|date:"d.m.Y H:i" }}</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
-        
-        <!-- Resim Yoksa -->
         {% if not gorev.tamamlama_resimleri.all and not gorev.asamalar.all and not gorev.gunluk_kontrol.resimler.all %}
-        <div class="text-center py-12 text-gray-500">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-images text-2xl text-gray-400"></i>
+        <div class="text-center py-8 text-gray-500">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <i class="fas fa-images text-xl text-gray-400"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Henüz resim yüklenmemiş</h3>
-            <p class="text-gray-600">Görev ile ilgili resimler burada görüntülenecek</p>
+            <h3 class="text-base font-medium text-gray-900 mb-1">Henüz resim yüklenmemiş</h3>
+            <p class="text-gray-600 text-xs">Görev ile ilgili resimler burada görüntülenecek</p>
         </div>
         {% endif %}
     </div>

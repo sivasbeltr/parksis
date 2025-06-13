@@ -4,18 +4,18 @@
 {% block title %}{% if is_edit %}Görev Düzenle{% else %}Yeni Görev{% endif %} - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="space-y-3">
     <!-- Header -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-        <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i class="fas {% if is_edit %}fa-edit{% else %}fa-plus{% endif %} text-white text-xl"></i>
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-3 shadow-soft">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas {% if is_edit %}fa-edit{% else %}fa-plus{% endif %} text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white gradient-text">
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white gradient-text">
                     {% if is_edit %}Görev Düzenle{% else %}Yeni Görev Oluştur{% endif %}
                 </h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <p class="text-gray-600 dark:text-gray-400 text-sm">
                     {% if is_edit %}Mevcut görev bilgilerini güncelleyin{% else %}Park yönetimi için yeni bir görev oluşturun{% endif %}
                 </p>
             </div>
@@ -23,25 +23,25 @@
     </div>
 
     <!-- Form -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-        <form method="post" class="space-y-6">
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <form method="post" class="space-y-0" id="gorevForm">
             {% csrf_token %}
             
             <!-- Basic Information -->
-            <div class="space-y-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+            <div class="p-4 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200/60 dark:border-gray-700/60 pb-2">
                     <i class="fas fa-info-circle text-blue-500 mr-2"></i>
                     Temel Bilgiler
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <!-- Park -->
-                    <div class="md:col-span-2">
+                    <div class="lg:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Park <span class="text-red-500">*</span>
                         </label>
                         <select name="park" required {% if is_edit %}disabled{% endif %}
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                                class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="">Park seçiniz...</option>
                             {% for park in parklar %}
                             <option value="{{ park.uuid }}" {% if is_edit and gorev.park.uuid == park.uuid %}selected{% endif %}>
@@ -51,19 +51,19 @@
                         </select>
                         {% if is_edit %}
                         <input type="hidden" name="park" value="{{ gorev.park.uuid }}">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Park düzenleme sırasında değiştirilemez</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Park düzenleme sırasında değiştirilemez</p>
                         {% endif %}
                     </div>
 
                     <!-- Title -->
-                    <div class="md:col-span-2">
+                    <div class="lg:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Görev Başlığı <span class="text-red-500">*</span>
                         </label>
                         <input type="text" name="baslik" required
                                value="{% if is_edit %}{{ gorev.baslik }}{% endif %}"
                                placeholder="Görevin açıklayıcı başlığını yazın..."
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                     </div>
 
                     <!-- Task Type -->
@@ -71,7 +71,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Görev Tipi
                         </label>
-                        <select name="gorev_tipi" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <select name="gorev_tipi" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="">Seçiniz...</option>
                             {% for tip in gorev_tipleri %}
                             <option value="{{ tip.uuid }}" {% if is_edit and gorev.gorev_tipi and gorev.gorev_tipi.uuid == tip.uuid %}selected{% endif %}>
@@ -86,7 +86,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Öncelik
                         </label>
-                        <select name="oncelik" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <select name="oncelik" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="dusuk" {% if is_edit and gorev.oncelik == 'dusuk' %}selected{% endif %}>Düşük</option>
                             <option value="normal" {% if not is_edit or gorev.oncelik == 'normal' %}selected{% endif %}>Normal</option>
                             <option value="yuksek" {% if is_edit and gorev.oncelik == 'yuksek' %}selected{% endif %}>Yüksek</option>
@@ -100,7 +100,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Durum
                         </label>
-                        <select name="durum" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <select name="durum" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="planlanmis" {% if gorev.durum == 'planlanmis' %}selected{% endif %}>Planlanmış</option>
                             <option value="devam_ediyor" {% if gorev.durum == 'devam_ediyor' %}selected{% endif %}>Devam Ediyor</option>
                             <option value="tamamlandi" {% if gorev.durum == 'tamamlandi' %}selected{% endif %}>Tamamlandı</option>
@@ -108,27 +108,27 @@
                         </select>
                     </div>
                     {% endif %}
-                </div>
 
-                <!-- Description -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Açıklama
-                    </label>
-                    <textarea name="aciklama" rows="4" 
-                              placeholder="Görevin detaylı açıklamasını yazın..."
-                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">{% if is_edit %}{{ gorev.aciklama }}{% endif %}</textarea>
+                    <!-- Description -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Açıklama
+                        </label>
+                        <textarea name="aciklama" rows="3" 
+                                  placeholder="Görevin detaylı açıklamasını yazın..."
+                                  class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm resize-none">{% if is_edit %}{{ gorev.aciklama }}{% endif %}</textarea>
+                    </div>
                 </div>
             </div>
 
             <!-- Schedule Information -->
-            <div class="space-y-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200/60 dark:border-gray-700/60 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200/60 dark:border-gray-700/60 pb-2">
                     <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
                     Tarih ve Zaman
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <!-- Start Date -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -136,7 +136,7 @@
                         </label>
                         <input type="datetime-local" name="baslangic_tarihi" required
                                value="{% if is_edit and gorev.baslangic_tarihi %}{{ gorev.baslangic_tarihi|date:'Y-m-d\TH:i' }}{% else %}{% now 'Y-m-d\TH:i' %}{% endif %}"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                     </div>
 
                     <!-- End Date -->
@@ -146,7 +146,7 @@
                         </label>
                         <input type="datetime-local" name="bitis_tarihi"
                                value="{% if is_edit and gorev.bitis_tarihi %}{{ gorev.bitis_tarihi|date:'Y-m-d\TH:i' }}{% endif %}"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                     </div>
 
                     {% if not is_edit %}
@@ -155,7 +155,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Tekrarlama
                         </label>
-                        <select name="tekrar_tipi" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                        <select name="tekrar_tipi" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="yok">Tekrar Yok</option>
                             <option value="gunluk">Günlük</option>
                             <option value="haftalik">Haftalık</option>
@@ -167,8 +167,8 @@
             </div>
 
             <!-- Personnel Assignment -->
-            <div class="space-y-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+            <div class="p-4 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200/60 dark:border-gray-700/60 pb-2">
                     <i class="fas fa-users text-green-500 mr-2"></i>
                     Personel Ataması
                 </h3>
@@ -177,8 +177,8 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Atanacak Personeller
                     </label>
-                    <select name="atanan_personeller" multiple size="8"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
+                    <select name="atanan_personeller" multiple size="6"
+                            class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                         {% for personel in personeller %}
                         <option value="{{ personel.uuid }}" 
                                 {% if is_edit and personel.uuid in atanan_personeller %}selected{% endif %}>
@@ -186,33 +186,84 @@
                         </option>
                         {% endfor %}
                     </select>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Ctrl/Cmd tuşu ile birden fazla personel seçebilirsiniz. Hiç personel seçmezseniz görev atanmamış olarak kalır.
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Ctrl/Cmd tuşu ile birden fazla personel seçebilirsiniz.
                     </p>
                 </div>
             </div>
 
-            <!-- Actions -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <button type="submit" 
-                        class="btn-modern inline-flex items-center justify-center px-6 py-3 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg font-medium transition-all duration-200">
-                    <i class="fas {% if is_edit %}fa-save{% else %}fa-plus{% endif %} mr-2"></i>
-                    {% if is_edit %}Değişiklikleri Kaydet{% else %}Görevi Oluştur{% endif %}
-                </button>
-                
-                <a href="{% if is_edit %}{% url 'istakip:gorev_detail' gorev.uuid %}{% else %}{% url 'istakip:gorev_list' %}{% endif %}" 
-                   class="inline-flex items-center justify-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-times mr-2"></i>
-                    İptal
-                </a>
+            <!-- Task Steps -->
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200/60 dark:border-gray-700/60 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-tasks text-indigo-500 mr-2"></i>
+                        Görev Aşamaları
+                    </h3>
+                    <button type="button" onclick="addStep()" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm transition-all">
+                        <i class="fas fa-plus mr-1"></i>
+                        Aşama Ekle
+                    </button>
+                </div>
 
-                {% if is_edit %}
-                <a href="{% url 'istakip:gorev_detail' gorev.uuid %}" 
-                   class="inline-flex items-center justify-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-eye mr-2"></i>
-                    Görevi Görüntüle
-                </a>
-                {% endif %}
+                <div id="steps-container" class="space-y-2">
+                    {% if is_edit and gorev.asamalar.all %}
+                        {% for asama in gorev.asamalar.all %}
+                        <div class="step-item bg-white/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60 p-3">
+                            <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+                                <div class="lg:col-span-2">
+                                    <input type="text" name="step_name[]" value="{{ asama.ad }}" placeholder="Aşama adı..." 
+                                           class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                                    <input type="hidden" name="step_id[]" value="{{ asama.uuid }}">
+                                </div>
+                                <div>
+                                    <select name="step_responsible[]" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                                        <option value="">Sorumlu seç...</option>
+                                        {% for personel in personeller %}
+                                        <option value="{{ personel.uuid }}" {% if asama.sorumlu and asama.sorumlu.uuid == personel.uuid %}selected{% endif %}>{{ personel.ad }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="flex gap-2">
+                                    <textarea name="step_description[]" rows="1" placeholder="Açıklama..." 
+                                              class="flex-1 px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm resize-none">{{ asama.aciklama }}</textarea>
+                                    <button type="button" onclick="removeStep(this)" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Görevinizi daha iyi takip etmek için aşamalara bölün. Her aşama için sorumlu atayabilirsiniz.
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200/60 dark:border-gray-700/60">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button type="submit" 
+                            class="btn-modern inline-flex items-center justify-center px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg font-medium transition-all duration-200 text-sm">
+                        <i class="fas {% if is_edit %}fa-save{% else %}fa-plus{% endif %} mr-2"></i>
+                        {% if is_edit %}Değişiklikleri Kaydet{% else %}Görevi Oluştur{% endif %}
+                    </button>
+                    
+                    <a href="{% if is_edit %}{% url 'istakip:gorev_detail' gorev.uuid %}{% else %}{% url 'istakip:gorev_list' %}{% endif %}" 
+                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 text-sm">
+                        <i class="fas fa-times mr-2"></i>
+                        İptal
+                    </a>
+
+                    {% if is_edit %}
+                    <a href="{% url 'istakip:gorev_detail' gorev.uuid %}" 
+                       class="inline-flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 text-sm">
+                        <i class="fas fa-eye mr-2"></i>
+                        Görevi Görüntüle
+                    </a>
+                    {% endif %}
+                </div>
             </div>
         </form>
     </div>
@@ -246,5 +297,47 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Dynamic step management
+function addStep() {
+    const container = document.getElementById('steps-container');
+    const personelOptions = `
+        <option value="">Sorumlu seç...</option>
+        {% for personel in personeller %}
+        <option value="{{ personel.uuid }}">{{ personel.ad }}</option>
+        {% endfor %}
+    `;
+    
+    const stepHtml = `
+        <div class="step-item bg-white/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60 p-3">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+                <div class="lg:col-span-2">
+                    <input type="text" name="step_name[]" placeholder="Aşama adı..." 
+                           class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                    <input type="hidden" name="step_id[]" value="">
+                </div>
+                <div>
+                    <select name="step_responsible[]" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                        ${personelOptions}
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <textarea name="step_description[]" rows="1" placeholder="Açıklama..." 
+                              class="flex-1 px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm resize-none"></textarea>
+                    <button type="button" onclick="removeStep(this)" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', stepHtml);
+}
+
+function removeStep(button) {
+    const stepItem = button.closest('.step-item');
+    stepItem.remove();
+}
 </script>
 {% endblock %}

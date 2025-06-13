@@ -99,6 +99,30 @@
         </div>
     </div>
 
+    <!-- Mahalle Bazında Top 5 -->
+    <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">En Çok Park Olan Mahalleler</h4>
+        <div class="space-y-2">
+            {% for mahalle in cografi_stats.mahalle_park_dagilimi %}
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{{ forloop.counter }}</div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ mahalle.ad }}</span>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ mahalle.park_sayisi }} park</span>
+            </div>
+            {% empty %}
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs font-bold">-</div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri bulunmuyor</span>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Coğrafi Dağılım Haritası Placeholder -->
     <div class="mb-6">
         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Dağılım Haritası</h4>
@@ -107,37 +131,6 @@
                 <i class="fas fa-map text-indigo-400 text-4xl mb-2"></i>
                 <p class="text-sm text-gray-500 dark:text-gray-400">İnteraktif harita yükleniyor...</p>
                 <button class="text-xs text-indigo-600 hover:text-indigo-700 mt-1">Haritayı Aç</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mahalle Bazında Top 5 -->
-    <div class="mb-6">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">En Çok Park Olan Mahalleler</h4>
-        <div class="space-y-2">
-            <!-- Bu veri dinamik olarak güncellenecek -->
-            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div class="flex items-center space-x-2">
-                    <div class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
-                </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
-            </div>
-            
-            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div class="flex items-center space-x-2">
-                    <div class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
-                </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
-            </div>
-            
-            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div class="flex items-center space-x-2">
-                    <div class="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Veri yükleniyor...</span>
-                </div>
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">--</span>
             </div>
         </div>
     </div>

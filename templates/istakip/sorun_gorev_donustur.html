@@ -4,18 +4,18 @@
 {% block title %}Sorunu Göreve Dönüştür - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="space-y-3">
     <!-- Header -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-        <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i class="fas fa-arrow-right text-white text-xl"></i>
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-3 shadow-soft">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-arrow-right text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white gradient-text">
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white gradient-text">
                     Sorunu Göreve Dönüştür
                 </h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <p class="text-gray-600 dark:text-gray-400 text-sm">
                     Bildirilen sorunu çözüm için bir görev haline getirin
                 </p>
             </div>
@@ -23,174 +23,180 @@
     </div>
 
     <!-- Problem Details -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-            Sorun Detayları
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4">
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <div class="p-4 space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200/60 dark:border-gray-700/60 pb-2">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                Sorun Detayları
+            </h3>        
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Park</label>
+                        <div class="p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60">
+                            <div class="font-medium text-gray-900 dark:text-white">{{ kontrol.park.ad }}</div>
+                            {% if kontrol.park.mahalle %}
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ kontrol.park.mahalle.ad }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bildiren Personel</label>
+                        <div class="p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60">
+                            <div class="font-medium text-gray-900 dark:text-white">{{ kontrol.personel.ad }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Durum</label>
+                        <div class="p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60">
+                            {% if kontrol.durum == 'acil' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/80 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200/60 dark:border-red-700/60">
+                                    <i class="fas fa-fire mr-1"></i>
+                                    ACİL MÜDAHALE GEREKLİ
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100/80 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/60">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    SORUN VAR
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Park</label>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div class="font-medium text-gray-900 dark:text-white">{{ kontrol.park.ad }}</div>
-                        {% if kontrol.park.mahalle %}
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ kontrol.park.mahalle.ad }}</div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Açıklama</label>
+                    <div class="p-3 bg-gray-50/80 dark:bg-gray-700/80 rounded-lg border border-gray-200/60 dark:border-gray-600/60 h-32 overflow-y-auto">
+                        <p class="text-gray-900 dark:text-white text-sm">
+                            {{ kontrol.aciklama|default:"Açıklama girilmemiş." }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images -->
+            {% if kontrol.resimler.exists %}
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sorun Resimleri</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {% for resim in kontrol.resimler.all %}
+                    <div class="relative group">
+                        <img src="{{ resim.resim.url }}" alt="Sorun resmi" 
+                             class="w-full h-20 object-cover rounded-lg border border-gray-200/60 dark:border-gray-700/60 cursor-pointer hover:opacity-75 transition-opacity shadow-soft"
+                             onclick="showImageModal('{{ resim.resim.url }}')">
+                        {% if resim.aciklama %}
+                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1.5 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                            {{ resim.aciklama }}
+                        </div>
                         {% endif %}
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bildiren Personel</label>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div class="font-medium text-gray-900 dark:text-white">{{ kontrol.personel.ad }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Durum</label>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        {% if kontrol.durum == 'acil' %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                <i class="fas fa-fire mr-1"></i>
-                                ACİL MÜDAHALE GEREKLİ
-                            </span>
-                        {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                SORUN VAR
-                            </span>
-                        {% endif %}
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Açıklama</label>
-                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg h-32 overflow-y-auto">
-                    <p class="text-gray-900 dark:text-white">
-                        {{ kontrol.aciklama|default:"Açıklama girilmemiş." }}
-                    </p>
-                </div>
-            </div>
+            {% endif %}
         </div>
-
-        <!-- Images -->
-        {% if kontrol.resimler.exists %}
-        <div class="mt-6">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Sorun Resimleri</label>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {% for resim in kontrol.resimler.all %}
-                <div class="relative group">
-                    <img src="{{ resim.resim.url }}" alt="Sorun resmi" 
-                         class="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-75 transition-opacity"
-                         onclick="showImageModal('{{ resim.resim.url }}')">
-                    {% if resim.aciklama %}
-                    <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        {{ resim.aciklama }}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
     </div>
 
     <!-- Task Creation Form -->
-    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 p-6 shadow-soft">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-            <i class="fas fa-tasks text-green-500 mr-2"></i>
-            Görev Bilgileri
-        </h3>
-
-        <form method="post" class="space-y-6">
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-soft overflow-hidden">
+        <form method="post" class="space-y-0">
             {% csrf_token %}
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Title -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Görev Başlığı <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="baslik" value="{{ initial_data.baslik }}" required
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
-                </div>
+            <!-- Basic Information -->
+            <div class="p-4 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200/60 dark:border-gray-700/60 pb-2">
+                    <i class="fas fa-tasks text-green-500 mr-2"></i>
+                    Görev Bilgileri
+                </h3>
 
-                <!-- Priority -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Öncelik
-                    </label>
-                    <select name="oncelik" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
-                        <option value="dusuk">Düşük</option>
-                        <option value="normal" {% if initial_data.oncelik == 'normal' %}selected{% endif %}>Normal</option>
-                        <option value="yuksek" {% if initial_data.oncelik == 'yuksek' %}selected{% endif %}>Yüksek</option>
-                        <option value="acil" {% if initial_data.oncelik == 'acil' %}selected{% endif %}>Acil</option>
-                    </select>
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Title -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Görev Başlığı <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="baslik" value="{{ initial_data.baslik }}" required
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                    </div>
 
-                <!-- Start Date -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Başlangıç Tarihi <span class="text-red-500">*</span>
-                    </label>
-                    <input type="datetime-local" name="baslangic_tarihi" required
-                           value="{% now 'Y-m-d\TH:i' %}"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
-                </div>
+                    <!-- Priority -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Öncelik
+                        </label>
+                        <select name="oncelik" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                            <option value="dusuk">Düşük</option>
+                            <option value="normal" {% if initial_data.oncelik == 'normal' %}selected{% endif %}>Normal</option>
+                            <option value="yuksek" {% if initial_data.oncelik == 'yuksek' %}selected{% endif %}>Yüksek</option>
+                            <option value="acil" {% if initial_data.oncelik == 'acil' %}selected{% endif %}>Acil</option>
+                        </select>
+                    </div>
 
-                <!-- End Date -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Bitiş Tarihi (Opsiyonel)
-                    </label>
-                    <input type="datetime-local" name="bitis_tarihi"
-                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">
-                </div>
+                    <!-- Start Date -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Başlangıç Tarihi <span class="text-red-500">*</span>
+                        </label>
+                        <input type="datetime-local" name="baslangic_tarihi" required
+                               value="{% now 'Y-m-d\TH:i' %}"
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                    </div>
 
-                <!-- Personnel Assignment -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Atanacak Personeller
-                    </label>
-                    <select name="atanan_personeller" multiple 
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 h-32">
-                        {% for personel in personeller %}
-                        <option value="{{ personel.uuid }}" {% if personel.uuid == kontrol.personel.uuid %}selected{% endif %}>
-                            {{ personel.ad }}{% if personel.pozisyon %} - {{ personel.pozisyon }}{% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ctrl/Cmd tuşu ile birden fazla personel seçebilirsiniz</p>
-                </div>
-            </div>
+                    <!-- End Date -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Bitiş Tarihi (Opsiyonel)
+                        </label>
+                        <input type="datetime-local" name="bitis_tarihi"
+                               class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
+                    </div>
 
-            <!-- Description -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Görev Açıklaması
-                </label>
-                <textarea name="aciklama" rows="4" 
-                          placeholder="Görevin detaylı açıklamasını yazın..."
-                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80">{{ initial_data.aciklama }}</textarea>
+                    <!-- Personnel Assignment -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Atanacak Personeller
+                        </label>
+                        <select name="atanan_personeller" multiple 
+                                class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 h-28 text-sm">
+                            {% for personel in personeller %}
+                            <option value="{{ personel.uuid }}" {% if personel.uuid == kontrol.personel.uuid %}selected{% endif %}>
+                                {{ personel.ad }}{% if personel.pozisyon %} - {{ personel.pozisyon }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ctrl/Cmd tuşu ile birden fazla personel seçebilirsiniz</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Görev Açıklaması
+                        </label>
+                        <textarea name="aciklama" rows="3" 
+                                  placeholder="Görevin detaylı açıklamasını yazın..."
+                                  class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm resize-none">{{ initial_data.aciklama }}</textarea>
+                    </div>
+                </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button type="submit" 
-                        class="btn-modern inline-flex items-center justify-center px-6 py-3 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-check mr-2"></i>
-                    Görevi Oluştur
-                </button>
-                
-                <a href="{% url 'istakip:sorun_bildirimleri' %}" 
-                   class="inline-flex items-center justify-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-times mr-2"></i>
-                    İptal
-                </a>
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200/60 dark:border-gray-700/60">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button type="submit" 
+                            class="btn-modern inline-flex items-center justify-center px-4 py-2 bg-park-green-600 hover:bg-park-green-700 text-white rounded-lg font-medium transition-all duration-200 text-sm">
+                        <i class="fas fa-check mr-2"></i>
+                        Görevi Oluştur
+                    </button>
+                    
+                    <a href="{% url 'istakip:sorun_bildirimleri' %}" 
+                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 text-sm">
+                        <i class="fas fa-times mr-2"></i>
+                        İptal
+                    </a>
+                </div>
             </div>
         </form>
     </div>

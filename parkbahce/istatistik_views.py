@@ -13,6 +13,7 @@ from .models import (
     ParkAbone,
     ParkBina,
     ParkDonati,
+    ParkOyunGrup,
     ParkTip,
     SporAlan,
     SulamaKaynak,
@@ -23,7 +24,7 @@ from .models import (
 
 def istatistik_index(request):
     """
-    İstatistikler ana sayfası - kategorize edilmiş istatistik kartları
+    İstatistikler ana sayfası - gerçek verilerle kategorize edilmiş istatistik kartları
     """
 
     # Temel Park İstatistikleri
@@ -36,7 +37,7 @@ def istatistik_index(request):
         .order_by("-sayi")[:5],
     }
 
-    # Alan İstatistikleri
+    # Alan İstatistikleri - Gerçek veriler
     alan_stats = {
         "yesil_alan_sayisi": YesilAlan.objects.count(),
         "toplam_yesil_alan": YesilAlan.objects.aggregate(toplam=Sum("alan"))["toplam"]
@@ -52,22 +53,22 @@ def istatistik_index(request):
         or 0,
     }
 
-    # Altyapı İstatistikleri
+    # Altyapı İstatistikleri - Mevcut modellere göre
     altyapi_stats = {
         "sulama_sistemli_park": Park.objects.filter(sulama_tipi__isnull=False).count(),
+        "toplam_abone": ParkAbone.objects.count(),
         "elektrik_abonesi": ParkAbone.objects.filter(abone_tipi="ELEKTRIK").count(),
         "su_abonesi": ParkAbone.objects.filter(abone_tipi="SU").count(),
         "dogalgaz_abonesi": ParkAbone.objects.filter(abone_tipi="DOGALGAZ").count(),
     }
 
-    # Donatı & Habitat İstatistikleri
+    # Donatı & Habitat İstatistikleri - Gerçek modeller
     donati_stats = {
-        "toplam_donati": (
-            ParkDonati.objects.count() if hasattr(ParkDonati, "objects") else 0
-        ),
-        "toplam_habitat": Habitat.objects.count() if hasattr(Habitat, "objects") else 0,
-        "donati_cesitleri": 0,  # ParkDonati modeli tamamlandığında güncellenecek
-        "habitat_cesitleri": 0,  # Habitat modeli tamamlandığında güncellenecek
+        "toplam_donati": ParkDonati.objects.count(),
+        "toplam_habitat": Habitat.objects.count(),
+        "toplam_oyun_grup": ParkOyunGrup.objects.count(),
+        "donati_cesitleri": ParkDonati.objects.values("donati_tipi").distinct().count(),
+        "habitat_cesitleri": Habitat.objects.values("habitat_tipi").distinct().count(),
     }
 
     # Coğrafi Dağılım İstatistikleri
@@ -83,14 +84,9 @@ def istatistik_index(request):
         )
         .order_by("-park_sayisi")
         .first(),
-    }
-
-    # Bakım & Kullanım İstatistikleri (gelecek için hazırlanmış)
-    bakim_stats = {
-        "bakim_bekleyen": 0,  # Bakım modeli eklendikinde güncellenecek
-        "aktif_sorun": 0,  # Sorun modeli eklendikinde güncellenecek
-        "tamamlanan_is": 0,  # İş takip modeli eklendikinde güncellenecek
-        "geciken_is": 0,  # İş takip modeli eklendikinde güncellenecek
+        "mahalle_park_dagilimi": Mahalle.objects.annotate(park_sayisi=Count("parklar"))
+        .filter(park_sayisi__gt=0)
+        .order_by("-park_sayisi")[:5],
     }
 
     context = {
@@ -99,7 +95,6 @@ def istatistik_index(request):
         "altyapi_stats": altyapi_stats,
         "donati_stats": donati_stats,
         "cografi_stats": cografi_stats,
-        "bakim_stats": bakim_stats,
     }
 
     return render(request, "istatistik/index.html", context)

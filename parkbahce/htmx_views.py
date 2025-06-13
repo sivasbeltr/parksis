@@ -596,9 +596,9 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
 
     from istakip.models import GunlukKontrol
 
-    # Son 3 ay varsayılan
+    # Son 30 gün varsayılan
     if not baslangic_tarihi:
-        baslangic_tarihi = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+        baslangic_tarihi = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     if not bitis_tarihi:
         bitis_tarihi = datetime.now().strftime("%Y-%m-%d")
 
@@ -628,35 +628,43 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
     if durum_filter:
         kontroller = kontroller.filter(durum=durum_filter)
 
-    # Son 20 kayıt
-    kontroller = kontroller[:20]
+    # Son 15 kayıt
+    kontroller = kontroller[:15]
 
-    # İstatistikler
+    # Durum istatistikleri - filtrelenmiş tarihlere göre
     from django.db.models import Count
 
-    durum_stats = (
-        GunlukKontrol.objects.filter(
-            park=park,
-            kontrol_tarihi__date__gte=(
-                datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
-                if baslangic_tarihi
-                else datetime.now() - timedelta(days=90)
-            ),
-            kontrol_tarihi__date__lte=(
-                datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
-                if bitis_tarihi
-                else datetime.now()
-            ),
-        )
-        .values("durum")
-        .annotate(sayi=Count("id"))
-        .order_by("durum")
+    try:
+        filter_start = datetime.strptime(baslangic_tarihi, "%Y-%m-%d").date()
+        filter_end = datetime.strptime(bitis_tarihi, "%Y-%m-%d").date()
+    except ValueError:
+        filter_start = datetime.now().date() - timedelta(days=30)
+        filter_end = datetime.now().date()
+
+    durum_stats_query = GunlukKontrol.objects.filter(
+        park=park,
+        kontrol_tarihi__date__gte=filter_start,
+        kontrol_tarihi__date__lte=filter_end,
     )
+
+    # Tüm durumlar için sayıları hesapla
+    durum_stats = {
+        "sorun_yok": durum_stats_query.filter(durum="sorun_yok").count(),
+        "sorun_var": durum_stats_query.filter(durum="sorun_var").count(),
+        "acil": durum_stats_query.filter(durum="acil").count(),
+        "gozden_gecirildi": durum_stats_query.filter(durum="gozden_gecirildi").count(),
+        "ise_donusturuldu": durum_stats_query.filter(durum="ise_donusturuldu").count(),
+        "cozuldu": durum_stats_query.filter(durum="cozuldu").count(),
+    }
+
+    # Toplam kontrol sayısı
+    toplam_kontrol = sum(durum_stats.values())
 
     context = {
         "park": park,
         "kontroller": kontroller,
         "durum_stats": durum_stats,
+        "toplam_kontrol": toplam_kontrol,
         "durum_filter": durum_filter,
         "baslangic_tarihi": baslangic_tarihi,
         "bitis_tarihi": bitis_tarihi,

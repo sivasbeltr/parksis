@@ -605,9 +605,7 @@ def mobil_asama_baslat(request, asama_uuid):
             if asama.durum != "baslamadi":
                 return JsonResponse(
                     {"success": False, "message": "Bu aşama zaten başlatılmış."}
-                )
-
-            # Aşamayı başlat
+                )  # Aşamayı başlat
             asama.durum = "devam_ediyor"
             asama.baslangic_tarihi = timezone.now()
             asama.save()
@@ -616,6 +614,11 @@ def mobil_asama_baslat(request, asama_uuid):
             if asama.gorev.durum == "planlanmis":
                 asama.gorev.durum = "devam_ediyor"
                 asama.gorev.save()
+
+                # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+                if asama.gorev.gunluk_kontrol:
+                    asama.gorev.gunluk_kontrol.durum = "ise_donusturuldu"
+                    asama.gorev.gunluk_kontrol.save()
 
             return JsonResponse({"success": True, "message": "Aşama başlatıldı."})
 
@@ -652,12 +655,26 @@ def mobil_asama_tamamla(request, asama_uuid):
                         "success": False,
                         "message": "Bu aşama tamamlanabilir durumda değil.",
                     }
-                )
-
-            # Aşamayı tamamla
+                )  # Aşamayı tamamla
             asama.durum = "tamamlandi"
             asama.tamamlanma_tarihi = timezone.now()
             asama.save()
+
+            # Tüm aşamalar tamamlandı mı kontrol et ve ana görevi güncelle
+            tum_asamalar = asama.gorev.asamalar.all()
+            tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+            if (
+                tum_asamalar.count() > 0
+                and tum_asamalar.count() == tamamlanan_asamalar.count()
+            ):
+                asama.gorev.durum = "tamamlandi"
+                asama.gorev.tamamlanma_tarihi = timezone.now()
+                asama.gorev.save()
+
+                # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+                if asama.gorev.gunluk_kontrol:
+                    asama.gorev.gunluk_kontrol.durum = "cozuldu"
+                    asama.gorev.gunluk_kontrol.save()
 
             return JsonResponse({"success": True, "message": "Aşama tamamlandı."})
 
@@ -691,9 +708,7 @@ def mobil_gorev_tamamla(request, gorev_uuid):
                         "success": False,
                         "message": "Bu görev zaten tamamlanmış veya iptal edilmiş.",
                     }
-                )
-
-            # Görevi tamamla
+                )  # Görevi tamamla
             gorev.durum = "tamamlandi"
             gorev.tamamlanma_tarihi = timezone.now()
             gorev.save()
@@ -702,6 +717,11 @@ def mobil_gorev_tamamla(request, gorev_uuid):
             GorevAsama.objects.filter(
                 gorev=gorev, durum__in=["baslamadi", "devam_ediyor"]
             ).update(durum="tamamlandi", tamamlanma_tarihi=timezone.now())
+
+            # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+            if gorev.gunluk_kontrol:
+                gorev.gunluk_kontrol.durum = "cozuldu"
+                gorev.gunluk_kontrol.save()
 
             return JsonResponse({"success": True, "message": "Görev tamamlandı."})
 
