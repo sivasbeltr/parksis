@@ -373,6 +373,7 @@ class Gorev(models.Model):
     class DurumChoices(models.TextChoices):
         PLANLANMIS = "planlanmis", _("Planlanmış")
         DEVAM_EDIYOR = "devam_ediyor", _("Devam Ediyor")
+        ONAYA_GONDERILDI = "onaya_gonderildi", _("Onaya Gönderildi")
         TAMAMLANDI = "tamamlandi", _("Tamamlandı")
         IPTAL = "iptal", _("İptal")
         GECIKMIS = "gecikmis", _("Gecikmiş")
@@ -493,6 +494,13 @@ class Gorev(models.Model):
     extra_data = models.JSONField(
         _("Ekstra Veri"),
         help_text=_("Görev ile ilgili ekstra verileri JSON formatında giriniz."),
+        blank=True,
+        null=True,
+    )
+
+    onay_tarihi = models.DateTimeField(
+        _("Onay Tarihi"),
+        help_text=_("Görevin onaylandığı tarihi giriniz."),
         blank=True,
         null=True,
     )

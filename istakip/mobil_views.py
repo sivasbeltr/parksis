@@ -602,10 +602,20 @@ def mobil_asama_baslat(request, asama_uuid):
                 uuid=asama_uuid,
             )
 
-            if asama.durum != "baslamadi":
+            if asama.durum == "devam_ediyor":
                 return JsonResponse(
-                    {"success": False, "message": "Bu aşama zaten başlatılmış."}
+                    {
+                        "success": False,
+                        "message": "Bu aşama zaten başlatılmış ve devam ediyor.",
+                    }
                 )  # Aşamayı başlat
+            if asama.durum == "tamamlandi":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu aşama zaten tamamlanmış.",
+                    }
+                )
             asama.durum = "devam_ediyor"
             asama.baslangic_tarihi = timezone.now()
             asama.save()
@@ -635,7 +645,7 @@ def mobil_asama_baslat(request, asama_uuid):
 @login_required
 def mobil_asama_tamamla(request, asama_uuid):
     """
-    Mobil görev aşamasını tamamlama
+    Mobil görev aşamasını tamamlama - resim ve açıklama ile
     """
     if request.method == "POST":
         try:
@@ -655,26 +665,25 @@ def mobil_asama_tamamla(request, asama_uuid):
                         "success": False,
                         "message": "Bu aşama tamamlanabilir durumda değil.",
                     }
-                )  # Aşamayı tamamla
+                )
+
+            # Tamamlama mesajını al
+            tamamlama_mesaji = request.POST.get("tamamlama_mesaji", "")
+
+            # Eğer tamamlama mesajı varsa, mevcut açıklamaya ekle
+            if tamamlama_mesaji:
+                if asama.aciklama:
+                    asama.aciklama += f"\n\nTamamlama Mesajı: {tamamlama_mesaji}"
+                else:
+                    asama.aciklama = f"Tamamlama Mesajı: {tamamlama_mesaji}"
+
+            # Aşamayı tamamla
             asama.durum = "tamamlandi"
-            asama.tamamlanma_tarihi = timezone.now()
+            asama.tamamlanma_tarihi = timezone.now()  # Tamamlama resmi varsa kaydet
+            if "tamamlama_resmi" in request.FILES:
+                asama.resim = request.FILES["tamamlama_resmi"]
+
             asama.save()
-
-            # Tüm aşamalar tamamlandı mı kontrol et ve ana görevi güncelle
-            tum_asamalar = asama.gorev.asamalar.all()
-            tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
-            if (
-                tum_asamalar.count() > 0
-                and tum_asamalar.count() == tamamlanan_asamalar.count()
-            ):
-                asama.gorev.durum = "tamamlandi"
-                asama.gorev.tamamlanma_tarihi = timezone.now()
-                asama.gorev.save()
-
-                # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
-                if asama.gorev.gunluk_kontrol:
-                    asama.gorev.gunluk_kontrol.durum = "cozuldu"
-                    asama.gorev.gunluk_kontrol.save()
 
             return JsonResponse({"success": True, "message": "Aşama tamamlandı."})
 
@@ -691,7 +700,7 @@ def mobil_asama_tamamla(request, asama_uuid):
 @login_required
 def mobil_gorev_tamamla(request, gorev_uuid):
     """
-    Mobil görev tamamlama
+    Mobil görev onaya gönderme
     """
     if request.method == "POST":
         try:
@@ -702,33 +711,95 @@ def mobil_gorev_tamamla(request, gorev_uuid):
                 Gorev.objects.filter(atamalar__personel=personel), uuid=gorev_uuid
             )
 
-            if gorev.durum in ["tamamlandi", "iptal"]:
+            if gorev.durum in ["tamamlandi", "iptal", "onaya_gonderildi"]:
                 return JsonResponse(
                     {
                         "success": False,
-                        "message": "Bu görev zaten tamamlanmış veya iptal edilmiş.",
+                        "message": "Bu görev zaten tamamlanmış, iptal edilmiş veya onaya gönderilmiş.",
                     }
-                )  # Görevi tamamla
-            gorev.durum = "tamamlandi"
+                )
+
+            # Tüm aşamalar tamamlandı mı kontrol et
+            tum_asamalar = gorev.asamalar.all()
+            tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+
+            if (
+                tum_asamalar.count() > 0
+                and tum_asamalar.count() != tamamlanan_asamalar.count()
+            ):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Tüm aşamalar tamamlanmadan görev onaya gönderilemez.",
+                    }
+                )
+
+            # Görevi onaya gönder
+            gorev.durum = "onaya_gonderildi"
             gorev.tamamlanma_tarihi = timezone.now()
             gorev.save()
 
-            # Tüm aşamaları da tamamla
-            GorevAsama.objects.filter(
-                gorev=gorev, durum__in=["baslamadi", "devam_ediyor"]
-            ).update(durum="tamamlandi", tamamlanma_tarihi=timezone.now())
+            # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+            if gorev.gunluk_kontrol:
+                gorev.gunluk_kontrol.durum = "gozden_gecirildi"
+                gorev.gunluk_kontrol.save()
+
+            return JsonResponse({"success": True, "message": "Görev onaya gönderildi."})
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
+
+    return JsonResponse({"success": False, "message": "Geçersiz istek."})
+
+
+@login_required
+def mobil_gorev_onayla(request, gorev_uuid):
+    """
+    Mobil görevi onaylama (yönetici için)
+    """
+    if request.method == "POST":
+        try:
+            # Sadece yöneticiler onaylayabilir
+            if (
+                not request.user.is_staff
+                and not request.user.groups.filter(
+                    name__in=["Yönetici", "Park Uzmanı"]
+                ).exists()
+            ):
+                return JsonResponse(
+                    {"success": False, "message": "Bu işlem için yetkiniz bulunmuyor."}
+                )
+
+            # Görevi bul ve kontrol et
+            gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+            if gorev.durum != "onaya_gonderildi":
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu görev onaylanabilir durumda değil.",
+                    }
+                )
+
+            # Görevi onayla ve tamamlandı olarak işaretle
+            gorev.durum = "tamamlandi"
+            gorev.onaylayan = request.user
+            gorev.onay_tarihi = timezone.now()
+            gorev.save()
 
             # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
             if gorev.gunluk_kontrol:
                 gorev.gunluk_kontrol.durum = "cozuldu"
                 gorev.gunluk_kontrol.save()
 
-            return JsonResponse({"success": True, "message": "Görev tamamlandı."})
-
-        except Personel.DoesNotExist:
             return JsonResponse(
-                {"success": False, "message": "Personel kaydınız bulunamadı."}
+                {"success": True, "message": "Görev başarıyla onaylandı ve tamamlandı."}
             )
+
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
 

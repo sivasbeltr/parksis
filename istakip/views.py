@@ -1393,7 +1393,14 @@ def gorev_durum_degistir(request, gorev_uuid):
             messages.error(request, "Durum seçimi zorunludur.")
             return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
 
-        valid_durumlar = ["planlanmis", "devam_ediyor", "tamamlandi", "iptal"]
+        valid_durumlar = [
+            "planlanmis",
+            "devam_ediyor",
+            "onaya_gonderildi",
+            "tamamlandi",
+            "iptal",
+            "gecikmis",
+        ]
         if yeni_durum not in valid_durumlar:
             messages.error(request, "Geçersiz durum.")
             return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
@@ -1416,6 +1423,10 @@ def gorev_durum_degistir(request, gorev_uuid):
 
         if yeni_durum == "tamamlandi" and not gorev.tamamlanma_tarihi:
             gorev.tamamlanma_tarihi = timezone.now()
+        elif yeni_durum == "onaya_gonderildi":
+            gorev.onay_tarihi = None  # Onay tarihi sıfırla
+        elif yeni_durum == "tamamlandi":
+            gorev.onay_tarihi = timezone.now()
 
         gorev.save()
 
@@ -1423,7 +1434,12 @@ def gorev_durum_degistir(request, gorev_uuid):
         if gorev.gunluk_kontrol:
             if yeni_durum == "tamamlandi":
                 gorev.gunluk_kontrol.durum = "cozuldu"
-            elif yeni_durum in ["devam_ediyor", "planlanmis", "iptal"]:
+            elif yeni_durum in [
+                "devam_ediyor",
+                "planlanmis",
+                "onaya_gonderildi",
+                "iptal",
+            ]:
                 gorev.gunluk_kontrol.durum = "ise_donusturuldu"
             gorev.gunluk_kontrol.save()
 
@@ -1435,6 +1451,35 @@ def gorev_durum_degistir(request, gorev_uuid):
         messages.error(request, f"Durum güncelleme sırasında hata: {str(e)}")
 
     return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
+
+
+@login_required
+@require_http_methods(["POST"])
+def gorev_onayla(request, gorev_uuid):
+    """Görev onaylama (onaya_gonderildi -> tamamlandi)"""
+
+    gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+    if gorev.durum != "onaya_gonderildi":
+        return JsonResponse(
+            {"success": False, "message": "Bu görev onay beklemede değil."}
+        )
+
+    try:
+        gorev.durum = "tamamlandi"
+        gorev.tamamlanma_tarihi = timezone.now()
+        gorev.onay_tarihi = timezone.now()
+        gorev.save()
+
+        # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+        if gorev.gunluk_kontrol:
+            gorev.gunluk_kontrol.durum = "cozuldu"
+            gorev.gunluk_kontrol.save()
+
+        return JsonResponse({"success": True, "message": "Görev başarıyla onaylandı."})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
 
 
 @login_required

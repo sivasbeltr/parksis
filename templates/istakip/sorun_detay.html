@@ -20,13 +20,14 @@
                 Sorun Detayı
             </h1>
         </div>
-        
-        <!-- Action buttons -->
+          <!-- Action buttons -->
         <div class="flex flex-wrap items-center gap-2">
+            {% if kontrol.durum in 'sorun_var,acil' %}
             <button onclick="openSorunDurumModal()" 
                     class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                 <i class="fas fa-edit mr-2"></i>Durum Değiştir
             </button>
+            {% endif %}
             
             {% if kontrol.durum in 'sorun_var,acil' and not kontrol.ilgili_gorevler.exists %}
                 <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}"
@@ -63,20 +64,22 @@
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.park.ad|truncatechars:20 }}</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Durum -->
+        </div>        <!-- Durum -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-10 h-10 {% if kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif kontrol.durum == 'sorun_var' %}bg-orange-100 dark:bg-orange-900/30{% elif kontrol.durum == 'cozuldu' %}bg-green-100 dark:bg-green-900/30{% else %}bg-blue-100 dark:bg-blue-900/30{% endif %} rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 {% if kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif kontrol.durum == 'sorun_var' %}bg-orange-100 dark:bg-orange-900/30{% elif kontrol.durum == 'cozuldu' %}bg-green-100 dark:bg-green-900/30{% elif kontrol.durum == 'ise_donusturuldu' %}bg-blue-100 dark:bg-blue-900/30{% elif kontrol.durum == 'gozden_gecirildi' %}bg-purple-100 dark:bg-purple-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
                     {% if kontrol.durum == 'acil' %}
                         <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
                     {% elif kontrol.durum == 'sorun_var' %}
                         <i class="fas fa-exclamation-circle text-orange-600 dark:text-orange-400"></i>
                     {% elif kontrol.durum == 'cozuldu' %}
                         <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
-                    {% else %}
+                    {% elif kontrol.durum == 'ise_donusturuldu' %}
                         <i class="fas fa-arrow-right text-blue-600 dark:text-blue-400"></i>
+                    {% elif kontrol.durum == 'gozden_gecirildi' %}
+                        <i class="fas fa-eye text-purple-600 dark:text-purple-400"></i>
+                    {% else %}
+                        <i class="fas fa-question-circle text-gray-600 dark:text-gray-400"></i>
                     {% endif %}
                 </div>
                 <div class="ml-3">
@@ -403,8 +406,7 @@
                 
                 <!-- Mevcut Durum Gösterimi -->
                 <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mevcut Durum:</div>
-                    <div class="flex items-center gap-2">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Mevcut Durum:</div>                    <div class="flex items-center gap-2">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
                             {% if kontrol.durum == 'acil' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
                             {% elif kontrol.durum == 'sorun_var' %}bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300

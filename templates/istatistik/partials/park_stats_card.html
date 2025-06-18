@@ -58,38 +58,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Park Tipleri -->
-    <div class="mb-6">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Park Tipleri Dağılımı</h4>
-        <div class="space-y-2">
-            {% for tip in park_stats.park_tipleri %}
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ tip.park_tipi__ad|default:"Belirtilmemiş" }}</span>
-                <div class="flex items-center space-x-2">
-                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        {% if park_stats.toplam_park > 0 %}
-                        <div class="bg-green-500 h-2 rounded-full" style="width: {% widthratio tip.sayi park_stats.toplam_park 100 %}%"></div>
-                        {% endif %}
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ tip.sayi }}</span>
-                </div>
-            </div>
-            {% empty %}
-            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Henüz park tipi verisi bulunmuyor</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Aksiyon Butonları -->
-    <div class="flex space-x-2">
-        <a href="#" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:shadow-lg transition-all btn-modern">
-            <i class="fas fa-chart-bar mr-2"></i>
-            Detaylı Rapor
-        </a>
-        <a href="{% url 'parkbahce:park_list' %}" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
-            <i class="fas fa-list mr-2"></i>
-            Parkları Gör
-        </a>
-    </div>
 </div>

@@ -78,22 +78,36 @@
             {% endif %}
         </div>
     </div>
-    
-    <!-- Görev Listesi -->
+      <!-- Görev Listesi -->
     {% if gorevler %}
-        <div class="space-y-3">
+        <div class="space-y-2">
             {% for gorev in gorevler %}
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden border-l-4 
+                <div class="rounded-xl shadow-soft overflow-hidden border-l-4 
                     {% if gorev.oncelik == 'acil' %}border-red-500
                     {% elif gorev.oncelik == 'yuksek' %}border-orange-500
                     {% elif gorev.oncelik == 'normal' %}border-blue-500
-                    {% else %}border-gray-400{% endif %}">
+                    {% else %}border-gray-400{% endif %}
+                    {% if gorev.durum == 'planlanmis' %}bg-gradient-to-r from-gray-50 to-gray-100
+                    {% elif gorev.durum == 'beklemede' %}bg-gradient-to-r from-orange-50 to-orange-100
+                    {% elif gorev.durum == 'devam_ediyor' %}bg-gradient-to-r from-blue-50 to-blue-100
+                    {% elif gorev.durum == 'onaya_gonderildi' %}bg-gradient-to-r from-purple-50 to-purple-100
+                    {% elif gorev.durum == 'tamamlandi' %}bg-gradient-to-r from-green-50 to-green-100
+                    {% elif gorev.durum == 'iptal' %}bg-gradient-to-r from-red-50 to-red-100
+                    {% elif gorev.durum == 'gecikmis' %}bg-gradient-to-r from-orange-50 to-red-100
+                    {% else %}bg-white{% endif %}">
                     
                     <!-- Görev Header -->
-                    <div class="p-4">
-                        <div class="flex items-start justify-between mb-3">
+                    <div class="p-3">                        <div class="flex items-start justify-between mb-2">
                             <div class="flex-1">
-                                <h3 class="font-bold text-base text-gray-900 leading-tight">{{ gorev.baslik }}</h3>
+                                <h3 class="font-bold text-base leading-tight
+                                    {% if gorev.durum == 'planlanmis' %}text-gray-800
+                                    {% elif gorev.durum == 'beklemede' %}text-orange-800
+                                    {% elif gorev.durum == 'devam_ediyor' %}text-blue-800
+                                    {% elif gorev.durum == 'onaya_gonderildi' %}text-purple-800
+                                    {% elif gorev.durum == 'tamamlandi' %}text-green-800
+                                    {% elif gorev.durum == 'iptal' %}text-red-800
+                                    {% elif gorev.durum == 'gecikmis' %}text-red-800
+                                    {% else %}text-gray-900{% endif %}">{{ gorev.baslik }}</h3>
                                 <p class="text-sm text-gray-600 mt-1">
                                     <i class="fas fa-map-marker-alt mr-1 text-park-green-600"></i>
                                     {{ gorev.park.ad }} - {{ gorev.park.mahalle.ad }}
@@ -105,17 +119,19 @@
                                 {% endif %}
                             </div>
                             
-                            <div class="flex flex-col items-end space-y-1">
-                                <!-- Durum -->
+                            <div class="flex flex-col items-end space-y-1">                                <!-- Durum -->
                                 <span class="px-2 py-1 rounded-full text-xs font-medium
-                                    {% if gorev.durum == 'planlanmis' %}bg-gray-100 text-gray-800
-                                    {% elif gorev.durum == 'devam_ediyor' %}bg-yellow-100 text-yellow-800
-                                    {% elif gorev.durum == 'tamamlandi' %}bg-green-100 text-green-800
-                                    {% elif gorev.durum == 'iptal' %}bg-red-100 text-red-800
-                                    {% elif gorev.durum == 'gecikmis' %}bg-red-100 text-red-800
-                                    {% endif %}">
-                                    {% if gorev.durum == 'planlanmis' %}<i class="fas fa-clock mr-1"></i>Planlanmış
+                                    {% if gorev.durum == 'planlanmis' %}bg-gray-200 text-gray-800
+                                    {% elif gorev.durum == 'beklemede' %}bg-orange-200 text-orange-800
+                                    {% elif gorev.durum == 'devam_ediyor' %}bg-blue-200 text-blue-800
+                                    {% elif gorev.durum == 'onaya_gonderildi' %}bg-purple-200 text-purple-800
+                                    {% elif gorev.durum == 'tamamlandi' %}bg-green-200 text-green-800
+                                    {% elif gorev.durum == 'iptal' %}bg-red-200 text-red-800
+                                    {% elif gorev.durum == 'gecikmis' %}bg-red-200 text-red-800
+                                    {% endif %}">                                    {% if gorev.durum == 'planlanmis' %}<i class="fas fa-clock mr-1"></i>Planlanmış
+                                    {% elif gorev.durum == 'beklemede' %}<i class="fas fa-pause mr-1"></i>Beklemede
                                     {% elif gorev.durum == 'devam_ediyor' %}<i class="fas fa-play mr-1"></i>Devam Ediyor
+                                    {% elif gorev.durum == 'onaya_gonderildi' %}<i class="fas fa-hourglass-half mr-1"></i>Onay Bekliyor
                                     {% elif gorev.durum == 'tamamlandi' %}<i class="fas fa-check mr-1"></i>Tamamlandı
                                     {% elif gorev.durum == 'iptal' %}<i class="fas fa-times mr-1"></i>İptal
                                     {% elif gorev.durum == 'gecikmis' %}<i class="fas fa-exclamation-triangle mr-1"></i>Gecikmiş
@@ -137,9 +153,8 @@
                                 </span>
                             </div>
                         </div>
-                        
-                        <!-- Tarih Bilgileri -->
-                        <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                          <!-- Tarih Bilgileri -->
+                        <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
                             <div class="flex items-center">
                                 <i class="fas fa-calendar-plus mr-1"></i>
                                 {{ gorev.created_at|date:"d.m.Y H:i" }}

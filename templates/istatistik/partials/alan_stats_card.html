@@ -91,69 +91,11 @@
         </div>
     </div>
 
-    <!-- Alan Dağılım Grafiği -->
-    <div class="mb-6">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Alan Dağılımı</h4>
-        <div class="h-32 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
-            <canvas id="alanDagilimChart" width="400" height="128"></canvas>
-        </div>
-    </div>
 
-    <!-- Aksiyon Butonları -->
-    <div class="flex space-x-2">
-        <a href="#" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:shadow-lg transition-all btn-modern">
-            <i class="fas fa-chart-pie mr-2"></i>
-            Alan Analizi
-        </a>
-        <a href="#" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
-            <i class="fas fa-map mr-2"></i>
-            Haritada Gör
-        </a>
-    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Alan dağılım grafiği
-    const ctx = document.getElementById('alanDagilimChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Yeşil Alan', 'Spor Alanı', 'Oyun Alanı', 'Bina'],
-                datasets: [{
-                    data: [
-                        {{ alan_stats.toplam_yesil_alan|default:0 }},
-                        {{ alan_stats.toplam_spor_alan|default:0 }},
-                        {{ alan_stats.toplam_oyun_alan|default:0 }},
-                        {{ alan_stats.toplam_bina_alan|default:0 }}
-                    ],
-                    backgroundColor: [
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(147, 51, 234, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(107, 114, 128, 0.8)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed.toLocaleString('tr-TR') + ' m²';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
+
 });
 </script>

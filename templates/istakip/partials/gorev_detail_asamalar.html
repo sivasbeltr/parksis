@@ -27,8 +27,24 @@
             <!-- Aşama Header -->
             <div class="p-3 border-l-4 
                 {% if asama.durum == 'tamamlandi' %}border-green-500 bg-green-50/30 dark:bg-green-900/10{% elif asama.durum == 'devam_ediyor' %}border-blue-500 bg-blue-50/30 dark:bg-blue-900/10{% elif asama.durum == 'beklemede' %}border-yellow-500 bg-yellow-50/30 dark:bg-yellow-900/10{% else %}border-gray-400 bg-gray-50/30 dark:bg-gray-900/10{% endif %}">
-                
-                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <!-- Sol: Resim Alanı -->
+                    <div class="flex-shrink-0">
+                        {% if asama.resim %}
+                            <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg cursor-pointer hover:scale-105 transition-transform duration-200"
+                                 onclick="openImageModal('{{ asama.resim.url }}', '{{ asama.ad }} - Aşama Resmi')">
+                                <img src="{{ asama.resim.url }}" 
+                                     alt="{{ asama.ad }}" 
+                                     class="w-full h-full object-cover">
+                            </div>
+                        {% else %}
+                            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                                <i class="fas fa-camera text-gray-400 dark:text-gray-500 text-lg"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Orta: Ana İçerik -->
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2">
                             <!-- Numaralı Badge -->
@@ -93,7 +109,7 @@
                         </div>
                     </div>
                     
-                    <!-- Durum Değiştir Dropdown -->
+                    <!-- Sağ: Durum Değiştir Dropdown -->
                     <div class="flex items-center">
                         <form method="post" action="{% url 'istakip:gorev_asama_durum_degistir' asama.uuid %}" class="inline">
                             {% csrf_token %}

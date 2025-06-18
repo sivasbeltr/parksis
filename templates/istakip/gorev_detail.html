@@ -35,13 +35,15 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700 group hover:shadow-md transition-all duration-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 {% if gorev.durum == 'tamamlandi' %}bg-green-100 dark:bg-green-900/30{% elif gorev.durum == 'devam_ediyor' %}bg-blue-100 dark:bg-blue-900/30{% elif gorev.durum == 'planlanmis' %}bg-yellow-100 dark:bg-yellow-900/30{% elif gorev.durum == 'iptal' %}bg-red-100 dark:bg-red-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
+                    <div class="w-10 h-10 {% if gorev.durum == 'tamamlandi' %}bg-green-100 dark:bg-green-900/30{% elif gorev.durum == 'devam_ediyor' %}bg-blue-100 dark:bg-blue-900/30{% elif gorev.durum == 'planlanmis' %}bg-yellow-100 dark:bg-yellow-900/30{% elif gorev.durum == 'onaya_gonderildi' %}bg-purple-100 dark:bg-purple-900/30{% elif gorev.durum == 'iptal' %}bg-red-100 dark:bg-red-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
                         {% if gorev.durum == 'tamamlandi' %}
                             <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
                         {% elif gorev.durum == 'devam_ediyor' %}
                             <i class="fas fa-play-circle text-blue-600 dark:text-blue-400"></i>
                         {% elif gorev.durum == 'planlanmis' %}
                             <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+                        {% elif gorev.durum == 'onaya_gonderildi' %}
+                            <i class="fas fa-hourglass-half text-purple-600 dark:text-purple-400"></i>
                         {% elif gorev.durum == 'iptal' %}
                             <i class="fas fa-times-circle text-red-600 dark:text-red-400"></i>
                         {% elif gorev.durum == 'gecikmis' %}
@@ -54,11 +56,12 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</p>
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ gorev.get_durum_display }}</p>
                     </div>
-                </div>
-                <button onclick="openDurumModal()" 
-                        class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400">
-                    <i class="fas fa-edit text-xs"></i>
-                </button>
+                </div>                {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+                    <button onclick="openDurumModal()" 
+                            class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                {% endif %}
             </div>
         </div>
 
@@ -364,6 +367,16 @@
                                     <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
                                     <span class="font-medium">Devam Ediyor</span>
                                     <i class="fas fa-play-circle ml-auto text-blue-500"></i>
+                                </button>                                <button type="button" onclick="selectDurum('onaya_gonderildi')" 
+                                        class="durum-option w-full text-left px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center">
+                                    <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                                    <div class="flex-1">
+                                        <span class="font-medium">Onaya Gönderildi</span>
+                                        {% if user.is_staff %}
+                                        <div class="text-xs text-gray-500 mt-1">Yönetici onayı bekleniyor</div>
+                                        {% endif %}
+                                    </div>
+                                    <i class="fas fa-hourglass-half ml-auto text-purple-500"></i>
                                 </button>
                                 
                                 <button type="button" onclick="selectDurum('tamamlandi')" 
@@ -376,6 +389,8 @@
                                         <span class="font-medium">Tamamlandı</span>
                                         {% if asama_stats.toplam > 0 and asama_stats.tamamlanan != asama_stats.toplam %}
                                         <div class="text-xs text-gray-500 mt-1">Tüm aşamalar tamamlanmalı</div>
+                                        {% elif gorev.durum == 'onaya_gonderildi' and user.is_staff %}
+                                        <div class="text-xs text-green-600 mt-1">Direkt onaylanacak</div>
                                         {% endif %}
                                     </div>
                                     <i class="fas fa-check-circle ml-auto text-green-500"></i>
@@ -487,7 +502,8 @@
 </div>
 
 <script>
-// Durum modal functions
+// JavaScript kodu - sadece durum değiştirme modalı kullanılıyor
+
 function openDurumModal() {
     document.getElementById('durumModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -509,10 +525,9 @@ function selectDurum(durum) {
     const mevcutDurum = '{{ gorev.durum }}';
     if (durum === mevcutDurum) {
         return;
-    }
-      // Tüm seçenekleri reset et
+    }    // Tüm seçenekleri reset et
     document.querySelectorAll('.durum-option').forEach(option => {
-        option.classList.remove('border-green-500', 'bg-green-50', 'border-blue-500', 'bg-blue-50', 'border-yellow-500', 'bg-yellow-50', 'border-red-500', 'bg-red-50', 'border-orange-500', 'bg-orange-50');
+        option.classList.remove('border-green-500', 'bg-green-50', 'border-blue-500', 'bg-blue-50', 'border-yellow-500', 'bg-yellow-50', 'border-red-500', 'bg-red-50', 'border-orange-500', 'bg-orange-50', 'border-purple-500', 'bg-purple-50');
     });
     
     // Seçilen seçeneği highlight et
@@ -521,6 +536,7 @@ function selectDurum(durum) {
         const colorClass = {
             'planlanmis': ['border-yellow-500', 'bg-yellow-50'],
             'devam_ediyor': ['border-blue-500', 'bg-blue-50'],
+            'onaya_gonderildi': ['border-purple-500', 'bg-purple-50'],
             'tamamlandi': ['border-green-500', 'bg-green-50'],
             'iptal': ['border-red-500', 'bg-red-50'],
             'gecikmis': ['border-orange-500', 'bg-orange-50']
@@ -531,6 +547,31 @@ function selectDurum(durum) {
         // Hidden input'u güncelle ve submit butonunu aktif et
         document.getElementById('selectedDurum').value = durum;
         document.getElementById('durumSubmitBtn').disabled = false;
+    }
+}
+
+// Görev onaylama fonksiyonu
+function approveTask() {
+    if (confirm('Bu görevi onaylamak istediğinizden emin misiniz? Görevi tamamlanan olarak işaretleyecek.')) {
+        fetch(`/istakip/mobil/gorev/{{ gorev.uuid }}/onayla/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Görev başarıyla onaylandı!');
+                location.reload();
+            } else {
+                alert(data.message || 'Hata oluştu');
+            }
+        })
+        .catch(error => {
+            alert('Bir hata oluştu');
+        });
     }
 }
 
