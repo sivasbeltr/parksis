@@ -1,6 +1,7 @@
 import json
 
-from django.contrib.gis.db import models
+from django.contrib.postgres.fields import JSONField
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 

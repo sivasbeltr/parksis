@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import Polygon
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
@@ -120,10 +121,21 @@ class BaseGeoViewSet(viewsets.ReadOnlyModelViewSet):
         bbox = self.request.query_params.get("bbox")
         if bbox:
             try:
+                # Parse BBOX coordinates (minx, miny, maxx, maxy)
                 bbox_coords = [float(coord) for coord in bbox.split(",")]
                 if len(bbox_coords) == 4:
+                    # Create a Polygon from BBOX in SRID 4326
                     bbox_polygon = Polygon.from_bbox(bbox_coords)
-                    queryset = queryset.filter(geom__intersects=bbox_polygon)
+                    bbox_polygon.srid = 4326  # Set SRID to 4326 (WGS84)
+
+                    # Transform the BBOX polygon to SRID 5256 to match database
+                    queryset = queryset.annotate(
+                        transformed_geom=Transform("geom", 5256)
+                    ).filter(
+                        transformed_geom__intersects=bbox_polygon.transform(
+                            5256, clone=True
+                        )
+                    )
             except (ValueError, IndexError):
                 pass
 

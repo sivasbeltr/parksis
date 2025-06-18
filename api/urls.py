@@ -1,6 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from .istakip_viewsets import GorevViewSet, GunlukKontrolViewSet, PersonelViewSet
+from .view_viewsets import ParkbahceListApiView
 from .viewsets import (
     ElektrikHatViewSet,
     ElektrikNoktaViewSet,
@@ -41,6 +43,25 @@ router.register(
     r"parklar-detay",
     ViewParklarDonatilarViewSet,
     basename="view-parklar-donatilar-habitatlar",
+)
+
+# İstakip Modülü ViewSets
+router.register(
+    r"kontrol-listesi",
+    GunlukKontrolViewSet,
+    basename="kontrol-listesi",
+)
+
+router.register(
+    r"gorev-listesi",
+    GorevViewSet,
+    basename="gorev-listesi",
+)
+
+router.register(
+    r"personeller",
+    PersonelViewSet,
+    basename="personeller",
 )
 
 # Nokta Geometrili Modeller
@@ -137,4 +158,11 @@ router.register(
 )
 
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("", include(router.urls)),
+    path(
+        "parkbahce-list-api/",
+        ParkbahceListApiView.as_view(),
+        name="parkbahce_list_api",
+    ),
+]

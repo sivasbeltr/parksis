@@ -34,7 +34,7 @@ from .models import (
 )
 
 
-@cache_page(60 * 5)  # 5 dakika cache
+# @cache_page(60 * 5)  # 5 dakika cache
 def index(request):
     """Dashboard ana sayfa view'i - Park yönetim sistemi istatistikleri"""
 

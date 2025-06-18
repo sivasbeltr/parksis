@@ -127,11 +127,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -157,8 +152,8 @@ CACHES = {
     }
 }
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = BASE_DIR / "media"
 USE_MINIO = os.getenv("USE_MINIO", "False").lower() == "true"
 
 
@@ -202,7 +197,7 @@ if USE_MINIO:
     MEDIA_URL = f"{protocol}://{MINIO_CUSTOM_DOMAIN}/{MINIO_MEDIA_LOCATION}/"
 
     # STATIC_ROOT collectstatic için gerekli (geçici klasör)
-    STATIC_ROOT = BASE_DIR / "staticfiles"
+    STATIC_ROOT = BASE_DIR / "static"
 
     print(f"✅ MinIO Storage aktif: {protocol}://{MINIO_ENDPOINT}")
     print(f"   📦 Bucket: {MINIO_BUCKET_NAME}")
@@ -212,7 +207,8 @@ if USE_MINIO:
 else:
     # Local storage (development)
     STATIC_URL = "/static/"
-    STATIC_ROOT = BASE_DIR / "staticfiles"
+    # STATIC_ROOT = BASE_DIR / "static"
+    STATICFILES_DIRS = [BASE_DIR / "static"]
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
     print("📁 Local storage aktif")

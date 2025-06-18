@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr" class="h-full">
 <head>
@@ -152,13 +153,12 @@
             </svg>
         </button>
     </div>
-    
-    <!-- Katman Drawer -->
+      <!-- Katman Drawer -->
     <div id="layerDrawer" class="layer-drawer bg-white/95 backdrop-blur-lg border-l border-gray-200/50 shadow-2xl">
-        <div class="p-6 h-full flex flex-col">
+        <div class="p-4 h-full flex flex-col">
             <!-- Drawer Header -->
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-900">
                     <i class="fas fa-layers text-park-green-600 mr-2"></i>
                     Harita Katmanları
                 </h2>
@@ -167,10 +167,109 @@
                     <i class="fas fa-times text-gray-500"></i>
                 </button>
             </div>
-            
-            <!-- Katman Listesi -->
+
+            <!-- İstakip Filtre Formu -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-emerald-800">
+                        <i class="fas fa-filter text-emerald-600 mr-2"></i>
+                        İstakip Filtreleri
+                    </h3>
+                    <button id="toggleFilters" class="text-emerald-600 hover:text-emerald-700">
+                        <i class="fas fa-chevron-up text-sm"></i>
+                    </button>
+                </div>
+                
+                <div id="filterForm" class="space-y-3">
+                    <!-- Görevler Filtresi -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-medium text-emerald-700">Görevler</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="gorevlerToggle" checked class="sr-only peer">
+                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                        
+                        <div id="gorevFilters" class="space-y-2">                            <select id="gorevDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                                <option value="">Tüm Durumlar</option>
+                                <option value="planlanmis" selected>Planlanmış</option>
+                                <option value="devam_ediyor" selected>Devam Ediyor</option>
+                                <option value="onaya_gonderildi" selected>Onay Bekliyor</option>
+                                <option value="tamamlandi">Tamamlandı</option>
+                                <option value="iptal">İptal</option>
+                                <option value="gecikmis" selected>Gecikmiş</option>
+                            </select>
+                            
+                            <select id="gorevOncelik" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                                <option value="">Tüm Öncelikler</option>
+                                <option value="acil">Acil</option>
+                                <option value="yuksek">Yüksek</option>
+                                <option value="normal">Normal</option>
+                                <option value="dusuk">Düşük</option>
+                            </select>
+                            
+                            <select id="gorevTarih" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                                <option value="">Tüm Zamanlar</option>
+                                <option value="bugun">Bugün</option>
+                                <option value="bu_hafta">Bu Hafta</option>
+                                <option value="bu_ay">Bu Ay</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Kontroller Filtresi -->
+                    <div class="space-y-2 pt-2 border-t border-emerald-200">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-medium text-emerald-700">Sorun Bildirimleri</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="kontrollerToggle" checked class="sr-only peer">
+                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                          <div id="kontrolFilters" class="space-y-2">
+                            <select id="kontrolDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                                <option value="sorun_var,acil">Çözülmemiş Sorunlar</option>
+                                <option value="">Tüm Durumlar</option>
+                                <option value="sorun_var">Sorun Var</option>
+                                <option value="acil">Acil</option>
+                                <option value="gozden_gecirildi">Gözden Geçirildi</option>
+                                <option value="ise_donusturuldu">İşe Dönüştürüldü</option>
+                                <option value="sorun_yok">Sorun Yok</option>
+                            </select>
+                            
+                            <select id="kontrolTarih" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                                <option value="">Tüm Zamanlar</option>
+                                <option value="bugun">Bugün</option>
+                                <option value="bu_hafta">Bu Hafta</option>
+                                <option value="bu_ay">Bu Ay</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filtre Butonları -->
+                    <div class="flex gap-2 pt-3 border-t border-emerald-200">
+                        <button id="applyFilters" class="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition-colors">
+                            <i class="fas fa-filter mr-1"></i>Süz
+                        </button>
+                        <button id="clearFilters" class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs font-medium transition-colors">
+                            <i class="fas fa-times mr-1"></i>Temizle
+                        </button>
+                    </div>
+                    
+                    <!-- İstatistikler -->
+                    <div id="filterStats" class="pt-3 border-t border-emerald-200">
+                        <div class="text-xs text-emerald-700 font-medium mb-2">Sonuçlar:</div>
+                        <div class="flex justify-between text-xs text-emerald-600">
+                            <span>Görevler: <span id="gorevCount">-</span></span>
+                            <span>Sorunlar: <span id="kontrolCount">-</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temel Katmanlar -->
             <div class="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                <!-- Temel Katmanlar -->
                 <div class="mb-4">
                     <h3 class="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Temel Katmanlar</h3>
                     
@@ -200,167 +299,14 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Park İçi Katmanlar -->
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Park İçi Öğeler</h3>
-                    
-                    <!-- Nokta Katmanları -->
-                    <div class="space-y-2">
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="habitatlar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-green-600 rounded-full mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Habitatlar</span>
-                                </div>
-                                <input type="checkbox" id="habitatlar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="donatilar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Donatılar</span>
-                                </div>
-                                <input type="checkbox" id="donatilar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="oyun-gruplari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-yellow-500 rounded-full mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Oyun Grupları</span>
-                                </div>
-                                <input type="checkbox" id="oyun-gruplari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="sulama-noktalari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-cyan-500 rounded-full mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Sulama Noktaları</span>
-                                </div>
-                                <input type="checkbox" id="sulama-noktalari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="elektrik-noktalari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-red-500 rounded-full mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Elektrik Noktaları</span>
-                                </div>
-                                <input type="checkbox" id="elektrik-noktalari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Alan Katmanları -->
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Alan Katmanları</h3>
-                    
-                    <div class="space-y-2">
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="yesil-alanlar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-green-400 rounded mr-3" style="opacity: 0.7;"></div>
-                                    <span class="text-sm font-medium text-gray-700">Yeşil Alanlar</span>
-                                </div>
-                                <input type="checkbox" id="yesil-alanlar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="spor-alanlar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-orange-500 rounded mr-3" style="opacity: 0.7;"></div>
-                                    <span class="text-sm font-medium text-gray-700">Spor Alanları</span>
-                                </div>
-                                <input type="checkbox" id="spor-alanlar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="oyun-alanlar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-purple-500 rounded mr-3" style="opacity: 0.7;"></div>
-                                    <span class="text-sm font-medium text-gray-700">Oyun Alanları</span>
-                                </div>
-                                <input type="checkbox" id="oyun-alanlar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="park-binalar">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 bg-gray-600 rounded mr-3" style="opacity: 0.7;"></div>
-                                    <span class="text-sm font-medium text-gray-700">Binalar</span>
-                                </div>
-                                <input type="checkbox" id="park-binalar-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Hat Katmanları -->
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Altyapı Hatları</h3>
-                    
-                    <div class="space-y-2">
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="sulama-hatlari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-1 bg-cyan-600 rounded mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Sulama Hatları</span>
-                                </div>
-                                <input type="checkbox" id="sulama-hatlari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                        
-                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="elektrik-hatlari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-1 bg-red-600 rounded mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Elektrik Hatları</span>
-                                </div>
-                                <input type="checkbox" id="elektrik-hatlari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>                        <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="kanal-hatlari">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-1 bg-yellow-800 rounded mr-3"></div>
-                                    <span class="text-sm font-medium text-gray-700">Kanal Hatları</span>
-                                </div>
-                                <input type="checkbox" id="kanal-hatlari-toggle" 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-            
-            <!-- Zoom Level Indicator -->
+              <!-- Zoom Level Indicator -->
             <div class="mt-4 p-3 bg-gray-50 rounded-lg">
                 <div class="text-xs text-gray-500 mb-1">Zoom Seviyesi</div>
                 <div id="zoomLevel" class="text-sm font-medium text-gray-700">-</div>
                 <div class="text-xs text-gray-500 mt-1">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Park detayları zoom 16+ seviyesinde görünür
+                    Haritayı yakınlaştırarak detayları görebilirsiniz
                 </div>
             </div>
         </div>    </div>    <!-- Park Detay Modal -->
@@ -400,498 +346,12 @@
                 </div>
             </div>
         </div>
-    </div>
-    
+    </div>    
     <!-- OpenLayers JS -->
     <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
     
-    <script>
-        // Harita ve katman değişkenleri
-        let map;
-        let layers = {};
-        let currentZoom = 10;
-        
-        // Sivas Merkez koordinatları (EPSG:4326)
-        const sivasCenter = [37.0167, 39.7500];
-        
-        // Harita başlangıç zoom seviyesi
-        const initialZoom = 12;
-        
-        // Katman renkleri
-        const layerColors = {
-            habitatlar: '#059669',
-            donatilar: '#3B82F6',
-            'oyun-gruplari': '#EAB308',
-            'sulama-noktalari': '#06B6D4',
-            'elektrik-noktalari': '#EF4444',
-            'yesil-alanlar': '#22C55E',
-            'spor-alanlar': '#F97316',
-            'oyun-alanlar': '#A855F7',
-            'park-binalar': '#6B7280',
-            'sulama-hatlari': '#0891B2',
-            'elektrik-hatlari': '#DC2626',
-            'kanal-hatlari': '#92400E'
-        };
-        
-        // Harita başlatma
-        function initMap() {
-            // Base layer (OpenStreetMap)
-            const baseLayer = new ol.layer.Tile({
-                source: new ol.source.OSM()
-            });
-            
-            // Harita oluşturma
-            map = new ol.Map({
-                target: 'map',
-                layers: [baseLayer],
-                view: new ol.View({
-                    center: ol.proj.fromLonLat(sivasCenter),
-                    zoom: initialZoom
-                })
-            });
-            
-            // Zoom değişim olayını dinle
-            map.getView().on('change:resolution', function() {
-                currentZoom = map.getView().getZoom();
-                updateZoomDisplay();
-                updateLayerVisibility();
-            });
-            
-            // Harita tıklama olayı
-            map.on('singleclick', handleMapClick);
-            
-            // Temel katmanları yükle
-            loadMahalleler();
-            loadParklar();
-            
-            updateZoomDisplay();
-        }
-        
-        // Zoom seviyesi göstergesi güncelle
-        function updateZoomDisplay() {
-            document.getElementById('zoomLevel').textContent = Math.round(currentZoom);
-        }
-        
-        // Katman görünürlüğünü zoom seviyesine göre güncelle
-        function updateLayerVisibility() {
-            Object.keys(layers).forEach(layerName => {
-                if (layerName !== 'mahalleler' && layerName !== 'parklar') {
-                    const layer = layers[layerName];
-                    if (layer) {
-                        // Park detay katmanları sadece yüksek zoom seviyelerinde görünür
-                        layer.setVisible(currentZoom >= 16 && layer.getVisible());
-                    }
-                }
-            });
-        }
-        
-        // Mahalleler katmanını yükle
-        async function loadMahalleler() {
-            try {
-                const response = await fetch('/api/v1/mahalleler/');
-                const data = await response.json();
-                
-                const vectorSource = new ol.source.Vector({
-                    features: new ol.format.GeoJSON().readFeatures(data, {
-                        featureProjection: 'EPSG:3857'
-                    })
-                });
-                  const mahalleLayer = new ol.layer.Vector({
-                    source: vectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#6B7280',
-                            width: 3,
-                            lineDash: [5, 5]
-                        }),
-                        fill: new ol.style.Fill({
-                            color: 'rgba(0, 0, 0, 0)'
-                        }),
-                        text: new ol.style.Text({
-                            font: '12px Arial',
-                            fill: new ol.style.Fill({
-                                color: '#374151'
-                            }),
-                            stroke: new ol.style.Stroke({
-                                color: '#FFFFFF',
-                                width: 2
-                            })
-                        })
-                    }),
-                    zIndex: 1
-                });
-                
-                // Mahalle isimlerini göster
-                mahalleLayer.getSource().getFeatures().forEach(feature => {
-                    const style = mahalleLayer.getStyle().clone();
-                    style.getText().setText(feature.get('ad'));
-                    feature.setStyle(style);
-                });
-                
-                layers.mahalleler = mahalleLayer;
-                map.addLayer(mahalleLayer);
-            } catch (error) {
-                console.error('Mahalleler yüklenirken hata:', error);
-            }
-        }
-        
-        // Parklar katmanını yükle
-        async function loadParklar() {
-            try {
-                const response = await fetch('/api/v1/parklar/');
-                const data = await response.json();
-                
-                const vectorSource = new ol.source.Vector({
-                    features: new ol.format.GeoJSON().readFeatures(data, {
-                        featureProjection: 'EPSG:3857'
-                    })
-                });
-                
-                const parkLayer = new ol.layer.Vector({
-                    source: vectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#047857',
-                            width: 2
-                        }),
-                        fill: new ol.style.Fill({
-                            color: 'rgba(16, 185, 129, 0.3)'
-                        })
-                    }),
-                    zIndex: 2
-                });
-                
-                layers.parklar = parkLayer;
-                map.addLayer(parkLayer);
-            } catch (error) {
-                console.error('Parklar yüklenirken hata:', error);
-            }
-        }
-        
-        // Dinamik katman yükleme (BBOX ile)
-        async function loadDynamicLayer(layerName, apiEndpoint) {
-            if (currentZoom < 16) return;
-            
-            const extent = map.getView().calculateExtent(map.getSize());
-            const bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
-            const bboxParam = `bbox=${bbox[0]},${bbox[1]},${bbox[2]},${bbox[3]}`;
-            
-            try {
-                const response = await fetch(`${apiEndpoint}?${bboxParam}`);
-                const data = await response.json();
-                
-                if (layers[layerName]) {
-                    map.removeLayer(layers[layerName]);
-                }
-                
-                const vectorSource = new ol.source.Vector({
-                    features: new ol.format.GeoJSON().readFeatures(data, {
-                        featureProjection: 'EPSG:3857'
-                    })
-                });
-                
-                const style = createLayerStyle(layerName);
-                const layer = new ol.layer.Vector({
-                    source: vectorSource,
-                    style: style,
-                    zIndex: 10
-                });
-                
-                layers[layerName] = layer;
-                map.addLayer(layer);
-                
-                // Checkbox durumuna göre görünürlük ayarla
-                const checkbox = document.getElementById(`${layerName}-toggle`);
-                if (checkbox) {
-                    layer.setVisible(checkbox.checked);
-                }
-            } catch (error) {
-                console.error(`${layerName} yüklenirken hata:`, error);
-            }
-        }
-        
-        // Katman stilleri oluştur
-        function createLayerStyle(layerName) {
-            const color = layerColors[layerName] || '#6B7280';
-            
-            if (layerName.includes('hat')) {
-                // Çizgi katmanları için
-                return new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: color,
-                        width: 3
-                    })
-                });
-            } else if (layerName.includes('alan') || layerName.includes('bina')) {
-                // Alan katmanları için
-                return new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: color,
-                        width: 2
-                    }),
-                    fill: new ol.style.Fill({
-                        color: color.replace(')', ', 0.3)').replace('rgb', 'rgba')
-                    })
-                });
-            } else {
-                // Nokta katmanları için
-                return new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 6,
-                        fill: new ol.style.Fill({
-                            color: color
-                        }),
-                        stroke: new ol.style.Stroke({
-                            color: '#FFFFFF',
-                            width: 2
-                        })
-                    })
-                });
-            }
-        }
-          // Harita tıklama işleyici
-        function handleMapClick(evt) {
-            const features = map.getFeaturesAtPixel(evt.pixel);
-            
-            if (features.length > 0) {
-                const feature = features[0];
-                const layer = map.getLayers().getArray().find(l => 
-                    l.getSource && l.getSource().getFeatures && 
-                    l.getSource().getFeatures().includes(feature)
-                );
-                
-                // Park tıklandıysa modal aç
-                if (layer === layers.parklar) {
-                    const parkUuid = feature.get('uuid');
-                    if (parkUuid) {
-                        showParkDetails(parkUuid);
-                    }
-                }
-                
-                // Mahalle tıklandıysa modal aç
-                if (layer === layers.mahalleler) {
-                    showMahalleDetails(feature);
-                }
-            }
-        }        // Park detaylarını göster
-        async function showParkDetails(uuid) {
-            try {
-                // Önce mahalle modal'ını kapat
-                const mahalleModal = document.getElementById('mahalleModal');
-                mahalleModal.classList.add('hidden');
-                
-                // CSS transition'ının tamamlanması için daha uzun bekle
-                await new Promise(resolve => setTimeout(resolve, 350));
-                
-                const response = await fetch(`/parkbahce/htmx/park-detail/${uuid}/`, {
-                    headers: {
-                        'HX-Request': 'true'
-                    }
-                });
-                
-                if (response.ok) {
-                    const content = await response.text();
-                    document.getElementById('parkModalTitle').textContent = 'Park Detayları';
-                    document.getElementById('parkModalContent').innerHTML = content;
-                    
-                    // Park modal'ını açmadan önce z-index'ini yeniden ayarla
-                    const parkModal = document.getElementById('parkModal');
-                    parkModal.style.zIndex = '999';
-                    parkModal.classList.remove('hidden');
-                } else {
-                    console.error('Park detayları yüklenemedi');
-                }
-            } catch (error) {
-                console.error('Park detayları yüklenirken hata:', error);
-            }
-        }          // Mahalle detaylarını göster
-        async function showMahalleDetails(feature) {
-            try {
-                const mahalleUuid = feature.get('uuid');
-                if (!mahalleUuid) {
-                    console.error('Mahalle UUID bulunamadı');
-                    return;
-                }
-
-                const response = await fetch(`/parkbahce/htmx/mahalle-detail/${mahalleUuid}/`, {
-                    headers: {
-                        'HX-Request': 'true'
-                    }
-                });
-                
-                if (response.ok) {
-                    const content = await response.text();
-                    document.getElementById('mahalleModalTitle').textContent = 'Mahalle Detayları';
-                    document.getElementById('mahalleModalContent').innerHTML = content;
-                    document.getElementById('mahalleModal').classList.remove('hidden');
-                } else {
-                    console.error('Mahalle detayları yüklenemedi:', response.status);
-                }
-            } catch (error) {
-                console.error('Mahalle detayları yüklenirken hata:', error);
-            }
-        }
-          // Park alt katmanlarını yükle
-        function loadParkSubLayers(parkUuid) {
-            const subLayers = [
-                'habitatlar', 'donatilar', 'oyun-gruplari', 'sulama-noktalari', 
-                'elektrik-noktalari', 'yesil-alanlar', 'spor-alanlar', 'oyun-alanlar', 
-                'park-binalar', 'sulama-hatlari', 'elektrik-hatlari', 'kanal-hatlari'
-            ];
-            
-            subLayers.forEach(layerName => {
-                const endpoint = `/api/v1/parklar/${parkUuid}/${layerName.replace('-', '_')}/`;
-                loadDynamicLayer(layerName, endpoint);
-                
-                // Checkbox'ı işaretle
-                const checkbox = document.getElementById(`${layerName}-toggle`);
-                if (checkbox) {
-                    checkbox.checked = true;
-                }
-            });
-            
-            // Modal'ı kapat
-            document.getElementById('parkModal').classList.add('hidden');
-        }
-        
-        // Park'a yakınlaş
-        function zoomToPark(parkUuid) {
-            const parkLayer = layers.parklar;
-            if (parkLayer) {
-                const features = parkLayer.getSource().getFeatures();
-                const parkFeature = features.find(f => f.get('uuid') === parkUuid);
-                if (parkFeature) {
-                    const extent = parkFeature.getGeometry().getExtent();
-                    map.getView().fit(extent, {
-                        padding: [50, 50, 50, 50],
-                        maxZoom: 18,
-                        duration: 1000
-                    });
-                }
-            }
-            document.getElementById('parkModal').classList.add('hidden');
-        }
-        
-        // Mahalle'ye yakınlaş
-        function zoomToMahalle(mahalleUuid) {
-            const mahalleLayer = layers.mahalleler;
-            if (mahalleLayer) {
-                const features = mahalleLayer.getSource().getFeatures();
-                const mahalleFeature = features.find(f => f.get('uuid') === mahalleUuid);
-                if (mahalleFeature) {
-                    const extent = mahalleFeature.getGeometry().getExtent();
-                    map.getView().fit(extent, {
-                        padding: [50, 50, 50, 50],
-                        maxZoom: 16,
-                        duration: 1000
-                    });
-                }
-            }
-            document.getElementById('mahalleModal').classList.add('hidden');
-        }
-        
-        // Mahalle parklarını göster
-        async function showMahalleParks(mahalleUuid) {
-            try {
-                // Önce mahalle'ye yakınlaş
-                zoomToMahalle(mahalleUuid);
-                
-                // Ardından o mahallede bulunan parkları vurgula
-                const parkLayer = layers.parklar;
-                if (parkLayer) {
-                    const features = parkLayer.getSource().getFeatures();
-                    const mahalleParks = features.filter(f => f.get('mahalle_uuid') === mahalleUuid);
-                    
-                    if (mahalleParks.length > 0) {
-                        // Parkları vurgula
-                        mahalleParks.forEach(park => {
-                            park.setStyle(new ol.style.Style({
-                                stroke: new ol.style.Stroke({
-                                    color: '#EF4444',
-                                    width: 3
-                                }),
-                                fill: new ol.style.Fill({
-                                    color: 'rgba(239, 68, 68, 0.3)'
-                                })
-                            }));
-                        });
-                        
-                        // 3 saniye sonra normal stile dön
-                        setTimeout(() => {
-                            mahalleParks.forEach(park => {
-                                park.setStyle(null);
-                            });
-                        }, 3000);
-                    }
-                }
-            } catch (error) {
-                console.error('Mahalle parkları gösterilirken hata:', error);
-            }
-        }
-        
-        // Drawer işlevleri
-        function toggleDrawer() {
-            const drawer = document.getElementById('layerDrawer');
-            drawer.classList.toggle('open');
-        }
-          // Event listener'lar
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap();
-            
-            // Drawer toggle
-            const drawerToggle = document.getElementById('drawerToggle');
-            const drawerClose = document.getElementById('drawerClose');
-            
-            if (drawerToggle) {
-                drawerToggle.addEventListener('click', toggleDrawer);
-            }
-            if (drawerClose) {
-                drawerClose.addEventListener('click', toggleDrawer);
-            }
-            
-            // Modal kapatma
-            const parkModalClose = document.getElementById('parkModalClose');
-            const parkModalOverlay = document.getElementById('parkModalOverlay');
-            const mahalleModalClose = document.getElementById('mahalleModalClose');
-            const mahalleModalOverlay = document.getElementById('mahalleModalOverlay');
-            
-            if (parkModalClose) {
-                parkModalClose.addEventListener('click', () => {
-                    document.getElementById('parkModal').classList.add('hidden');
-                });
-            }
-            if (parkModalOverlay) {
-                parkModalOverlay.addEventListener('click', () => {
-                    document.getElementById('parkModal').classList.add('hidden');
-                });
-            }
-            
-            if (mahalleModalClose) {
-                mahalleModalClose.addEventListener('click', () => {
-                    document.getElementById('mahalleModal').classList.add('hidden');
-                });
-            }
-            if (mahalleModalOverlay) {
-                mahalleModalOverlay.addEventListener('click', () => {
-                    document.getElementById('mahalleModal').classList.add('hidden');
-                });
-            }            
-            // Katman checkbox'ları
-document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const layerName = this.id.replace('-toggle', '');
-                    const layer = layers[layerName];
-                    
-                    if (layer) {
-                        layer.setVisible(this.checked);
-                    } else if (this.checked && layerName !== 'mahalleler' && layerName !== 'parklar') {
-                        // Katman yüklenmemişse yükle
-                        const endpoint = `/api/v1/${layerName.replace('-', '-')}/`;
-                        loadDynamicLayer(layerName, endpoint);
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- Park Harita JavaScript -->
+    
+    <script src="{% static 'js/parkmap.js' %}"></script>
 </body>
 </html>
