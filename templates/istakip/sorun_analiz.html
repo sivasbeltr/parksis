@@ -22,11 +22,12 @@
         </div>
     </div>    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <!-- Normal Kontroller -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+        <!-- Sorun Yok -->
+        <div class="rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300"
+             style="background: linear-gradient(135deg, {{ KONTROL_DURUM_COLORS.sorun_yok.color }} 0%, {{ KONTROL_DURUM_COLORS.sorun_yok.color }}CC 100%);">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-medium text-green-100">Sorun Yok</h3>
+                    <h3 class="text-xs font-medium opacity-90">Sorun Yok</h3>
                     <p class="text-2xl font-bold mt-1">{{ durum_stats.sorun_yok }}</p>
                 </div>
                 <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -35,11 +36,12 @@
             </div>
         </div>
 
-        <!-- Normal Sorunlar -->
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+        <!-- Sorun Var -->
+        <div class="rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300"
+             style="background: linear-gradient(135deg, {{ KONTROL_DURUM_COLORS.sorun_var.color }} 0%, {{ KONTROL_DURUM_COLORS.sorun_var.color }}CC 100%);">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-medium text-amber-100">Sorun Var</h3>
+                    <h3 class="text-xs font-medium opacity-90">Sorun Var</h3>
                     <p class="text-2xl font-bold mt-1">{{ durum_stats.sorun_var }}</p>
                 </div>
                 <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -48,11 +50,12 @@
             </div>
         </div>
 
-        <!-- Acil Sorunlar -->
-        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+        <!-- Acil -->
+        <div class="rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300"
+             style="background: linear-gradient(135deg, {{ KONTROL_DURUM_COLORS.acil.color }} 0%, {{ KONTROL_DURUM_COLORS.acil.color }}CC 100%);">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-medium text-red-100">Acil</h3>
+                    <h3 class="text-xs font-medium opacity-90">Acil</h3>
                     <p class="text-2xl font-bold mt-1">{{ durum_stats.acil }}</p>
                 </div>
                 <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -62,10 +65,11 @@
         </div>
 
         <!-- İşe Dönüştürülen -->
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+        <div class="rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300"
+             style="background: linear-gradient(135deg, {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }} 0%, {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }}CC 100%);">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-medium text-blue-100">İşe Dönüştürülen</h3>
+                    <h3 class="text-xs font-medium opacity-90">İşe Dönüştürülen</h3>
                     <p class="text-2xl font-bold mt-1">{{ durum_stats.ise_donusturuldu }}</p>
                 </div>
                 <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -74,12 +78,12 @@
             </div>
         </div>
 
-
         <!-- Çözülen -->
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
+        <div class="rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300"
+             style="background: linear-gradient(135deg, {{ KONTROL_DURUM_COLORS.cozuldu.color }} 0%, {{ KONTROL_DURUM_COLORS.cozuldu.color }}CC 100%);">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-medium text-emerald-100">Çözülen</h3>
+                    <h3 class="text-xs font-medium opacity-90">Çözülen</h3>
                     <p class="text-2xl font-bold mt-1">{{ durum_stats.cozuldu }}</p>
                 </div>
                 <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -88,7 +92,7 @@
             </div>
         </div>
 
-        <!-- Toplam -->
+        <!-- Toplam Kartı -->
         <div class="bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl p-4 shadow-soft text-white animate-card hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div>
@@ -489,41 +493,43 @@
                     <i class="fas fa-bolt text-orange-500 mr-2"></i>
                     Hızlı Aksiyonlar
                 </h3>
-            </div>
-            <div class="p-6 space-y-3">
+            </div>            <div class="p-6 space-y-3">
                 <a href="{% url 'istakip:sorun_bildirimleri' %}?durum=acil" 
-                   class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                   class="flex items-center justify-between p-3 rounded-lg hover:shadow-md transition-all duration-300 group"
+                   style="background-color: {{ KONTROL_DURUM_COLORS.acil.color }}20; border: 1px solid {{ KONTROL_DURUM_COLORS.acil.color }}40;">
                     <div class="flex items-center gap-3">
-                        <i class="fas fa-fire text-red-500"></i>
+                        <i class="fas fa-fire" style="color: {{ KONTROL_DURUM_COLORS.acil.color }};"></i>
                         <span class="font-medium text-gray-900 dark:text-white">Acil Sorunlar</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-red-600 dark:text-red-400 font-bold">{{ durum_stats.acil }}</span>
-                        <i class="fas fa-arrow-right text-red-500 group-hover:translate-x-1 transition-transform"></i>
+                        <span class="font-bold" style="color: {{ KONTROL_DURUM_COLORS.acil.color }};">{{ durum_stats.acil }}</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform" style="color: {{ KONTROL_DURUM_COLORS.acil.color }};"></i>
                     </div>
                 </a>
                 
                 <a href="{% url 'istakip:sorun_bildirimleri' %}?durum=sorun_var" 
-                   class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                   class="flex items-center justify-between p-3 rounded-lg hover:shadow-md transition-all duration-300 group"
+                   style="background-color: {{ KONTROL_DURUM_COLORS.sorun_var.color }}20; border: 1px solid {{ KONTROL_DURUM_COLORS.sorun_var.color }}40;">
                     <div class="flex items-center gap-3">
-                        <i class="fas fa-exclamation-circle text-amber-500"></i>
+                        <i class="fas fa-exclamation-circle" style="color: {{ KONTROL_DURUM_COLORS.sorun_var.color }};"></i>
                         <span class="font-medium text-gray-900 dark:text-white">Bekleyen</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-amber-600 dark:text-amber-400 font-bold">{{ durum_stats.sorun_var }}</span>
-                        <i class="fas fa-arrow-right text-amber-500 group-hover:translate-x-1 transition-transform"></i>
+                        <span class="font-bold" style="color: {{ KONTROL_DURUM_COLORS.sorun_var.color }};">{{ durum_stats.sorun_var }}</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform" style="color: {{ KONTROL_DURUM_COLORS.sorun_var.color }};"></i>
                     </div>
                 </a>
                 
                 <a href="{% url 'istakip:gorev_list' %}?durum=devam_ediyor" 
-                   class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:shadow-md transition-all duration-300 group">
+                   class="flex items-center justify-between p-3 rounded-lg hover:shadow-md transition-all duration-300 group"
+                   style="background-color: {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }}20; border: 1px solid {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }}40;">
                     <div class="flex items-center gap-3">
-                        <i class="fas fa-tasks text-blue-500"></i>
+                        <i class="fas fa-tasks" style="color: {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }};"></i>
                         <span class="font-medium text-gray-900 dark:text-white">Görevler</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-blue-600 dark:text-blue-400 font-bold">{{ durum_stats.ise_donusturuldu }}</span>
-                        <i class="fas fa-arrow-right text-blue-500 group-hover:translate-x-1 transition-transform"></i>
+                        <span class="font-bold" style="color: {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }};">{{ durum_stats.ise_donusturuldu }}</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform" style="color: {{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }};"></i>
                     </div>
                 </a>
             </div>
@@ -603,18 +609,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         {{ durum_stats.cozuldu }}
                     ],
                     backgroundColor: [
-                        'rgba(34, 197, 94, 0.8)',    // Yeşil - Sorun Yok
-                        'rgba(245, 158, 11, 0.8)',   // Amber - Sorun Var
-                        'rgba(239, 68, 68, 0.8)',    // Kırmızı - Acil
-                        'rgba(59, 130, 246, 0.8)',   // Mavi - İşe Dönüştürüldü
-                        'rgba(16, 185, 129, 0.8)'    // Emerald - Çözüldü
+                        '{{ KONTROL_DURUM_COLORS.sorun_yok.color }}CC',      // Sorun Yok
+                        '{{ KONTROL_DURUM_COLORS.sorun_var.color }}CC',       // Sorun Var
+                        '{{ KONTROL_DURUM_COLORS.acil.color }}CC',            // Acil
+                        '{{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }}CC', // İşe Dönüştürüldü
+                        '{{ KONTROL_DURUM_COLORS.cozuldu.color }}CC'          // Çözüldü
                     ],
                     borderColor: [
-                        'rgb(34, 197, 94)',
-                        'rgb(245, 158, 11)',
-                        'rgb(239, 68, 68)',
-                        'rgb(59, 130, 246)',
-                        'rgb(16, 185, 129)'
+                        '{{ KONTROL_DURUM_COLORS.sorun_yok.color }}',
+                        '{{ KONTROL_DURUM_COLORS.sorun_var.color }}',
+                        '{{ KONTROL_DURUM_COLORS.acil.color }}',
+                        '{{ KONTROL_DURUM_COLORS.ise_donusturuldu.color }}',
+                        '{{ KONTROL_DURUM_COLORS.cozuldu.color }}'
                     ],
                     borderWidth: 2,
                     hoverOffset: 4

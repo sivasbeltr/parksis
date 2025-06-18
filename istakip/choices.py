@@ -98,7 +98,7 @@ class KontrolDurumChoices:
 
 
 KONTROL_DURUM_COLORS = {
-    "sorun_yok": {"color": "#10B981", "bg": "bg-green-100", "text": "text-green-600"},
+    "sorun_yok": {"color": "#59AAF7", "bg": "bg-green-100", "text": "text-green-600"},
     "sorun_var": {"color": "#EF4444", "bg": "bg-red-100", "text": "text-red-600"},
     "acil": {"color": "#DC2626", "bg": "bg-red-200", "text": "text-red-700"},
     "gozden_gecirildi": {
