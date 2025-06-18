@@ -164,15 +164,79 @@ async function loadIstakipLayers() {
     }
 }
 
-// Görevler katmanını yükle
+// Leaflet benzeri SVG marker (sorun bildirimleri için)
+function leafletMarkerStyle(color = '#10B981') {
+    return new ol.style.Style({
+        image: new ol.style.Icon({
+            src: `data:image/svg+xml;utf8,<svg width='32' height='48' viewBox='0 0 32 48' fill='none' xmlns='http://www.w3.org/2000/svg'><g filter='url(%23a)'><path d='M16 47c7-10 15-18 15-29A15 15 0 0 0 1 18c0 11 8 19 15 29Z' fill='${encodeURIComponent(color)}'/><circle cx='16' cy='18' r='6' fill='white'/></g><defs><filter id='a' x='0' y='0' width='32' height='48' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'><feDropShadow dx='0' dy='2' stdDeviation='2' flood-color='%23000000' flood-opacity='0.3'/></filter></defs></svg>`,
+            anchor: [0.5, 1],
+            scale: 1
+        })
+    });
+}
+
+// Duruma göre renk döndüren yardımcı fonksiyonlar
+function getGorevColor(durum) {
+    switch (durum) {
+        case 'planlanmis': return '#FDE68A'; // bg-yellow-100
+        case 'devam_ediyor': return '#FDE68A'; // bg-amber-100
+        case 'onaya_gonderildi': return '#E9D5FF'; // bg-purple-100
+        case 'tamamlandi': return '#BBF7D0'; // bg-green-100
+        case 'iptal': return '#FCA5A5'; // bg-red-100
+        case 'gecikmis': return '#FED7AA'; // bg-orange-100
+        default: return '#E5E7EB'; // bg-gray-100
+    }
+}
+function getGorevMainColor(durum) {
+    switch (durum) {
+        case 'planlanmis': return '#F59E0B'; // text-yellow-600
+        case 'devam_ediyor': return '#F59E0B'; // text-amber-600
+        case 'onaya_gonderildi': return '#8B5CF6'; // text-purple-600
+        case 'tamamlandi': return '#10B981'; // text-green-600
+        case 'iptal': return '#EF4444'; // text-red-600
+        case 'gecikmis': return '#F97316'; // text-orange-600
+        default: return '#6B7280'; // text-gray-600
+    }
+}
+function getKontrolColor(durum) {
+    switch (durum) {
+        case 'sorun_var': return '#FCA5A5'; // bg-red-100
+        case 'acil': return '#FECACA'; // bg-red-200
+        case 'gozden_gecirildi': return '#FED7AA'; // bg-orange-100
+        case 'ise_donusturuldu': return '#DDD6FE'; // bg-purple-100
+        case 'sorun_yok': return '#BBF7D0'; // bg-green-100
+        default: return '#E5E7EB'; // bg-gray-100
+    }
+}
+function getKontrolMainColor(durum) {
+    switch (durum) {
+        case 'sorun_var': return '#EF4444'; // text-red-600
+        case 'acil': return '#DC2626'; // text-red-700
+        case 'gozden_gecirildi': return '#F59E0B'; // text-orange-600
+        case 'ise_donusturuldu': return '#8B5CF6'; // text-purple-600
+        case 'sorun_yok': return '#10B981'; // text-green-600
+        default: return '#6B7280'; // text-gray-600
+    }
+}
+
+// Estetik görev marker (duruşa göre renkli, poligonun merkezine)
+function gorevMarkerStyle(durum) {
+    const color = getGorevMainColor(durum);
+    return new ol.style.Style({
+        image: new ol.style.Icon({
+            src: `data:image/svg+xml;utf8,<svg width='36' height='36' viewBox='0 0 36 36' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='18' cy='18' r='16' fill='white' stroke='${encodeURIComponent(color)}' stroke-width='4'/><circle cx='18' cy='18' r='10' fill='${encodeURIComponent(color)}' stroke='white' stroke-width='2'/></svg>`,
+            anchor: [0.5, 0.5],
+            scale: 1
+        })
+    });
+}
+
+// Görevler katmanını yükle (polygon yerine merkezine marker)
 async function loadGorevler(filters = {}) {
     try {
-        // Mevcut katmanı temizle
         if (istakipLayers.gorevler) {
             map.removeLayer(istakipLayers.gorevler);
         }
-
-        // API URL'sini oluştur
         const params = new URLSearchParams();
         if (filters.durum) params.append('durum', filters.durum);
         if (filters.oncelik) params.append('oncelik', filters.oncelik);
@@ -181,191 +245,93 @@ async function loadGorevler(filters = {}) {
             if (dateRange.start) params.append('tarih_baslangic', dateRange.start);
             if (dateRange.end) params.append('tarih_bitis', dateRange.end);
         }
-
         const response = await fetch(`/api/v1/gorev-listesi/?${params.toString()}`);
         const data = await response.json();
-
-        const vectorSource = new ol.source.Vector({
-            features: new ol.format.GeoJSON().readFeatures(data, {
-                featureProjection: 'EPSG:3857'
-            })
+        // Sadece marker için feature oluştur
+        const features = [];
+        (data.features || []).forEach(f => {
+            let geom = f.geometry;
+            if (geom && (geom.type === 'Polygon' || geom.type === 'MultiPolygon')) {
+                // GeoJSON koordinatları [lng, lat]
+                let coords = geom.type === 'Polygon' ? geom.coordinates[0] : geom.coordinates[0][0];
+                let x = 0, y = 0;
+                coords.forEach(c => { x += c[0]; y += c[1]; });
+                x /= coords.length; y /= coords.length;
+                const point = new ol.geom.Point(ol.proj.fromLonLat([x, y]));
+                const feature = new ol.Feature({ geometry: point });
+                Object.entries(f.properties).forEach(([k, v]) => feature.set(k, v));
+                features.push(feature);
+            } else if (geom && geom.type === 'Point') {
+                const point = new ol.geom.Point(ol.proj.fromLonLat(geom.coordinates));
+                const feature = new ol.Feature({ geometry: point });
+                Object.entries(f.properties).forEach(([k, v]) => feature.set(k, v));
+                features.push(feature);
+            }
         });
-
+        const vectorSource = new ol.source.Vector({ features });
         const gorevLayer = new ol.layer.Vector({
             source: vectorSource,
             style: function (feature) {
-                const durum = feature.get('durum');
-                const oncelik = feature.get('oncelik');
-
-                // Duruma göre ana renk
-                let fillColor = '#3B82F6'; // varsayılan mavi
-                let strokeColor = '#1E40AF';
-
-                switch (durum) {
-                    case 'planlanmis':
-                        fillColor = '#6B7280'; // gri
-                        strokeColor = '#374151';
-                        break;
-                    case 'devam_ediyor':
-                        fillColor = '#F59E0B'; // amber
-                        strokeColor = '#D97706';
-                        break;
-                    case 'onaya_gonderildi':
-                        fillColor = '#8B5CF6'; // purple
-                        strokeColor = '#7C3AED';
-                        break;
-                    case 'tamamlandi':
-                        fillColor = '#10B981'; // green
-                        strokeColor = '#059669';
-                        break;
-                    case 'iptal':
-                        fillColor = '#EF4444'; // red
-                        strokeColor = '#DC2626';
-                        break;
-                    case 'gecikmis':
-                        fillColor = '#F97316'; // orange
-                        strokeColor = '#EA580C';
-                        break;
-                }
-
-                // Önceliğe göre stroke kalınlığı
-                let strokeWidth = 2;
-                if (oncelik === 'acil') {
-                    strokeWidth = 4;
-                    strokeColor = '#DC2626'; // kırmızı
-                } else if (oncelik === 'yuksek') {
-                    strokeWidth = 3;
-                }
-
-                return new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        color: fillColor + '80' // %50 şeffaflık
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: strokeColor,
-                        width: strokeWidth
-                    })
-                });
+                return gorevMarkerStyle(feature.get('durum'));
             },
-            zIndex: 10
+            zIndex: 20
         });
-
         istakipLayers.gorevler = gorevLayer;
         map.addLayer(gorevLayer);
-
-        // Görünürlük durumunu checkbox'a göre ayarla
         const isVisible = document.getElementById('gorevlerToggle').checked;
         gorevLayer.setVisible(isVisible);
-
-        console.log(`${data.features.length} görev yüklendi`);
+        console.log(`${features.length} görev marker'ı yüklendi`);
     } catch (error) {
         console.error('Görevler yüklenirken hata:', error);
     }
 }
 
-// Günlük kontroller katmanını yükle
+// Sorun bildirimleri katmanını yükle (Leaflet marker)
 async function loadGunlukKontroller(filters = {}) {
     try {
-        // Mevcut katmanı temizle
         if (istakipLayers.gunlukKontroller) {
             map.removeLayer(istakipLayers.gunlukKontroller);
         }
-
-        // API URL'sini oluştur
         const params = new URLSearchParams();
         if (filters.durum) params.append('durum', filters.durum);
         if (filters.tarih) {
             const dateRange = getDateRange(filters.tarih);
             if (dateRange.start) params.append('tarih_baslangic', dateRange.start);
             if (dateRange.end) params.append('tarih_bitis', dateRange.end);
-        } const response = await fetch(`/api/v1/kontrol-listesi/?${params.toString()}`);
-        const data = await response.json();
-        console.log('Günlük kontroller verisi:', data);
-
-        // Veri kontrolü
-        if (!data || !data.features || data.features.length === 0) {
-            console.warn('Kontrol verisi bulunamadı veya boş');
-            updateFilterStats();
-            return;
         }
-
-        console.log('Toplam kontrol features:', data.features.length);
-
-        // Her feature'ı detaylı olarak logla
-        data.features.forEach((feature, index) => {
-            console.log(`Feature ${index + 1}:`, {
-                type: feature.type,
-                geometry: feature.geometry,
-                coordinates: feature.geometry?.coordinates,
-                properties: feature.properties,
-                durum: feature.properties?.durum
-            });
-        });
-        const vectorSource = new ol.source.Vector({
-            features: new ol.format.GeoJSON().readFeatures(data, {
-                featureProjection: 'EPSG:3857'
-            })
-        });
-
-        console.log('🔄 Vector source oluşturuldu, feature sayısı:', vectorSource.getFeatures().length);
-
-        // Features kontrolü
-        vectorSource.getFeatures().forEach((feature, index) => {
-            console.log(`📍 Feature ${index + 1}:`, {
-                uuid: feature.get('uuid'),
-                durum: feature.get('durum'),
-                geometry: feature.getGeometry().getType(),
-                coordinates: feature.getGeometry().getCoordinates()
-            });
-        });
-
+        const response = await fetch(`/api/v1/kontrol-listesi/?${params.toString()}`);
+        const data = await response.json();
+        const features = (data.features || []).map(f => {
+            if (f.geometry && f.geometry.type === 'Point') {
+                const point = new ol.geom.Point(ol.proj.fromLonLat(f.geometry.coordinates));
+                const feature = new ol.Feature({ geometry: point });
+                Object.entries(f.properties).forEach(([k, v]) => feature.set(k, v));
+                return feature;
+            }
+            return null;
+        }).filter(Boolean);
+        const vectorSource = new ol.source.Vector({ features });
         const kontrolLayer = new ol.layer.Vector({
             source: vectorSource,
             style: function (feature) {
-                const durum = feature.get('durum');
-                let color = '#10B981'; // varsayılan yeşil
-                let iconUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDI0IDI0IDEyQzI0IDUuMzcyNTggMTguNjI3NCAwIDEyIDBDNS4zNzI1OCAwIDAgNS4zNzI1OCAwIDEyQzAgMjQgMTIgMzYgMTIgMzYiIGZpbGw9IiMxMEI5ODEiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNCIgZmlsbD0iIzEwQjk4MSIvPgo8L3N2Zz4K';
-
-                switch (durum) {
-                    case 'sorun_var':
-                        color = '#EF4444';
-                        iconUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDI0IDI0IDEyQzI0IDUuMzcyNTggMTguNjI3NCAwIDEyIDBDNS4zNzI1OCAwIDAgNS4zNzI1OCAwIDEyQzAgMjQgMTIgMzYgMTIgMzYiIGZpbGw9IiNFRjQ0NDQiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPHRleHQgeD0iMTIiIHk9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iRm9udEF3ZXNvbWUiIGZpbGw9IiNFRjQ0NDQiPiE8L3RleHQ+Cjwvc3ZnPgo=`;
-                        break;
-                    case 'acil':
-                        color = '#DC2626';
-                        iconUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iNDQiIHZpZXdCb3g9IjAgMCAzMCA0NCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDQ0QzE1IDQ0IDMwIDMwIDMwIDE1QzMwIDYuNzE1NzMgMjMuMjg0MyAwIDE1IDBDNi43MTU3MyAwIDAgNi43MTU3MyAwIDE1QzAgMzAgMTUgNDQgMTUgNDQiIGZpbGw9IiNEQzI2MjYiLz4KPGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMTAiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE1IiB5PSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxNCIgZm9udC1mYW1pbHk9IkZvbnRBd2Vzb21lIiBmaWxsPSIjREMyNjI2Ij7wn5qoPC90ZXh0Pgo8L3N2Zz4K`;
-                        break;
-                    case 'gozden_gecirildi':
-                        color = '#F59E0B';
-                        iconUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDI0IDI0IDEyQzI0IDUuMzcyNTggMTguNjI3NCAwIDEyIDBDNS4zNzI1OCAwIDAgNS4zNzI1OCAwIDEyQzAgMjQgMTIgMzYgMTIgMzYiIGZpbGw9IiNGNTlFMEIiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPHRleHQgeD0iMTIiIHk9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjgiIGZvbnQtZmFtaWx5PSJGb250QXdlc29tZSIgZmlsbD0iI0Y1OUUwQiI+8J+QgTwvdGV4dD4KPC9zdmc+Cg==`;
-                        break;
-                    case 'sorun_yok':
-                        color = '#10B981';
-                        iconUrl = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAyNCAzNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDM2QzEyIDM2IDI0IDI0IDI0IDEyQzI0IDUuMzcyNTggMTguNjI3NCAwIDEyIDBDNS4zNzI1OCAwIDAgNS4zNzI1OCAwIDEyQzAgMjQgMTIgMzYgMTIgMzYiIGZpbGw9IiMxMEI5ODEiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0id2hpdGUiLz4KPHRleHQgeD0iMTIiIHk9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjgiIGZvbnQtZmFtaWx5PSJGb250QXdlc29tZSIgZmlsbD0iIzEwQjk4MSI+4pyTPC90ZXh0Pgo8L3N2Zz4K`;
-                        break;
+                // Duruma göre renk
+                let color = '#10B981';
+                switch (feature.get('durum')) {
+                    case 'sorun_var': color = '#EF4444'; break;
+                    case 'acil': color = '#DC2626'; break;
+                    case 'gozden_gecirildi': color = '#F59E0B'; break;
+                    case 'ise_donusturuldu': color = '#8B5CF6'; break;
+                    case 'sorun_yok': color = '#10B981'; break;
                 }
-
-                return new ol.style.Style({
-                    image: new ol.style.Icon({
-                        src: iconUrl,
-                        scale: 1,
-                        anchor: [0.5, 1],
-                        anchorXUnits: 'fraction',
-                        anchorYUnits: 'fraction'
-                    })
-                });
+                return leafletMarkerStyle(color);
             },
-            zIndex: 15
+            zIndex: 30
         });
-
         istakipLayers.gunlukKontroller = kontrolLayer;
         map.addLayer(kontrolLayer);
-
-        // Görünürlük durumunu checkbox'a göre ayarla
         const isVisible = document.getElementById('kontrollerToggle').checked;
         kontrolLayer.setVisible(isVisible);
-
-        console.log(`${data.features.length} kontrol yüklendi`);
+        console.log(`${features.length} sorun bildirimi marker'ı yüklendi`);
     } catch (error) {
         console.error('Günlük kontroller yüklenirken hata:', error);
     }
@@ -411,14 +377,17 @@ function handleMapClick(evt) {
 
 // Görev popup'ını göster
 function showGorevPopup(feature, coordinate) {
+    const durum = feature.get('durum');
+    const headerBg = getGorevMainColor(durum);
+    const headerStyle = `background: linear-gradient(90deg, ${headerBg} 0%, #10B981 100%);`;
     const content = `
         <div class="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 max-w-sm overflow-hidden">
             <!-- Header -->
-            <div class="p-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white">
+            <div class="p-4 text-white" style="${headerStyle}">
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg font-bold truncate mb-1">${feature.get('baslik')}</h3>
-                        <p class="text-emerald-100 text-sm opacity-90">
+                        <p class="opacity-90 text-sm">
                             <i class="fas fa-clipboard-list mr-1"></i>Görev Detayları
                         </p>
                     </div>
@@ -427,7 +396,6 @@ function showGorevPopup(feature, coordinate) {
                     </button>
                 </div>
             </div>
-            
             <!-- Content -->
             <div class="p-4 space-y-3">
                 <!-- Durum Badge -->
@@ -436,7 +404,6 @@ function showGorevPopup(feature, coordinate) {
                         ${getDurumIcon(feature.get('durum'))} ${feature.get('durum_display')}
                     </span>
                 </div>
-                
                 <!-- Bilgiler Grid -->
                 <div class="space-y-2">
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
@@ -522,14 +489,17 @@ function showGorevPopup(feature, coordinate) {
 
 // Kontrol popup'ını göster
 function showKontrolPopup(feature, coordinate) {
+    const durum = feature.get('durum');
+    const headerBg = getKontrolMainColor(durum);
+    const headerStyle = `background: linear-gradient(90deg, ${headerBg} 0%, #F59E0B 100%);`;
     const content = `
         <div class="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 max-w-sm overflow-hidden">
             <!-- Header -->
-            <div class="p-4 bg-gradient-to-r from-red-500 to-orange-600 text-white">
+            <div class="p-4 text-white" style="${headerStyle}">
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg font-bold mb-1">Sorun Bildirimi</h3>
-                        <p class="text-red-100 text-sm opacity-90">
+                        <p class="opacity-90 text-sm">
                             <i class="fas fa-exclamation-triangle mr-1"></i>Kontrol Raporu
                         </p>
                     </div>
@@ -538,7 +508,6 @@ function showKontrolPopup(feature, coordinate) {
                     </button>
                 </div>
             </div>
-            
             <!-- Content -->
             <div class="p-4 space-y-3">
                 <!-- Durum Badge -->

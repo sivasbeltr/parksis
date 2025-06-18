@@ -5,6 +5,14 @@ from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
+from istakip.choices import (
+    GorevAsamaDurumChoices,
+    GorevDurumChoices,
+    GorevOncelikChoices,
+    GorevTekrarlamaChoices,
+    KontrolDurumChoices,
+    KontrolTipiChoices,
+)
 from parkbahce.models import Park
 
 
@@ -126,19 +134,6 @@ class GunlukKontrol(models.Model):
     Model for daily park checks performed by personnel with detailed status tracking.
     """
 
-    class DurumChoices(models.TextChoices):
-        SORUN_YOK = "sorun_yok", _("Sorun Yok")
-        SORUN_VAR = "sorun_var", _("Sorun Var")
-        ACIL = "acil", _("Acil Müdahale Gerekli")
-        GOZDEN_GECIRILDI = "gozden_gecirildi", _("Gözden Geçirildi")
-        ISE_DONUSTURULDU = "ise_donusturuldu", _("İşe Dönüştürüldü")
-        COZULDU = "cozuldu", _("Çözüldü")
-
-    class KontrolTipiChoices(models.TextChoices):
-        RUTIN = "rutin", _("Rutin Kontrol")
-        OZEL = "ozel", _("Özel Kontrol")
-        DENETIM = "denetim", _("Denetim")
-
     uuid = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, blank=True, null=True
     )
@@ -161,18 +156,18 @@ class GunlukKontrol(models.Model):
         help_text=_("Kontrol tarihini giriniz."),
         auto_now_add=True,
     )
-    kontrol_tipi = models.CharField(
-        _("Kontrol Tipi"),
-        max_length=20,
-        choices=KontrolTipiChoices.choices,
-        default=KontrolTipiChoices.RUTIN,
-        help_text=_("Kontrol tipini seçiniz."),
-    )
     durum = models.CharField(
         _("Durum"),
         max_length=20,
-        choices=DurumChoices.choices,
+        choices=KontrolDurumChoices.CHOICES,
         help_text=_("Parkın durumunu seçiniz."),
+    )
+    kontrol_tipi = models.CharField(
+        _("Kontrol Tipi"),
+        max_length=20,
+        choices=KontrolTipiChoices.CHOICES,
+        default=KontrolTipiChoices.RUTIN,
+        help_text=_("Kontrol tipini seçiniz."),
     )
     aciklama = models.TextField(
         _("Açıklama"),
@@ -370,27 +365,6 @@ class Gorev(models.Model):
     Model for tasks/processes related to park operations with detailed scheduling.
     """
 
-    class DurumChoices(models.TextChoices):
-        PLANLANMIS = "planlanmis", _("Planlanmış")
-        DEVAM_EDIYOR = "devam_ediyor", _("Devam Ediyor")
-        ONAYA_GONDERILDI = "onaya_gonderildi", _("Onaya Gönderildi")
-        TAMAMLANDI = "tamamlandi", _("Tamamlandı")
-        IPTAL = "iptal", _("İptal")
-        GECIKMIS = "gecikmis", _("Gecikmiş")
-
-    class OncelikChoices(models.TextChoices):
-        DUSUK = "dusuk", _("Düşük")
-        NORMAL = "normal", _("Normal")
-        YUKSEK = "yuksek", _("Yüksek")
-        ACIL = "acil", _("Acil")
-
-    class TekrarlamaChoices(models.TextChoices):
-        YOK = "yok", _("Tekrar Yok")
-        GUNLUK = "gunluk", _("Günlük")
-        HAFTALIK = "haftalik", _("Haftalık")
-        AYLIK = "aylik", _("Aylık")
-        YILLIK = "yillik", _("Yıllık")
-
     uuid = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, blank=True, null=True
     )
@@ -436,22 +410,22 @@ class Gorev(models.Model):
     durum = models.CharField(
         _("Durum"),
         max_length=20,
-        choices=DurumChoices.choices,
-        default=DurumChoices.PLANLANMIS,
+        choices=GorevDurumChoices.CHOICES,
+        default=GorevDurumChoices.PLANLANMIS,
         help_text=_("Görevin durumunu seçiniz."),
     )
     oncelik = models.CharField(
         _("Öncelik"),
         max_length=20,
-        choices=OncelikChoices.choices,
-        default=OncelikChoices.NORMAL,
+        choices=GorevOncelikChoices.CHOICES,
+        default=GorevOncelikChoices.NORMAL,
         help_text=_("Görevin öncelik seviyesini seçiniz."),
     )
     tekrar_tipi = models.CharField(
         _("Tekrarlama Tipi"),
         max_length=20,
-        choices=TekrarlamaChoices.choices,
-        default=TekrarlamaChoices.YOK,
+        choices=GorevTekrarlamaChoices.CHOICES,
+        default=GorevTekrarlamaChoices.YOK,
         help_text=_("Görevin tekrarlanma sıklığını seçiniz."),
     )
     tekrar_son_tarihi = models.DateTimeField(
@@ -582,12 +556,6 @@ class GorevAsama(models.Model):
     Model for tracking task process stages with detailed status updates.
     """
 
-    class DurumChoices(models.TextChoices):
-        BEKLEMEDE = "beklemede", _("Beklemede")
-        BASLAMADI = "baslamadi", _("Başlamadı")
-        DEVAM_EDIYOR = "devam_ediyor", _("Devam Ediyor")
-        TAMAMLANDI = "tamamlandi", _("Tamamlandı")
-
     uuid = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, blank=True, null=True
     )
@@ -612,8 +580,8 @@ class GorevAsama(models.Model):
     durum = models.CharField(
         _("Durum"),
         max_length=20,
-        choices=DurumChoices.choices,
-        default=DurumChoices.BASLAMADI,
+        choices=GorevAsamaDurumChoices.CHOICES,
+        default=GorevAsamaDurumChoices.BASLAMADI,
         help_text=_("Aşamanın durumunu seçiniz."),
     )
     baslangic_tarihi = models.DateTimeField(

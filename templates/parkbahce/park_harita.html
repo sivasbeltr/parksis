@@ -90,7 +90,8 @@
             background-color: rgba(16, 185, 129, 0.2);
             border-left: 4px solid #10B981;
         }
-          /* Modal styles */
+        
+        /* Modal styles */
         .modal-overlay {
             backdrop-filter: blur(4px);
         }
@@ -128,6 +129,15 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: rgba(16, 185, 129, 0.8);
         }
+        
+        /* Katman simgeleri için stil */
+        .layer-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body class="h-full overflow-hidden">
@@ -144,7 +154,8 @@
             Ana Sayfaya Dön
         </a>
     </div>
-      <!-- Katman Drawer Toggle Butonu -->
+    
+    <!-- Katman Drawer Toggle Butonu -->
     <div class="drawer-toggle">
         <button id="drawerToggle" 
                 class="flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-gray-700 hover:text-park-green-600">
@@ -153,7 +164,8 @@
             </svg>
         </button>
     </div>
-      <!-- Katman Drawer -->
+    
+    <!-- Katman Drawer -->
     <div id="layerDrawer" class="layer-drawer bg-white/95 backdrop-blur-lg border-l border-gray-200/50 shadow-2xl">
         <div class="p-4 h-full flex flex-col">
             <!-- Drawer Header -->
@@ -191,7 +203,8 @@
                             </label>
                         </div>
                         
-                        <div id="gorevFilters" class="space-y-2">                            <select id="gorevDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
+                        <div id="gorevFilters" class="space-y-2">
+                            <select id="gorevDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
                                 <option value="">Tüm Durumlar</option>
                                 <option value="planlanmis" selected>Planlanmış</option>
                                 <option value="devam_ediyor" selected>Devam Ediyor</option>
@@ -227,7 +240,7 @@
                                 <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                             </label>
                         </div>
-                          <div id="kontrolFilters" class="space-y-2">
+                        <div id="kontrolFilters" class="space-y-2">
                             <select id="kontrolDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
                                 <option value="sorun_var,acil">Çözülmemiş Sorunlar</option>
                                 <option value="">Tüm Durumlar</option>
@@ -298,9 +311,12 @@
                             </div>
                         </div>
                     </div>
+                    
+
                 </div>
             </div>
-              <!-- Zoom Level Indicator -->
+            
+            <!-- Zoom Level Indicator -->
             <div class="mt-4 p-3 bg-gray-50 rounded-lg">
                 <div class="text-xs text-gray-500 mb-1">Zoom Seviyesi</div>
                 <div id="zoomLevel" class="text-sm font-medium text-gray-700">-</div>
@@ -309,11 +325,15 @@
                     Haritayı yakınlaştırarak detayları görebilirsiniz
                 </div>
             </div>
-        </div>    </div>    <!-- Park Detay Modal -->
+        </div>
+    </div>
+    
+    <!-- Park Detay Modal -->
     <div id="parkModal" class="fixed inset-0 z-[999] hidden">
         <div class="modal-overlay fixed inset-0 bg-black/50" id="parkModalOverlay"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full"><div class="p-6 border-b border-gray-200">
+            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full">
+                <div class="p-6 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-gray-900" id="parkModalTitle">Park Detayları</h2>
                         <button id="parkModalClose" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
@@ -326,7 +346,9 @@
                 </div>
             </div>
         </div>
-    </div>    <!-- Mahalle Detay Modal -->
+    </div>
+    
+    <!-- Mahalle Detay Modal -->
     <div id="mahalleModal" class="fixed inset-0 z-[30] hidden">
         <div class="modal-overlay fixed inset-0 bg-black/50" id="mahalleModalOverlay"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -346,12 +368,12 @@
                 </div>
             </div>
         </div>
-    </div>    
+    </div>
+    
     <!-- OpenLayers JS -->
     <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
     
     <!-- Park Harita JavaScript -->
-    
     <script src="{% static 'js/parkmap.js' %}"></script>
 </body>
 </html>
