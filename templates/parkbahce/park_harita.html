@@ -180,149 +180,137 @@
                 </button>
             </div>
 
-            <!-- İstakip Filtre Formu -->
-            <div class="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-semibold text-emerald-800">
-                        <i class="fas fa-filter text-emerald-600 mr-2"></i>
-                        İstakip Filtreleri
-                    </h3>
-                    <button id="toggleFilters" class="text-emerald-600 hover:text-emerald-700">
-                        <i class="fas fa-chevron-up text-sm"></i>
-                    </button>
+            <!-- Temel Katmanlar (Üst Taraf) -->
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Temel Katmanlar</h3>
+                
+                <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer mb-2" data-layer="mahalleler">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 border-2 border-gray-400 rounded mr-3" style="border-style: dashed;"></div>
+                            <span class="text-sm font-medium text-gray-700">Mahalleler</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="mahalleler-toggle" checked 
+                                   class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                        </div>
+                    </div>
                 </div>
                 
-                <div id="filterForm" class="space-y-3">
-                    <!-- Görevler Filtresi -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="text-xs font-medium text-emerald-700">Görevler</label>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="gorevlerToggle" checked class="sr-only peer">
-                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                            </label>
+                <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="parklar">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-park-green-500 rounded mr-3"></div>
+                            <span class="text-sm font-medium text-gray-700">Parklar</span>
                         </div>
-                        
-                        <div id="gorevFilters" class="space-y-2">
-                            <select id="gorevDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
-                                <option value="">Tüm Durumlar</option>
-                                <option value="planlanmis" selected>Planlanmış</option>
-                                <option value="devam_ediyor" selected>Devam Ediyor</option>
-                                <option value="onaya_gonderildi" selected>Onay Bekliyor</option>
-                                <option value="tamamlandi">Tamamlandı</option>
-                                <option value="iptal">İptal</option>
-                                <option value="gecikmis" selected>Gecikmiş</option>
-                            </select>
-                            
-                            <select id="gorevOncelik" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
-                                <option value="">Tüm Öncelikler</option>
-                                <option value="acil">Acil</option>
-                                <option value="yuksek">Yüksek</option>
-                                <option value="normal">Normal</option>
-                                <option value="dusuk">Düşük</option>
-                            </select>
-                            
-                            <select id="gorevTarih" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
-                                <option value="">Tüm Zamanlar</option>
-                                <option value="bugun">Bugün</option>
-                                <option value="bu_hafta">Bu Hafta</option>
-                                <option value="bu_ay">Bu Ay</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Kontroller Filtresi -->
-                    <div class="space-y-2 pt-2 border-t border-emerald-200">
-                        <div class="flex items-center justify-between">
-                            <label class="text-xs font-medium text-emerald-700">Sorun Bildirimleri</label>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="kontrollerToggle" checked class="sr-only peer">
-                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                            </label>
-                        </div>
-                        <div id="kontrolFilters" class="space-y-2">
-                            <select id="kontrolDurum" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
-                                <option value="sorun_var,acil">Çözülmemiş Sorunlar</option>
-                                <option value="">Tüm Durumlar</option>
-                                <option value="sorun_var">Sorun Var</option>
-                                <option value="acil">Acil</option>
-                                <option value="gozden_gecirildi">Gözden Geçirildi</option>
-                                <option value="ise_donusturuldu">İşe Dönüştürüldü</option>
-                                <option value="sorun_yok">Sorun Yok</option>
-                            </select>
-                            
-                            <select id="kontrolTarih" class="w-full px-2 py-1 text-xs border border-emerald-200 rounded focus:ring-1 focus:ring-emerald-500 bg-white">
-                                <option value="">Tüm Zamanlar</option>
-                                <option value="bugun">Bugün</option>
-                                <option value="bu_hafta">Bu Hafta</option>
-                                <option value="bu_ay">Bu Ay</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Filtre Butonları -->
-                    <div class="flex gap-2 pt-3 border-t border-emerald-200">
-                        <button id="applyFilters" class="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition-colors">
-                            <i class="fas fa-filter mr-1"></i>Süz
-                        </button>
-                        <button id="clearFilters" class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs font-medium transition-colors">
-                            <i class="fas fa-times mr-1"></i>Temizle
-                        </button>
-                    </div>
-                    
-                    <!-- İstatistikler -->
-                    <div id="filterStats" class="pt-3 border-t border-emerald-200">
-                        <div class="text-xs text-emerald-700 font-medium mb-2">Sonuçlar:</div>
-                        <div class="flex justify-between text-xs text-emerald-600">
-                            <span>Görevler: <span id="gorevCount">-</span></span>
-                            <span>Sorunlar: <span id="kontrolCount">-</span></span>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="parklar-toggle" checked 
+                                   class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Temel Katmanlar -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                <div class="mb-4">
-                    <h3 class="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Temel Katmanlar</h3>
-                    
-                    <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer" data-layer="mahalleler">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="w-4 h-4 border-2 border-gray-400 rounded mr-3" style="border-style: dashed;"></div>
-                                <span class="text-sm font-medium text-gray-700">Mahalleler</span>
+            <!-- İstakip Filtre Formu (Alt Taraf) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <div class="mb-6 p-4 bg-white border border-emerald-100 rounded-xl shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-semibold text-emerald-800">
+                            <i class="fas fa-filter text-emerald-600 mr-2"></i>
+                            İstakip Filtreleri
+                        </h3>
+                        <button id="toggleFilters" class="text-emerald-600 hover:text-emerald-700">
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                    </div>
+<!-- Sadece filtre formu kısmı -->
+                    <div id="filterForm" class="space-y-3" style="display: none;">
+                        <!-- Görevler Filtresi -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-medium text-emerald-700">Görevler</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="gorevlerToggle" checked class="sr-only peer">
+                                    <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                </label>
                             </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="mahalleler-toggle" checked 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            <div id="gorevFilters" class="space-y-2">
+                                <select id="gorevDurum" multiple class="w-full px-3 py-2 text-sm border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white text-gray-700">
+                                    <option value="planlanmis" selected>Planlanmış</option>
+                                    <option value="devam_ediyor" selected>Devam Ediyor</option>
+                                    <option value="onaya_gonderildi" selected>Onay Bekliyor</option>
+                                    <option value="gecikmis" selected>Gecikmiş</option>
+                                    <option value="tamamlandi" selected>Tamamlandı</option>
+                                    <option value="iptal" selected>İptal</option>
+                                </select>
+                                <select id="gorevOncelik" multiple class="w-full px-3 py-2 text-sm border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white text-gray-700">
+                                    <option value="acil" selected>Acil</option>
+                                    <option value="yuksek" selected>Yüksek</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="dusuk" selected>Düşük</option>
+                                </select>
+                                <select id="gorevTarih" class="w-full px-3 py-2 text-sm border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white text-gray-700">
+                                    <option value="">Tüm Zamanlar</option>
+                                    <option value="bugun">Bugün</option>
+                                    <option value="bu_hafta">Bu Hafta</option>
+                                    <option value="bu_ay">Bu Ay</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Kontroller Filtresi -->
+                        <div class="space-y-2 pt-2 border-t border-emerald-200">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-medium text-emerald-700">Sorun Bildirimleri</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="kontrollerToggle" checked class="sr-only peer">
+                                    <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div id="kontrolFilters" class="space-y-2">
+                                <select id="kontrolDurum" multiple class="w-full px-3 py-2 text-sm border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white text-gray-700">
+                                    <option value="sorun_yok" selected>Sorun Yok</option>
+                                    <option value="sorun_var" selected>Sorun Var</option>
+                                    <option value="acil" selected>Acil</option>
+                                    <option value="gozden_gecirildi" selected>Gözden Geçirildi</option>
+                                    <option value="ise_donusturuldu" selected>İşe Dönüştürüldü</option>
+                                    <option value="cozuldu" selected>Çözüldü</option>
+                                </select>
+                                <select id="kontrolTarih" class="w-full px-3 py-2 text-sm border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white text-gray-700">
+                                    <option value="">Tüm Zamanlar</option>
+                                    <option value="bugun">Bugün</option>
+                                    <option value="bu_hafta">Bu Hafta</option>
+                                    <option value="bu_ay">Bu Ay</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Filtre Butonları -->
+                        <div class="flex gap-2 pt-3 border-t border-emerald-200">
+                            <button id="applyFilters" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md">
+                                <i class="fas fa-filter mr-2"></i>Filtrele
+                            </button>
+                            <button id="clearFilters" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md">
+                                <i class="fas fa-times mr-2"></i>Temizle
+                            </button>
+                        </div>
+                        <!-- İstatistikler -->
+                        <div id="filterStats" class="pt-3 border-t border-emerald-200">
+                            <div class="text-xs text-emerald-700 font-medium mb-2">Sonuçlar:</div>
+                            <div class="flex justify-between text-xs text-emerald-600">
+                                <span>Görevler: <span id="gorevCount">-</span></span>
+                                <span>Sorunlar: <span id="kontrolCount">-</span></span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="layer-item p-3 rounded-lg border border-gray-200 cursor-pointer mt-2" data-layer="parklar">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="w-4 h-4 bg-park-green-500 rounded mr-3"></div>
-                                <span class="text-sm font-medium text-gray-700">Parklar</span>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="parklar-toggle" checked 
-                                       class="w-4 h-4 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
-                            </div>
-                        </div>
-                    </div>
-                    
-
                 </div>
-            </div>
-            
-            <!-- Zoom Level Indicator -->
-            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                <div class="text-xs text-gray-500 mb-1">Zoom Seviyesi</div>
-                <div id="zoomLevel" class="text-sm font-medium text-gray-700">-</div>
-                <div class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Haritayı yakınlaştırarak detayları görebilirsiniz
+
+                <!-- Zoom Level Indicator -->
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="text-xs text-gray-500 mb-1">Zoom Seviyesi</div>
+                    <div id="zoomLevel" class="text-sm font-medium text-gray-700">-</div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Haritayı yakınlaştırarak detayları görebilirsiniz
+                    </div>
                 </div>
             </div>
         </div>

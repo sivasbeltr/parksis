@@ -37,7 +37,7 @@ const ISTAKIP_COLORS = {
 let map;
 let layers = {};
 let currentZoom = 10;
-let istakipLayers = {}; // İstakip katmanları için değişken
+let istakipLayers = {};
 
 // Sivas Merkez koordinatları (EPSG:4326)
 const sivasCenter = [37.0167, 39.7500];
@@ -45,15 +45,15 @@ const sivasCenter = [37.0167, 39.7500];
 // Harita başlangıç zoom seviyesi
 const initialZoom = 12;
 
-// Varsayılan filtreler
+// Varsayılan filtreler (tüm seçenekleri kapsayacak şekilde)
 const defaultFilters = {
     gorevler: {
-        durum: 'planlanmis,devam_ediyor,onaya_gonderildi,gecikmis', // Tamamlanmamış görevler
-        oncelik: '',
+        durum: 'planlanmis,devam_ediyor,onaya_gonderildi,gecikmis,tamamlandi,iptal',
+        oncelik: 'acil,yuksek,normal,dusuk',
         tarih: ''
     },
     kontroller: {
-        durum: 'sorun_var,acil', // Çözülmemiş sorunlar
+        durum: 'sorun_yok,sorun_var,acil,gozden_gecirildi,ise_donusturuldu,cozuldu',
         tarih: ''
     }
 };
@@ -186,6 +186,7 @@ async function loadParklar() {
 async function loadIstakipLayers() {
     try {
         // Varsayılan filtrelerle görevleri ve kontrolleri yükle
+        console.log('Varsayılan filtreler yükleniyor:', defaultFilters);
         await loadGorevler(defaultFilters.gorevler);
         await loadGunlukKontroller(defaultFilters.kontroller);
 
@@ -224,23 +225,24 @@ function getKontrolMainColor(durum) {
     return ISTAKIP_COLORS.KONTROL_DURUM[durum] || ISTAKIP_COLORS.KONTROL_DURUM.sorun_yok;
 }
 
-// Estetik görev marker (duruşa göre renkli, poligonun merkezine)
+// Yeni estetik görev marker
 function gorevMarkerStyle(durum) {
     const color = getGorevMainColor(durum);
     return new ol.style.Style({
         image: new ol.style.Icon({
-            src: `data:image/svg+xml;utf8,<svg width='36' height='36' viewBox='0 0 36 36' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='18' cy='18' r='16' fill='white' stroke='${encodeURIComponent(color)}' stroke-width='4'/><circle cx='18' cy='18' r='10' fill='${encodeURIComponent(color)}' stroke='white' stroke-width='2'/></svg>`,
+            src: `data:image/svg+xml;utf8,<svg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'><g filter='url(%23shadow)'><circle cx='20' cy='20' r='18' fill='white'/><circle cx='20' cy='20' r='14' fill='${encodeURIComponent(color)}'/><circle cx='20' cy='20' r='10' fill='white'/><circle cx='20' cy='20' r='6' fill='${encodeURIComponent(color)}'/></g><defs><filter id='shadow' x='0' y='0' width='40' height='40' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'><feDropShadow dx='0' dy='2' stdDeviation='2' flood-color='%23000000' flood-opacity='0.3'/></filter></defs></svg>`,
             anchor: [0.5, 0.5],
             scale: 1
         })
     });
 }
 
-// Görevler katmanını yükle (polygon yerine merkezine marker)
+// Görevler katmanını yükle
 async function loadGorevler(filters = {}) {
     try {
         if (istakipLayers.gorevler) {
             map.removeLayer(istakipLayers.gorevler);
+            istakipLayers.gorevler = null;
         }
         const params = new URLSearchParams();
         if (filters.durum) params.append('durum', filters.durum);
@@ -250,14 +252,13 @@ async function loadGorevler(filters = {}) {
             if (dateRange.start) params.append('tarih_baslangic', dateRange.start);
             if (dateRange.end) params.append('tarih_bitis', dateRange.end);
         }
+        console.log('Görevler için URL:', `/api/v1/gorev-listesi/?${params.toString()}`);
         const response = await fetch(`/api/v1/gorev-listesi/?${params.toString()}`);
         const data = await response.json();
-        // Sadece marker için feature oluştur
         const features = [];
         (data.features || []).forEach(f => {
             let geom = f.geometry;
             if (geom && (geom.type === 'Polygon' || geom.type === 'MultiPolygon')) {
-                // GeoJSON koordinatları [lng, lat]
                 let coords = geom.type === 'Polygon' ? geom.coordinates[0] : geom.coordinates[0][0];
                 let x = 0, y = 0;
                 coords.forEach(c => { x += c[0]; y += c[1]; });
@@ -285,17 +286,18 @@ async function loadGorevler(filters = {}) {
         map.addLayer(gorevLayer);
         const isVisible = document.getElementById('gorevlerToggle').checked;
         gorevLayer.setVisible(isVisible);
-        console.log(`${features.length} görev marker'ı yüklendi`);
+        console.log(`${features.length} görev marker'ı yüklendi`, { filters });
     } catch (error) {
         console.error('Görevler yüklenirken hata:', error);
     }
 }
 
-// Sorun bildirimleri katmanını yükle (Leaflet marker)
+// Sorun bildirimleri katmanını yükle
 async function loadGunlukKontroller(filters = {}) {
     try {
         if (istakipLayers.gunlukKontroller) {
             map.removeLayer(istakipLayers.gunlukKontroller);
+            istakipLayers.gunlukKontroller = null;
         }
         const params = new URLSearchParams();
         if (filters.durum) params.append('durum', filters.durum);
@@ -304,6 +306,7 @@ async function loadGunlukKontroller(filters = {}) {
             if (dateRange.start) params.append('tarih_baslangic', dateRange.start);
             if (dateRange.end) params.append('tarih_bitis', dateRange.end);
         }
+        console.log('Kontroller için URL:', `/api/v1/kontrol-listesi/?${params.toString()}`);
         const response = await fetch(`/api/v1/kontrol-listesi/?${params.toString()}`);
         const data = await response.json();
         const features = (data.features || []).map(f => {
@@ -317,8 +320,8 @@ async function loadGunlukKontroller(filters = {}) {
         }).filter(Boolean);
         const vectorSource = new ol.source.Vector({ features });
         const kontrolLayer = new ol.layer.Vector({
-            source: vectorSource, style: function (feature) {
-                // Duruma göre renk
+            source: vectorSource,
+            style: function (feature) {
                 const durum = feature.get('durum');
                 const color = getKontrolMainColor(durum);
                 return leafletMarkerStyle(color);
@@ -329,7 +332,7 @@ async function loadGunlukKontroller(filters = {}) {
         map.addLayer(kontrolLayer);
         const isVisible = document.getElementById('kontrollerToggle').checked;
         kontrolLayer.setVisible(isVisible);
-        console.log(`${features.length} sorun bildirimi marker'ı yüklendi`);
+        console.log(`${features.length} sorun bildirimi marker'ı yüklendi`, { filters });
     } catch (error) {
         console.error('Günlük kontroller yüklenirken hata:', error);
     }
@@ -338,35 +341,26 @@ async function loadGunlukKontroller(filters = {}) {
 // Harita tıklama işleyici
 function handleMapClick(evt) {
     const features = map.getFeaturesAtPixel(evt.pixel);
-
     if (features.length > 0) {
         const feature = features[0];
         const layer = map.getLayers().getArray().find(l =>
             l.getSource && l.getSource().getFeatures &&
             l.getSource().getFeatures().includes(feature)
         );
-
-        // Görev tıklandıysa popup göster
         if (layer === istakipLayers.gorevler) {
             showGorevPopup(feature, evt.coordinate);
             return;
         }
-
-        // Kontrol tıklandıysa popup göster
         if (layer === istakipLayers.gunlukKontroller) {
             showKontrolPopup(feature, evt.coordinate);
             return;
         }
-
-        // Park tıklandıysa modal aç
         if (layer === layers.parklar) {
             const parkUuid = feature.get('uuid');
             if (parkUuid) {
                 showParkDetails(parkUuid);
             }
         }
-
-        // Mahalle tıklandıysa modal aç
         if (layer === layers.mahalleler) {
             showMahalleDetails(feature);
         }
@@ -380,7 +374,6 @@ function showGorevPopup(feature, coordinate) {
     const headerStyle = `background: linear-gradient(90deg, ${headerBg} 0%, #10B981 100%);`;
     const content = `
         <div class="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 max-w-sm overflow-hidden">
-            <!-- Header -->
             <div class="p-4 text-white" style="${headerStyle}">
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
@@ -394,15 +387,12 @@ function showGorevPopup(feature, coordinate) {
                     </button>
                 </div>
             </div>
-            <!-- Content -->
             <div class="p-4 space-y-3">
-                <!-- Durum Badge -->
                 <div class="flex items-center justify-center">
                     <span class="px-3 py-1.5 text-sm font-semibold rounded-full ${getDurumBadgeClass(feature.get('durum'))}">
                         ${getDurumIcon(feature.get('durum'))} ${feature.get('durum_display')}
                     </span>
                 </div>
-                <!-- Bilgiler Grid -->
                 <div class="space-y-2">
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-park-green-100 rounded-full flex items-center justify-center mr-3">
@@ -413,7 +403,6 @@ function showGorevPopup(feature, coordinate) {
                             <p class="text-sm font-medium text-gray-900 truncate">${feature.get('park_ad')}</p>
                         </div>
                     </div>
-                    
                     ${feature.get('gorev_tipi_ad') ? `
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
@@ -425,7 +414,6 @@ function showGorevPopup(feature, coordinate) {
                         </div>
                     </div>
                     ` : ''}
-                    
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                             <i class="fas fa-calendar text-blue-600 text-sm"></i>
@@ -438,7 +426,6 @@ function showGorevPopup(feature, coordinate) {
     })}</p>
                         </div>
                     </div>
-                    
                     ${feature.get('oncelik') !== 'normal' ? `
                     <div class="flex items-center p-2 bg-orange-50 border border-orange-200 rounded-lg">
                         <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
@@ -450,7 +437,6 @@ function showGorevPopup(feature, coordinate) {
                         </div>
                     </div>
                     ` : ''}
-                    
                     ${feature.get('atanan_personeller') && feature.get('atanan_personeller').length > 0 ? `
                     <div class="flex items-center p-2 bg-indigo-50 border border-indigo-200 rounded-lg">
                         <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
@@ -467,8 +453,6 @@ function showGorevPopup(feature, coordinate) {
                     ` : ''}
                 </div>
             </div>
-            
-            <!-- Footer -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-2">
                 <a href="/istakip/gorevler/${feature.get('uuid')}/" 
                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md">
@@ -481,7 +465,6 @@ function showGorevPopup(feature, coordinate) {
             </div>
         </div>
     `;
-
     showMapPopup(content, coordinate);
 }
 
@@ -492,7 +475,6 @@ function showKontrolPopup(feature, coordinate) {
     const headerStyle = `background: linear-gradient(90deg, ${headerBg} 0%, #F59E0B 100%);`;
     const content = `
         <div class="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 max-w-sm overflow-hidden">
-            <!-- Header -->
             <div class="p-4 text-white" style="${headerStyle}">
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
@@ -506,16 +488,12 @@ function showKontrolPopup(feature, coordinate) {
                     </button>
                 </div>
             </div>
-            <!-- Content -->
             <div class="p-4 space-y-3">
-                <!-- Durum Badge -->
                 <div class="flex items-center justify-center">
                     <span class="px-3 py-1.5 text-sm font-semibold rounded-full ${getKontrolBadgeClass(feature.get('durum'))}">
                         ${getKontrolIcon(feature.get('durum'))} ${feature.get('durum_display')}
                     </span>
                 </div>
-                
-                <!-- Bilgiler Grid -->
                 <div class="space-y-2">
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-park-green-100 rounded-full flex items-center justify-center mr-3">
@@ -526,7 +504,6 @@ function showKontrolPopup(feature, coordinate) {
                             <p class="text-sm font-medium text-gray-900 truncate">${feature.get('park_ad')}</p>
                         </div>
                     </div>
-                    
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                             <i class="fas fa-user text-blue-600 text-sm"></i>
@@ -536,7 +513,6 @@ function showKontrolPopup(feature, coordinate) {
                             <p class="text-sm font-medium text-gray-900 truncate">${feature.get('personel_ad')}</p>
                         </div>
                     </div>
-                    
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
                             <i class="fas fa-clock text-purple-600 text-sm"></i>
@@ -549,7 +525,6 @@ function showKontrolPopup(feature, coordinate) {
     })}</p>
                         </div>
                     </div>
-                    
                     <div class="flex items-center p-2 bg-gray-50 rounded-lg">
                         <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
                             <i class="fas fa-list text-indigo-600 text-sm"></i>
@@ -560,9 +535,7 @@ function showKontrolPopup(feature, coordinate) {
                         </div>
                     </div>
                 </div>
-                
                 ${feature.get('aciklama') ? `
-                <!-- Açıklama -->
                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <p class="text-xs text-amber-600 uppercase tracking-wide mb-1">Açıklama</p>
                     <p class="text-sm text-gray-800 leading-relaxed">${feature.get('aciklama').length > 120 ?
@@ -571,8 +544,6 @@ function showKontrolPopup(feature, coordinate) {
                 </div>
                 ` : ''}
             </div>
-            
-            <!-- Footer -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-2">
                 <a href="/istakip/sorun/${feature.get('uuid')}/detay/" 
                    class="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md">
@@ -585,46 +556,33 @@ function showKontrolPopup(feature, coordinate) {
             </div>
         </div>
     `;
-
     showMapPopup(content, coordinate);
 }
 
 // Popup göster
 function showMapPopup(content, coordinate) {
-    // Mevcut popup'ı kaldır
     const existingPopup = document.getElementById('mapPopup');
     if (existingPopup) {
         existingPopup.remove();
     }
-
-    // Yeni popup oluştur
     const popup = document.createElement('div');
     popup.id = 'mapPopup';
     popup.innerHTML = content;
     popup.style.position = 'absolute';
     popup.style.zIndex = '1000';
     popup.style.pointerEvents = 'auto';
-
-    // Koordinatları pixel pozisyonuna çevir
     const pixel = map.getPixelFromCoordinate(coordinate);
     popup.style.left = (pixel[0] + 10) + 'px';
     popup.style.top = (pixel[1] - 10) + 'px';
-
-    // Popup'ı haritaya ekle
     document.getElementById('map').appendChild(popup);
-
-    // 5 saniye sonra otomatik kapat
     setTimeout(() => {
         if (document.getElementById('mapPopup')) {
             document.getElementById('mapPopup').remove();
         }
     }, 5000);
-
-    // Tıklama ile kapat
     popup.addEventListener('click', (e) => {
         e.stopPropagation();
     });
-
     map.once('click', () => {
         if (document.getElementById('mapPopup')) {
             document.getElementById('mapPopup').remove();
@@ -716,25 +674,18 @@ function closeMapPopup() {
 // Park detaylarını göster
 async function showParkDetails(uuid) {
     try {
-        // Önce mahalle modal'ını kapat
         const mahalleModal = document.getElementById('mahalleModal');
         mahalleModal.classList.add('hidden');
-
-        // CSS transition'ının tamamlanması için bekle
         await new Promise(resolve => setTimeout(resolve, 350));
-
         const response = await fetch(`/parkbahce/htmx/park-detail/${uuid}/`, {
             headers: {
                 'HX-Request': 'true'
             }
         });
-
         if (response.ok) {
             const content = await response.text();
             document.getElementById('parkModalTitle').textContent = 'Park Detayları';
             document.getElementById('parkModalContent').innerHTML = content;
-
-            // Park modal'ını aç
             const parkModal = document.getElementById('parkModal');
             parkModal.style.zIndex = '999';
             parkModal.classList.remove('hidden');
@@ -754,13 +705,11 @@ async function showMahalleDetails(feature) {
             console.error('Mahalle UUID bulunamadı');
             return;
         }
-
         const response = await fetch(`/parkbahce/htmx/mahalle-detail/${mahalleUuid}/`, {
             headers: {
                 'HX-Request': 'true'
             }
         });
-
         if (response.ok) {
             const content = await response.text();
             document.getElementById('mahalleModalTitle').textContent = 'Mahalle Detayları';
@@ -818,25 +767,21 @@ function toggleDrawer() {
 
 // Event listener'lar
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM yüklendi, form değerleri ayarlanıyor...');
+    setDefaultFormValues();
     initMap();
-
-    // Drawer toggle
     const drawerToggle = document.getElementById('drawerToggle');
     const drawerClose = document.getElementById('drawerClose');
-
     if (drawerToggle) {
         drawerToggle.addEventListener('click', toggleDrawer);
     }
     if (drawerClose) {
         drawerClose.addEventListener('click', toggleDrawer);
     }
-
-    // Modal kapatma
     const parkModalClose = document.getElementById('parkModalClose');
     const parkModalOverlay = document.getElementById('parkModalOverlay');
     const mahalleModalClose = document.getElementById('mahalleModalClose');
     const mahalleModalOverlay = document.getElementById('mahalleModalOverlay');
-
     if (parkModalClose) {
         parkModalClose.addEventListener('click', () => {
             document.getElementById('parkModal').classList.add('hidden');
@@ -847,7 +792,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('parkModal').classList.add('hidden');
         });
     }
-
     if (mahalleModalClose) {
         mahalleModalClose.addEventListener('click', () => {
             document.getElementById('mahalleModal').classList.add('hidden');
@@ -858,50 +802,38 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('mahalleModal').classList.add('hidden');
         });
     }
-
-    // Katman checkbox'ları - sadece temel katmanlar için
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         if (checkbox.id === 'mahalleler-toggle' || checkbox.id === 'parklar-toggle') {
             checkbox.addEventListener('change', function () {
                 const layerName = this.id.replace('-toggle', '');
                 const layer = layers[layerName];
-
                 if (layer) {
                     layer.setVisible(this.checked);
                 }
             });
         }
     });
-
-    // İstakip katman toggle'ları
     const gorevlerToggle = document.getElementById('gorevlerToggle');
     const kontrollerToggle = document.getElementById('kontrollerToggle');
-
     if (gorevlerToggle) {
         gorevlerToggle.addEventListener('change', function () {
             toggleIstakipLayer('gorevler', this.checked);
         });
     }
-
     if (kontrollerToggle) {
         kontrollerToggle.addEventListener('change', function () {
             toggleIstakipLayer('kontroller', this.checked);
         });
     }
-
-    // Filter butonları
     const applyFiltersBtn = document.getElementById('applyFilters');
     const clearFiltersBtn = document.getElementById('clearFilters');
     const toggleFiltersBtn = document.getElementById('toggleFilters');
-
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', applyFilters);
     }
-
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', clearFilters);
     }
-
     if (toggleFiltersBtn) {
         toggleFiltersBtn.addEventListener('click', toggleFilterForm);
     }
@@ -912,7 +844,6 @@ function getDateRange(period) {
     const today = new Date();
     let start = null;
     let end = null;
-
     switch (period) {
         case 'bugun':
             start = today.toISOString().split('T')[0];
@@ -922,7 +853,6 @@ function getDateRange(period) {
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
             start = weekStart.toISOString().split('T')[0];
-
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
             end = weekEnd.toISOString().split('T')[0];
@@ -932,46 +862,55 @@ function getDateRange(period) {
             end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
             break;
     }
-
     return { start, end };
 }
 
 // Filtreleri uygula
 async function applyFilters() {
+    const gorevDurumOptions = Array.from(document.getElementById('gorevDurum').selectedOptions).map(opt => opt.value);
+    const gorevOncelikOptions = Array.from(document.getElementById('gorevOncelik').selectedOptions).map(opt => opt.value);
+    const kontrolDurumOptions = Array.from(document.getElementById('kontrolDurum').selectedOptions).map(opt => opt.value);
     const gorevFilters = {
-        durum: document.getElementById('gorevDurum').value,
-        oncelik: document.getElementById('gorevOncelik').value,
+        durum: gorevDurumOptions.join(','),
+        oncelik: gorevOncelikOptions.join(','),
         tarih: document.getElementById('gorevTarih').value
     };
-
     const kontrolFilters = {
-        durum: document.getElementById('kontrolDurum').value,
+        durum: kontrolDurumOptions.join(','),
         tarih: document.getElementById('kontrolTarih').value
     };
-
-    // Yükleme göstergesi
+    console.log('Filtreleme işlemi başladı:', {
+        gorev: gorevFilters,
+        kontrol: kontrolFilters
+    });
     const applyBtn = document.getElementById('applyFilters');
     const originalText = applyBtn.innerHTML;
     applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Yükleniyor...';
     applyBtn.disabled = true;
-
     try {
-        // Katmanları güncelle
         if (document.getElementById('gorevlerToggle').checked) {
+            console.log('Görevler filtreleniyor:', gorevFilters);
             await loadGorevler(gorevFilters);
+        } else {
+            if (istakipLayers.gorevler) {
+                map.removeLayer(istakipLayers.gorevler);
+                istakipLayers.gorevler = null;
+            }
         }
-
         if (document.getElementById('kontrollerToggle').checked) {
+            console.log('Kontroller filtreleniyor:', kontrolFilters);
             await loadGunlukKontroller(kontrolFilters);
+        } else {
+            if (istakipLayers.gunlukKontroller) {
+                map.removeLayer(istakipLayers.gunlukKontroller);
+                istakipLayers.gunlukKontroller = null;
+            }
         }
-
-        // İstatistikleri güncelle
         updateFilterStats();
-
+        console.log('Filtreleme işlemi tamamlandı');
     } catch (error) {
         console.error('Filtreler uygulanırken hata:', error);
     } finally {
-        // Yükleme göstergesini kaldır
         applyBtn.innerHTML = originalText;
         applyBtn.disabled = false;
     }
@@ -979,17 +918,23 @@ async function applyFilters() {
 
 // Filtreleri temizle
 async function clearFilters() {
-    // Form alanlarını temizle
-    document.getElementById('gorevDurum').value = '';
-    document.getElementById('gorevOncelik').value = '';
+    const gorevDurum = document.getElementById('gorevDurum');
+    const gorevOncelik = document.getElementById('gorevOncelik');
+    const kontrolDurum = document.getElementById('kontrolDurum');
+    Array.from(gorevDurum.options).forEach(option => {
+        option.selected = true;
+    });
+    Array.from(gorevOncelik.options).forEach(option => {
+        option.selected = true;
+    });
+    Array.from(kontrolDurum.options).forEach(option => {
+        option.selected = true;
+    });
     document.getElementById('gorevTarih').value = '';
-    document.getElementById('kontrolDurum').value = '';
     document.getElementById('kontrolTarih').value = '';
-
-    // Varsayılan filtreleri uygula
+    console.log('Filtreler temizlendi, varsayılan filtreler uygulanıyor:', defaultFilters);
     await loadGorevler(defaultFilters.gorevler);
     await loadGunlukKontroller(defaultFilters.kontroller);
-
     updateFilterStats();
 }
 
@@ -999,9 +944,9 @@ function updateFilterStats() {
         istakipLayers.gorevler.getSource().getFeatures().length : 0;
     const kontrolCount = istakipLayers.gunlukKontroller ?
         istakipLayers.gunlukKontroller.getSource().getFeatures().length : 0;
-
     document.getElementById('gorevCount').textContent = gorevCount;
     document.getElementById('kontrolCount').textContent = kontrolCount;
+    console.log('İstatistikler güncellendi:', { gorevCount, kontrolCount });
 }
 
 // Toggle filter form
@@ -1009,8 +954,7 @@ function toggleFilterForm() {
     const filterForm = document.getElementById('filterForm');
     const toggleBtn = document.getElementById('toggleFilters');
     const icon = toggleBtn.querySelector('i');
-
-    if (filterForm.style.display === 'none') {
+    if (filterForm.style.display === 'none' || filterForm.style.display === '') {
         filterForm.style.display = 'block';
         icon.className = 'fas fa-chevron-up text-sm';
     } else {
@@ -1028,17 +972,14 @@ function toggleIstakipLayer(layerType, isVisible) {
     }
 }
 
-// Test fonksiyonu - Manual marker ekleme
+// Test fonksiyonu
 function addTestMarkers() {
     console.log('🧪 Test marker\'ları ekleniyor...');
-
-    // Test koordinatları (Sivas merkez)
     const testCoordinates = [
-        [37.0167, 39.7500], // Sivas merkez
-        [37.0200, 39.7530], // Biraz doğuda
-        [37.0130, 39.7470]  // Biraz batıda
+        [37.0167, 39.7500],
+        [37.0200, 39.7530],
+        [37.0130, 39.7470]
     ];
-
     const testFeatures = testCoordinates.map((coord, index) => {
         const feature = new ol.Feature({
             geometry: new ol.geom.Point(ol.proj.fromLonLat(coord))
@@ -1048,11 +989,9 @@ function addTestMarkers() {
         feature.set('park_ad', `Test Park ${index + 1}`);
         return feature;
     });
-
     const testSource = new ol.source.Vector({
         features: testFeatures
     });
-
     const testLayer = new ol.layer.Vector({
         source: testSource,
         style: function (feature) {
@@ -1073,11 +1012,8 @@ function addTestMarkers() {
         },
         zIndex: 200
     });
-
     map.addLayer(testLayer);
     console.log('✅ Test marker\'ları eklendi');
-
-    // Test marker'larına zoom yap
     map.getView().fit(testSource.getExtent(), {
         padding: [50, 50, 50, 50],
         maxZoom: 14,
@@ -1085,5 +1021,28 @@ function addTestMarkers() {
     });
 }
 
-// Global test fonksiyonu
 window.addTestMarkers = addTestMarkers;
+
+// Form değerlerini varsayılan filtrelere ayarla
+function setDefaultFormValues() {
+    console.log('Form değerleri varsayılan değerlere ayarlanıyor...');
+    const gorevDurum = document.getElementById('gorevDurum');
+    if (gorevDurum) {
+        Array.from(gorevDurum.options).forEach(option => {
+            option.selected = true;
+        });
+    }
+    const gorevOncelik = document.getElementById('gorevOncelik');
+    if (gorevOncelik) {
+        Array.from(gorevOncelik.options).forEach(option => {
+            option.selected = true;
+        });
+    }
+    const kontrolDurum = document.getElementById('kontrolDurum');
+    if (kontrolDurum) {
+        Array.from(kontrolDurum.options).forEach(option => {
+            option.selected = true;
+        });
+    }
+    console.log('Form değerleri ayarlandı');
+}
