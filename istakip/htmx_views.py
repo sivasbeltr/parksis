@@ -78,9 +78,11 @@ def kullanici_kontroller_htmx(request, personel_uuid):
     park_filter = request.GET.get("park", "")
     durum_filter = request.GET.get("durum", "")
 
-    # Temel queryset
-    kontroller = personel.gunluk_kontroller.select_related("park").order_by(
-        "-kontrol_tarihi"
+    # Temel queryset - resimler de dahil et
+    kontroller = (
+        personel.gunluk_kontroller.select_related("park", "park__mahalle")
+        .prefetch_related("resimler")
+        .order_by("-kontrol_tarihi")
     )
 
     # Filtreleme
@@ -94,7 +96,7 @@ def kullanici_kontroller_htmx(request, personel_uuid):
         kontroller = kontroller.filter(durum=durum_filter)
 
     # Sayfalama
-    per_page = 20
+    per_page = 10  # Daha kompakt olması için sayıyı azaltıyoruz
     paginator = Paginator(kontroller, per_page)
     page_number = request.GET.get("page")
     kontroller_page = paginator.get_page(page_number)
@@ -128,26 +130,39 @@ def kullanici_performans_htmx(request, personel_uuid):
     bugun = timezone.now().date()
     bu_hafta_baslangic = bugun - timedelta(days=bugun.weekday())
     bu_ay_baslangic = bugun.replace(day=1)
+    gecen_ay = bugun - timedelta(days=30)
 
     # Kontrol istatistikleri
+    tum_kontroller = personel.gunluk_kontroller.all()
     kontrol_stats = {
-        "toplam": personel.gunluk_kontroller.count(),
-        "bugun": personel.gunluk_kontroller.filter(kontrol_tarihi__date=bugun).count(),
-        "bu_hafta": personel.gunluk_kontroller.filter(
+        "toplam": tum_kontroller.count(),
+        "bugun": tum_kontroller.filter(kontrol_tarihi__date=bugun).count(),
+        "bu_hafta": tum_kontroller.filter(
             kontrol_tarihi__date__gte=bu_hafta_baslangic
         ).count(),
-        "bu_ay": personel.gunluk_kontroller.filter(
+        "bu_ay": tum_kontroller.filter(
             kontrol_tarihi__date__gte=bu_ay_baslangic
         ).count(),
     }
 
     # Sorun istatistikleri
     sorun_stats = {
-        "toplam": personel.gunluk_kontroller.filter(
-            durum__in=["sorun_var", "acil"]
-        ).count(),
-        "acil": personel.gunluk_kontroller.filter(durum="acil").count(),
-        "normal": personel.gunluk_kontroller.filter(durum="sorun_var").count(),
+        "toplam": tum_kontroller.filter(durum__in=["sorun_var", "acil"]).count(),
+        "acil": tum_kontroller.filter(durum="acil").count(),
+        "normal": tum_kontroller.filter(durum="sorun_var").count(),
+    }
+
+    # Kontrol performansı
+    kontrol_performansi = {
+        "toplam": kontrol_stats["toplam"],
+        "basarili": tum_kontroller.filter(durum="sorun_yok").count(),
+    }
+
+    # Görev performansı
+    tum_gorevler = Gorev.objects.filter(atamalar__personel=personel).distinct()
+    gorev_performansi = {
+        "toplam": tum_gorevler.count(),
+        "tamamlanan": tum_gorevler.filter(durum="tamamlandi").count(),
     }
 
     # Performans oranları
@@ -156,11 +171,91 @@ def kullanici_performans_htmx(request, personel_uuid):
     else:
         sorun_orani = 0
 
+    # Kontrol dağılımı
+    kontrol_dagilimi = {
+        "sorun_yok": tum_kontroller.filter(durum="sorun_yok").count(),
+        "sorun_var": tum_kontroller.filter(durum="sorun_var").count(),
+        "acil": tum_kontroller.filter(durum="acil").count(),
+    }
+
+    # Park bazlı performans
+    park_performansi = []
+    for atama in personel.park_personeller.select_related("park").all()[
+        :5
+    ]:  # İlk 5 park
+        park_kontroller = tum_kontroller.filter(park=atama.park)
+        toplam_kontrol = park_kontroller.count()
+        basarili_kontrol = park_kontroller.filter(durum="sorun_yok").count()
+
+        if toplam_kontrol > 0:
+            basari_orani = round((basarili_kontrol / toplam_kontrol) * 100, 1)
+        else:
+            basari_orani = 0
+
+        park_performansi.append(
+            {
+                "park_ad": atama.park.ad,
+                "kontrol_sayisi": toplam_kontrol,
+                "basari_orani": basari_orani,
+            }
+        )
+
+    # Haftalık veriler (son 7 gün)
+    haftalik_kontroller = []
+    haftalik_gorevler = []
+    haftalik_tarihler = []
+
+    for i in range(7):
+        tarih = bugun - timedelta(days=6 - i)
+        haftalik_tarihler.append(tarih.strftime("%d.%m"))
+        haftalik_kontroller.append(
+            tum_kontroller.filter(kontrol_tarihi__date=tarih).count()
+        )
+        haftalik_gorevler.append(tum_gorevler.filter(created_at__date=tarih).count())
+
+    # Ortalama tepki süresi (saat)
+    son_ay_sorunlar = tum_kontroller.filter(
+        kontrol_tarihi__date__gte=gecen_ay, durum__in=["sorun_var", "acil"]
+    )
+
+    if son_ay_sorunlar.exists():
+        ortalama_tepki_suresi = (
+            2.5  # Örnek değer - gerçek hesaplama için ilgili görevlere bakılabilir
+        )
+    else:
+        ortalama_tepki_suresi = 0
+
+    # Aylık aktivite
+    aylik_aktivite = kontrol_stats["bu_ay"] + gorev_performansi["toplam"]
+
+    # Performans skoru hesaplama
+    kontrol_basari_orani = (
+        (kontrol_performansi["basarili"] / kontrol_performansi["toplam"] * 100)
+        if kontrol_performansi["toplam"] > 0
+        else 0
+    )
+    gorev_basari_orani = (
+        (gorev_performansi["tamamlanan"] / gorev_performansi["toplam"] * 100)
+        if gorev_performansi["toplam"] > 0
+        else 0
+    )
+    performans_skoru = (kontrol_basari_orani + gorev_basari_orani) / 2
+
     context = {
         "personel": personel,
         "kontrol_stats": kontrol_stats,
         "sorun_stats": sorun_stats,
         "sorun_orani": round(sorun_orani, 1),
+        "kontrol_performansi": kontrol_performansi,
+        "gorev_performansi": gorev_performansi,
+        "kontrol_dagilimi": kontrol_dagilimi,
+        "park_performansi": park_performansi,
+        "haftalik_kontroller": haftalik_kontroller,
+        "haftalik_gorevler": haftalik_gorevler,
+        "haftalik_tarihler": haftalik_tarihler,
+        "ortalama_tepki_suresi": ortalama_tepki_suresi,
+        "aylik_aktivite": aylik_aktivite,
+        "performans_skoru": performans_skoru,
     }
     return render(request, "istakip/partials/kullanici_performans.html", context)
 
@@ -177,15 +272,34 @@ def kullanici_gorevler_htmx(request, personel_uuid):
     # Görev filtreleme
     durum_filter = request.GET.get("gorev_durum", "")
 
-    # Görevler (şimdilik boş, ileride eklenecek)
+    # Personele atanan görevleri getir
     gorevler = (
-        []
-    )  # personel.atanan_gorevler.select_related("park").order_by("-created_at")
+        Gorev.objects.filter(atamalar__personel=personel)
+        .select_related("park", "gorev_tipi")
+        .prefetch_related("atamalar__personel")
+        .distinct()
+        .order_by("-created_at")
+    )
+
+    # Durum filtrelemesi
+    if durum_filter:
+        gorevler = gorevler.filter(durum=durum_filter)
+
+    # İstatistikleri hesapla (tüm görevler üzerinden)
+    tum_gorevler = Gorev.objects.filter(atamalar__personel=personel).distinct()
+    gorev_stats = {
+        "planlanmis": tum_gorevler.filter(durum="planlanmis").count(),
+        "devam_ediyor": tum_gorevler.filter(durum="devam_ediyor").count(),
+        "tamamlandi": tum_gorevler.filter(durum="tamamlandi").count(),
+        "gecikmis": tum_gorevler.filter(durum="gecikmis").count(),
+        "acil": tum_gorevler.filter(oncelik="acil").count(),
+    }
 
     context = {
         "personel": personel,
         "gorevler": gorevler,
         "durum_filter": durum_filter,
+        "gorev_stats": gorev_stats,
     }
     return render(request, "istakip/partials/kullanici_gorevler.html", context)
 

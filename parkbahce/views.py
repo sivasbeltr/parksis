@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.contrib import messages
@@ -6,10 +7,12 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from ortak.models import Mahalle
 
@@ -1187,3 +1190,418 @@ def endeks_ekle(request, abone_uuid):
     }
 
     return render(request, "parkbahce/endeks_ekle.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def kullanici_park_ekle(request, park_uuid, kullanici_uuid):
+    """Kullanıcıyı parka ekleme işlemi - JSON response"""
+    try:
+        # Park ve personel kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+
+        # kullanici_uuid'nin Personel UUID olduğunu varsayıyoruz
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(uuid=kullanici_uuid)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel bulunamadı."}, status=400
+            )
+
+        # Zaten atanmış mı kontrol et
+        existing_assignment = ParkPersonel.objects.filter(
+            park=park, personel=personel
+        ).exists()
+
+        if existing_assignment:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} zaten {park.ad} parkına atanmış.",
+                },
+                status=400,
+            )
+
+        # Personel aktif mi kontrol et
+        if not personel.aktif:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} aktif değil. Önce personeli aktif hale getirin.",
+                },
+                status=400,
+            )
+
+        # Park ataması oluştur
+        park_personel = ParkPersonel.objects.create(
+            park=park,
+            personel=personel,
+            gorev_aciklama=f"{park.ad} parkı için sorumlu personel olarak atandı.",
+        )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"{personel.ad} başarıyla {park.ad} parkına atandı.",
+                "data": {
+                    "atama_id": str(park_personel.uuid),
+                    "personel_ad": personel.ad,
+                    "park_ad": park.ad,
+                    "atama_tarihi": park_personel.atama_tarihi.strftime(
+                        "%d.%m.%Y %H:%M"
+                    ),
+                },
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Atama işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )
+    """Kullanıcıyı parka ekleme işlemi - JSON response"""
+    try:
+        # Park ve kullanıcı kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+        user = get_object_or_404(User, id=kullanici_uuid)
+
+        # Personel kontrolü
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(user=user)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Kullanıcıya ait personel kaydı bulunamadı.",
+                },
+                status=400,
+            )
+
+        # Zaten atanmış mı kontrol et
+        existing_assignment = ParkPersonel.objects.filter(
+            park=park, personel=personel
+        ).exists()
+
+        if existing_assignment:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} zaten {park.ad} parkına atanmış.",
+                },
+                status=400,
+            )
+
+        # Personel aktif mi kontrol et
+        if not personel.aktif:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} aktif değil. Önce personeli aktif hale getirin.",
+                },
+                status=400,
+            )
+
+        # Park ataması oluştur
+        park_personel = ParkPersonel.objects.create(
+            park=park,
+            personel=personel,
+            gorev_aciklama=f"{park.ad} parkı için sorumlu personel olarak atandı.",
+        )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"{personel.ad} başarıyla {park.ad} parkına atandı.",
+                "data": {
+                    "atama_id": str(park_personel.uuid),
+                    "personel_ad": personel.ad,
+                    "park_ad": park.ad,
+                    "atama_tarihi": park_personel.atama_tarihi.strftime(
+                        "%d.%m.%Y %H:%M"
+                    ),
+                },
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Atama işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )
+
+
+@login_required
+@require_http_methods(["POST", "DELETE"])
+def kullanici_park_cikar(request, park_uuid, kullanici_uuid):
+    """Kullanıcıyı parktan çıkarma işlemi - JSON response"""
+    try:
+        # Park ve personel kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+
+        # kullanici_uuid'nin Personel UUID olduğunu varsayıyoruz
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(uuid=kullanici_uuid)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel bulunamadı."}, status=400
+            )
+
+        # Atama var mı kontrol et
+        try:
+            park_personel = ParkPersonel.objects.get(park=park, personel=personel)
+        except ParkPersonel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} zaten {park.ad} parkına atanmamış.",
+                },
+                status=400,
+            )
+
+        # Atamayı sil
+        atama_tarihi = park_personel.atama_tarihi.strftime("%d.%m.%Y %H:%M")
+        park_personel.delete()
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"{personel.ad} başarıyla {park.ad} parkından çıkarıldı.",
+                "data": {
+                    "personel_ad": personel.ad,
+                    "park_ad": park.ad,
+                    "atama_tarihi": atama_tarihi,
+                    "cikarma_tarihi": timezone.now().strftime("%d.%m.%Y %H:%M"),
+                },
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Çıkarma işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )
+    """Kullanıcıyı parktan çıkarma işlemi - JSON response"""
+    try:
+        # Park ve kullanıcı kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+        user = get_object_or_404(User, id=kullanici_uuid)
+
+        # Personel kontrolü
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(user=user)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Kullanıcıya ait personel kaydı bulunamadı.",
+                },
+                status=400,
+            )
+
+        # Atama var mı kontrol et
+        try:
+            park_personel = ParkPersonel.objects.get(park=park, personel=personel)
+        except ParkPersonel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"{personel.ad} zaten {park.ad} parkına atanmamış.",
+                },
+                status=400,
+            )
+
+        # Atamayı sil
+        atama_tarihi = park_personel.atama_tarihi.strftime("%d.%m.%Y %H:%M")
+        park_personel.delete()
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f"{personel.ad} başarıyla {park.ad} parkından çıkarıldı.",
+                "data": {
+                    "personel_ad": personel.ad,
+                    "park_ad": park.ad,
+                    "atama_tarihi": atama_tarihi,
+                    "cikarma_tarihi": timezone.now().strftime("%d.%m.%Y %H:%M"),
+                },
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Çıkarma işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )
+
+
+@require_http_methods(["GET"])
+def kullanici_park_kontrol(request, park_uuid, kullanici_uuid):
+    """Kullanıcının parka atanıp atanmadığını kontrol etme - JSON response"""
+    try:
+        # Park ve personel kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+
+        # kullanici_uuid'nin Personel UUID olduğunu varsayıyoruz
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(uuid=kullanici_uuid)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": False,
+                    "message": "Personel bulunamadı.",
+                    "data": {
+                        "personel_var": False,
+                        "personel_ad": None,
+                        "park_ad": park.ad,
+                        "atama_tarihi": None,
+                    },
+                }
+            )
+
+        # Atama var mı kontrol et
+        try:
+            park_personel = ParkPersonel.objects.get(park=park, personel=personel)
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": True,
+                    "message": f"{personel.ad} {park.ad} parkına atanmış.",
+                    "data": {
+                        "personel_var": True,
+                        "personel_ad": personel.ad,
+                        "personel_pozisyon": personel.pozisyon,
+                        "personel_aktif": personel.aktif,
+                        "park_ad": park.ad,
+                        "atama_tarihi": park_personel.atama_tarihi.strftime(
+                            "%d.%m.%Y %H:%M"
+                        ),
+                        "gorev_aciklama": park_personel.gorev_aciklama,
+                        "atama_id": str(park_personel.uuid),
+                    },
+                }
+            )
+
+        except ParkPersonel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": False,
+                    "message": f"{personel.ad} {park.ad} parkına atanmamış.",
+                    "data": {
+                        "personel_var": True,
+                        "personel_ad": personel.ad,
+                        "personel_pozisyon": personel.pozisyon,
+                        "personel_aktif": personel.aktif,
+                        "park_ad": park.ad,
+                        "atama_tarihi": None,
+                    },
+                }
+            )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Kontrol işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )
+    """Kullanıcının parka atanıp atanmadığını kontrol etme - JSON response"""
+    try:
+        # Park ve kullanıcı kontrolü
+        park = get_object_or_404(Park, uuid=park_uuid)
+        user = get_object_or_404(User, id=kullanici_uuid)
+
+        # Personel kontrolü
+        from istakip.models import ParkPersonel, Personel
+
+        try:
+            personel = Personel.objects.get(user=user)
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": False,
+                    "message": "Kullanıcıya ait personel kaydı bulunamadı.",
+                    "data": {
+                        "personel_var": False,
+                        "personel_ad": None,
+                        "park_ad": park.ad,
+                        "atama_tarihi": None,
+                    },
+                }
+            )
+
+        # Atama var mı kontrol et
+        try:
+            park_personel = ParkPersonel.objects.get(park=park, personel=personel)
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": True,
+                    "message": f"{personel.ad} {park.ad} parkına atanmış.",
+                    "data": {
+                        "personel_var": True,
+                        "personel_ad": personel.ad,
+                        "personel_pozisyon": personel.pozisyon,
+                        "personel_aktif": personel.aktif,
+                        "park_ad": park.ad,
+                        "atama_tarihi": park_personel.atama_tarihi.strftime(
+                            "%d.%m.%Y %H:%M"
+                        ),
+                        "gorev_aciklama": park_personel.gorev_aciklama,
+                        "atama_id": str(park_personel.uuid),
+                    },
+                }
+            )
+
+        except ParkPersonel.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "atanmis": False,
+                    "message": f"{personel.ad} {park.ad} parkına atanmamış.",
+                    "data": {
+                        "personel_var": True,
+                        "personel_ad": personel.ad,
+                        "personel_pozisyon": personel.pozisyon,
+                        "personel_aktif": personel.aktif,
+                        "park_ad": park.ad,
+                        "atama_tarihi": None,
+                    },
+                }
+            )
+
+    except Exception as e:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": f"Kontrol işlemi sırasında hata oluştu: {str(e)}",
+            },
+            status=500,
+        )

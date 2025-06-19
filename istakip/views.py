@@ -163,9 +163,7 @@ def kullanici_detail(request, personel_uuid):
             "atanan_gorevler",
         ),
         uuid=personel_uuid,
-    )
-
-    # İstatistikler
+    )  # İstatistikler
     bugun = timezone.now().date()
     bu_hafta_baslangic = bugun - timedelta(days=bugun.weekday())
     bu_ay_baslangic = bugun.replace(day=1)
@@ -184,12 +182,19 @@ def kullanici_detail(request, personel_uuid):
         "toplam_sorun": personel.gunluk_kontroller.filter(
             durum__in=["sorun_var", "acil"]
         ).count(),
-        "bekleyen_gorevler": personel.atanan_gorevler.filter(
-            durum="devam_ediyor"
-        ).count(),
-        "tamamlanan_gorevler": personel.atanan_gorevler.filter(
-            durum="tamamlandi"
-        ).count(),
+        "bekleyen_gorevler": Gorev.objects.filter(
+            atamalar__personel=personel, durum__in=["planlanmis", "devam_ediyor"]
+        )
+        .distinct()
+        .count(),
+        "tamamlanan_gorevler": Gorev.objects.filter(
+            atamalar__personel=personel, durum="tamamlandi"
+        )
+        .distinct()
+        .count(),
+        "toplam_gorevler": Gorev.objects.filter(atamalar__personel=personel)
+        .distinct()
+        .count(),
         "sorumlu_park_sayisi": personel.park_personeller.count(),
     }
 

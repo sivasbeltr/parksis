@@ -169,8 +169,7 @@
                     <i class="fas fa-chart-line mr-2"></i>
                     Performans
                 </button>
-                
-                <button id="tab-gorevler" 
+                  <button id="tab-gorevler" 
                         class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
                         onclick="switchTab('gorevler')"
                         hx-get="{% url 'istakip:kullanici_gorevler_htmx' personel.uuid %}"
@@ -179,7 +178,7 @@
                     <i class="fas fa-tasks mr-2"></i>
                     Görevler
                     <span class="ml-2 px-2 py-0.5 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
-                        {{ stats.bekleyen_gorevler }}
+                        {{ stats.toplam_gorevler }}
                     </span>
                 </button>
             </nav>

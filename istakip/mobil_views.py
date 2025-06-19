@@ -937,26 +937,26 @@ class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
             personel = Personel.objects.get(user=self.request.user)
 
             # Tarih hesaplamaları
-            bugün = timezone.now().date()
-            hafta_başı = bugün - timedelta(days=bugün.weekday())
-            hafta_sonu = hafta_başı + timedelta(days=6)
-            ay_başı = bugün.replace(day=1)
+            bugun = timezone.now().date()
+            hafta_basi = bugun - timedelta(days=bugun.weekday())
+            hafta_sonu = hafta_basi + timedelta(days=6)
+            ay_basi = bugun.replace(day=1)
 
             # Bugünkü kontroller
             bugun_kontroller = GunlukKontrol.objects.filter(
-                personel=personel, kontrol_tarihi__date=bugün
+                personel=personel, kontrol_tarihi__date=bugun
             )
 
             # Haftalık kontroller
             hafta_kontroller = GunlukKontrol.objects.filter(
                 personel=personel,
-                kontrol_tarihi__date__gte=hafta_başı,
+                kontrol_tarihi__date__gte=hafta_basi,
                 kontrol_tarihi__date__lte=hafta_sonu,
             )
 
             # Aylık kontroller
             ay_kontroller = GunlukKontrol.objects.filter(
-                personel=personel, kontrol_tarihi__date__gte=ay_başı
+                personel=personel, kontrol_tarihi__date__gte=ay_basi
             )
 
             # Bugünkü istatistikler
@@ -988,7 +988,7 @@ class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
             # Toplam resim sayısı (bu ay)
             toplam_resim = KontrolResim.objects.filter(
                 gunluk_kontrol__personel=personel,
-                gunluk_kontrol__kontrol_tarihi__date__gte=ay_başı,
+                gunluk_kontrol__kontrol_tarihi__date__gte=ay_basi,
             ).count()
 
             # Son 7 günlük trend
@@ -996,7 +996,7 @@ class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
             max_kontrol = 0
 
             for i in range(7):
-                gun = bugün - timedelta(days=6 - i)
+                gun = bugun - timedelta(days=6 - i)
                 gun_kontrol = GunlukKontrol.objects.filter(
                     personel=personel, kontrol_tarihi__date=gun
                 ).count()
@@ -1033,9 +1033,9 @@ class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
             context.update(
                 {
                     "personel": personel,
-                    "hafta_baslangic": hafta_başı,
+                    "hafta_baslangic": hafta_basi,
                     "hafta_bitis": hafta_sonu,
-                    "ay_baslangic": ay_başı,
+                    "ay_baslangic": ay_basi,
                     "stats": {
                         "bugun_kontrol": bugun_kontrol,
                         "bugun_sorunsuz": bugun_sorunsuz,

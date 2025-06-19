@@ -109,5 +109,20 @@ urlpatterns = [
         "htmx/infrastructure-status/",
         htmx_views.infrastructure_status_htmx,
         name="infrastructure_status_htmx",
+    ),  # Park-Kullanıcı Eşleştirme API'leri
+    path(
+        "eslestir/<uuid:park_uuid>/ekle/<uuid:kullanici_uuid>/",
+        views.kullanici_park_ekle,
+        name="kullanici_park_ekle",
+    ),
+    path(
+        "eslestir/<uuid:park_uuid>/cikar/<uuid:kullanici_uuid>/",
+        views.kullanici_park_cikar,
+        name="kullanici_park_cikar",
+    ),
+    path(
+        "eslestir/<uuid:park_uuid>/kontrol/<uuid:kullanici_uuid>/",
+        views.kullanici_park_kontrol,
+        name="kullanici_park_kontrol",
     ),
 ]
