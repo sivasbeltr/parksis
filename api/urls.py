@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .istakip_viewsets import GorevViewSet, GunlukKontrolViewSet, PersonelViewSet
+from .istakip_viewsets import PersonelViewSet
 from .view_viewsets import ParkbahceListApiView
 from .viewsets import (
     ElektrikHatViewSet,
@@ -45,18 +45,6 @@ router.register(
     basename="view-parklar-donatilar-habitatlar",
 )
 
-# İstakip Modülü ViewSets
-router.register(
-    r"kontrol-listesi",
-    GunlukKontrolViewSet,
-    basename="kontrol-listesi",
-)
-
-router.register(
-    r"gorev-listesi",
-    GorevViewSet,
-    basename="gorev-listesi",
-)
 
 router.register(
     r"personeller",
