@@ -1,7 +1,21 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .istakip_viewsets import PersonelViewSet
+from .istakip_viewsets import (
+    GorevDevamEdiyorViewSet,
+    GorevGecikmisTViewSet,
+    GorevIptalViewSet,
+    GorevOnayaGonderildiViewSet,
+    GorevPlanlanmisViewSet,
+    GorevTamamlandiViewSet,
+    GunlukKontrolAcilViewSet,
+    GunlukKontrolCozulduViewSet,
+    GunlukKontrolGozdenGecirildiViewSet,
+    GunlukKontrolIseDonusturulduViewSet,
+    GunlukKontrolSorunVarViewSet,
+    GunlukKontrolSorunYokViewSet,
+    PersonelViewSet,
+)
 from .view_viewsets import ParkbahceListApiView
 from .viewsets import (
     ElektrikHatViewSet,
@@ -45,11 +59,84 @@ router.register(
     basename="view-parklar-donatilar-habitatlar",
 )
 
-
 router.register(
     r"personeller",
     PersonelViewSet,
     basename="personeller",
+)
+
+# İş Takip - Görev Durumları
+router.register(
+    r"gorevler/planlanmis",
+    GorevPlanlanmisViewSet,
+    basename="gorevler-planlanmis",
+)
+
+router.register(
+    r"gorevler/devam-ediyor",
+    GorevDevamEdiyorViewSet,
+    basename="gorevler-devam-ediyor",
+)
+
+router.register(
+    r"gorevler/onaya-gonderildi",
+    GorevOnayaGonderildiViewSet,
+    basename="gorevler-onaya-gonderildi",
+)
+
+router.register(
+    r"gorevler/tamamlandi",
+    GorevTamamlandiViewSet,
+    basename="gorevler-tamamlandi",
+)
+
+router.register(
+    r"gorevler/iptal",
+    GorevIptalViewSet,
+    basename="gorevler-iptal",
+)
+
+router.register(
+    r"gorevler/gecikmis",
+    GorevGecikmisTViewSet,
+    basename="gorevler-gecikmis",
+)
+
+# İş Takip - Günlük Kontrol Durumları
+router.register(
+    r"gunluk-kontrol/sorun-yok",
+    GunlukKontrolSorunYokViewSet,
+    basename="gunluk-kontrol-sorun-yok",
+)
+
+router.register(
+    r"gunluk-kontrol/sorun-var",
+    GunlukKontrolSorunVarViewSet,
+    basename="gunluk-kontrol-sorun-var",
+)
+
+router.register(
+    r"gunluk-kontrol/acil",
+    GunlukKontrolAcilViewSet,
+    basename="gunluk-kontrol-acil",
+)
+
+router.register(
+    r"gunluk-kontrol/gozden-gecirildi",
+    GunlukKontrolGozdenGecirildiViewSet,
+    basename="gunluk-kontrol-gozden-gecirildi",
+)
+
+router.register(
+    r"gunluk-kontrol/ise-donusturuldu",
+    GunlukKontrolIseDonusturulduViewSet,
+    basename="gunluk-kontrol-ise-donusturuldu",
+)
+
+router.register(
+    r"gunluk-kontrol/cozuldu",
+    GunlukKontrolCozulduViewSet,
+    basename="gunluk-kontrol-cozuldu",
 )
 
 # Nokta Geometrili Modeller

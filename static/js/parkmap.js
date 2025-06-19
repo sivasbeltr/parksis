@@ -82,11 +82,17 @@ function initMap() {
     });
 
     // Harita tıklama olayı
-    map.on('singleclick', handleMapClick);
-
-    // Temel katmanları yükle
+    map.on('singleclick', handleMapClick);    // Temel katmanları yükle
     loadMahalleler();
     loadParklar();
+
+    // İstakip katman yöneticisini başlat
+    istakipLayerManager = new IstakipLayerManager(map, ISTAKIP_COLORS);
+
+    // İstakip katman sayılarını sayfa yüklendiğinde otomatik güncellemek için
+    if (istakipLayerManager) {
+        istakipLayerManager.loadLayerCounts();
+    }
 
     updateZoomDisplay();
 }
@@ -222,6 +228,15 @@ function handleMapClick(evt) {
             l.getSource().getFeatures().includes(feature)
         );
 
+        // İstakip katmanlarını kontrol et
+        if (istakipLayerManager && layer) {
+            const handled = istakipLayerManager.handleMapClick(feature, layer);
+            if (handled) {
+                return; // İstakip katmanı işlendi, diğer işlemleri yapma
+            }
+        }
+
+        // Normal park ve mahalle tıklamaları
         if (layer === layers.parklar) {
             const parkUuid = feature.get('uuid');
             if (parkUuid) {

@@ -223,9 +223,195 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                
+                <!-- Tarih Aralığı Filtreleme -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Tarih Aralığı</h3>
+                    <div class="space-y-3 p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Başlangıç Tarihi</label>
+                            <input type="date" id="baslangic-tarih" 
+                                   class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-park-green-500 focus:border-park-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Bitiş Tarihi</label>
+                            <input type="date" id="bitis-tarih" 
+                                   class="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-park-green-500 focus:border-park-green-500">
+                        </div>
+                        <button id="tarih-uygula" 
+                                class="w-full px-3 py-1.5 bg-park-green-600 text-white text-xs rounded hover:bg-park-green-700 transition-colors">
+                            <i class="fas fa-filter mr-1"></i>
+                            Filtreyi Uygula
+                        </button>
+                    </div>
+                </div>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- İş Takip Katmanları -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
+                        <i class="fas fa-tasks text-blue-600 mr-1"></i>
+                        Görevler
+                    </h3>
+                    
+                    <!-- Görev katmanları -->
+                    <div class="space-y-2">
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-planlanmis">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #F59E0B;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Planlanmış</span>
+                                    <span id="gorev-planlanmis-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-planlanmis-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-devam-ediyor">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #F59E0B;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Devam Ediyor</span>
+                                    <span id="gorev-devam-ediyor-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-devam-ediyor-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-onaya-gonderildi">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #8B5CF6;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Onaya Gönderildi</span>
+                                    <span id="gorev-onaya-gonderildi-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-onaya-gonderildi-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-tamamlandi">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #10B981;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Tamamlandı</span>
+                                    <span id="gorev-tamamlandi-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-tamamlandi-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-iptal">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #EF4444;"></div>
+                                    <span class="text-xs font-medium text-gray-700">İptal</span>
+                                    <span id="gorev-iptal-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-iptal-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="gorev-gecikmis">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #F97316;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Gecikmiş</span>
+                                    <span id="gorev-gecikmis-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="gorev-gecikmis-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Günlük Kontrol Katmanları -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
+                        <i class="fas fa-clipboard-check text-green-600 mr-1"></i>
+                        Günlük Kontroller
+                    </h3>
+                    
+                    <!-- Kontrol katmanları -->
+                    <div class="space-y-2">
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-sorun-yok">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #10B981;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Sorun Yok</span>
+                                    <span id="kontrol-sorun-yok-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-sorun-yok-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-sorun-var">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #EF4444;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Sorun Var</span>
+                                    <span id="kontrol-sorun-var-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-sorun-var-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-acil">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #DC2626;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Acil</span>
+                                    <span id="kontrol-acil-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-acil-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-gozden-gecirildi">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #F59E0B;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Gözden Geçirildi</span>
+                                    <span id="kontrol-gozden-gecirildi-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-gozden-gecirildi-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-ise-donusturuldu">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #8B5CF6;"></div>
+                                    <span class="text-xs font-medium text-gray-700">İşe Dönüştürüldü</span>
+                                    <span id="kontrol-ise-donusturuldu-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-ise-donusturuldu-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                        
+                        <div class="layer-item p-2 rounded-lg border border-gray-200 cursor-pointer" data-layer="kontrol-cozuldu">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: #10B981;"></div>
+                                    <span class="text-xs font-medium text-gray-700">Çözüldü</span>
+                                    <span id="kontrol-cozuldu-count" class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">0</span>
+                                </div>
+                                <input type="checkbox" id="kontrol-cozuldu-toggle" 
+                                       class="w-3 h-3 text-park-green-600 border-gray-300 rounded focus:ring-park-green-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Zoom Level Indicator -->
                 <div class="mt-4 p-3 bg-gray-50 rounded-lg">
@@ -280,9 +466,11 @@
             </div>
         </div>
     </div>
-    
-    <!-- OpenLayers JS -->
+      <!-- OpenLayers JS -->
     <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+    
+    <!-- Park Layers JavaScript -->
+    <script src="{% static 'js/parklayers.js' %}"></script>
     
     <!-- Park Harita JavaScript -->
     <script src="{% static 'js/parkmap.js' %}"></script>
