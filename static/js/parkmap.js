@@ -1,6 +1,38 @@
 // Park Harita JavaScript Modülü
 // Sivas Belediyesi Park ve Bahçeler Müdürlüğü
 
+// Choices.py'dan gelen renk tanımlamaları
+const ISTAKIP_COLORS = {
+    GOREV_DURUM: {
+        "planlanmis": "#F59E0B",
+        "devam_ediyor": "#F59E0B",
+        "onaya_gonderildi": "#8B5CF6",
+        "tamamlandi": "#10B981",
+        "iptal": "#EF4444",
+        "gecikmis": "#F97316"
+    },
+    GOREV_ONCELIK: {
+        "dusuk": "#6B7280",
+        "normal": "#3B82F6",
+        "yuksek": "#F59E0B",
+        "acil": "#EF4444"
+    },
+    KONTROL_DURUM: {
+        "sorun_yok": "#10B981",
+        "sorun_var": "#EF4444",
+        "acil": "#DC2626",
+        "gozden_gecirildi": "#F59E0B",
+        "ise_donusturuldu": "#8B5CF6",
+        "cozuldu": "#10B981"
+    },
+    GOREV_ASAMA_DURUM: {
+        "beklemede": "#F59E0B",
+        "baslamadi": "#6B7280",
+        "devam_ediyor": "#3B82F6",
+        "tamamlandi": "#10B981"
+    }
+};
+
 // Harita ve katman değişkenleri
 let map;
 let layers = {};
@@ -177,46 +209,19 @@ function leafletMarkerStyle(color = '#10B981') {
 
 // Duruma göre renk döndüren yardımcı fonksiyonlar
 function getGorevColor(durum) {
-    switch (durum) {
-        case 'planlanmis': return '#FDE68A'; // bg-yellow-100
-        case 'devam_ediyor': return '#FDE68A'; // bg-amber-100
-        case 'onaya_gonderildi': return '#E9D5FF'; // bg-purple-100
-        case 'tamamlandi': return '#BBF7D0'; // bg-green-100
-        case 'iptal': return '#FCA5A5'; // bg-red-100
-        case 'gecikmis': return '#FED7AA'; // bg-orange-100
-        default: return '#E5E7EB'; // bg-gray-100
-    }
+    return ISTAKIP_COLORS.GOREV_DURUM[durum] + '40'; // 40 = %25 opacity için hex
 }
+
 function getGorevMainColor(durum) {
-    switch (durum) {
-        case 'planlanmis': return '#F59E0B'; // text-yellow-600
-        case 'devam_ediyor': return '#F59E0B'; // text-amber-600
-        case 'onaya_gonderildi': return '#8B5CF6'; // text-purple-600
-        case 'tamamlandi': return '#10B981'; // text-green-600
-        case 'iptal': return '#EF4444'; // text-red-600
-        case 'gecikmis': return '#F97316'; // text-orange-600
-        default: return '#6B7280'; // text-gray-600
-    }
+    return ISTAKIP_COLORS.GOREV_DURUM[durum] || ISTAKIP_COLORS.GOREV_DURUM.planlanmis;
 }
+
 function getKontrolColor(durum) {
-    switch (durum) {
-        case 'sorun_var': return '#FCA5A5'; // bg-red-100
-        case 'acil': return '#FECACA'; // bg-red-200
-        case 'gozden_gecirildi': return '#FED7AA'; // bg-orange-100
-        case 'ise_donusturuldu': return '#DDD6FE'; // bg-purple-100
-        case 'sorun_yok': return '#BBF7D0'; // bg-green-100
-        default: return '#E5E7EB'; // bg-gray-100
-    }
+    return ISTAKIP_COLORS.KONTROL_DURUM[durum] + '40'; // 40 = %25 opacity için hex
 }
+
 function getKontrolMainColor(durum) {
-    switch (durum) {
-        case 'sorun_var': return '#EF4444'; // text-red-600
-        case 'acil': return '#DC2626'; // text-red-700
-        case 'gozden_gecirildi': return '#F59E0B'; // text-orange-600
-        case 'ise_donusturuldu': return '#8B5CF6'; // text-purple-600
-        case 'sorun_yok': return '#10B981'; // text-green-600
-        default: return '#6B7280'; // text-gray-600
-    }
+    return ISTAKIP_COLORS.KONTROL_DURUM[durum] || ISTAKIP_COLORS.KONTROL_DURUM.sorun_yok;
 }
 
 // Estetik görev marker (duruşa göre renkli, poligonun merkezine)
@@ -312,17 +317,10 @@ async function loadGunlukKontroller(filters = {}) {
         }).filter(Boolean);
         const vectorSource = new ol.source.Vector({ features });
         const kontrolLayer = new ol.layer.Vector({
-            source: vectorSource,
-            style: function (feature) {
+            source: vectorSource, style: function (feature) {
                 // Duruma göre renk
-                let color = '#10B981';
-                switch (feature.get('durum')) {
-                    case 'sorun_var': color = '#EF4444'; break;
-                    case 'acil': color = '#DC2626'; break;
-                    case 'gozden_gecirildi': color = '#F59E0B'; break;
-                    case 'ise_donusturuldu': color = '#8B5CF6'; break;
-                    case 'sorun_yok': color = '#10B981'; break;
-                }
+                const durum = feature.get('durum');
+                const color = getKontrolMainColor(durum);
                 return leafletMarkerStyle(color);
             },
             zIndex: 30
@@ -638,7 +636,7 @@ function showMapPopup(content, coordinate) {
 function getDurumBadgeClass(durum) {
     switch (durum) {
         case 'planlanmis':
-            return 'bg-gray-100 text-gray-800';
+            return 'bg-yellow-100 text-yellow-800';
         case 'devam_ediyor':
             return 'bg-amber-100 text-amber-800';
         case 'onaya_gonderildi':
@@ -1057,18 +1055,22 @@ function addTestMarkers() {
 
     const testLayer = new ol.layer.Vector({
         source: testSource,
-        style: new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 12,
-                fill: new ol.style.Fill({
-                    color: '#FF0000'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#FFFFFF',
-                    width: 3
+        style: function (feature) {
+            const durum = feature.get('durum');
+            const color = getKontrolMainColor(durum);
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 12,
+                    fill: new ol.style.Fill({
+                        color: color
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#FFFFFF',
+                        width: 3
+                    })
                 })
-            })
-        }),
+            });
+        },
         zIndex: 200
     });
 

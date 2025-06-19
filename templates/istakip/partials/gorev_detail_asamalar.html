@@ -1,3 +1,4 @@
+{% load istakip_tags %}
 <div id="asamalar-tab" class="tab-content">
     <div class="space-y-4">
         <!-- İlerleme Çubuğu -->
@@ -22,11 +23,10 @@
         {% endif %}
 
         <!-- Mevcut Aşamalar -->
-        {% for asama in gorev.asamalar.all %}
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        {% for asama in gorev.asamalar.all %}        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
             <!-- Aşama Header -->
-            <div class="p-3 border-l-4 
-                {% if asama.durum == 'tamamlandi' %}border-green-500 bg-green-50/30 dark:bg-green-900/10{% elif asama.durum == 'devam_ediyor' %}border-blue-500 bg-blue-50/30 dark:bg-blue-900/10{% elif asama.durum == 'beklemede' %}border-yellow-500 bg-yellow-50/30 dark:bg-yellow-900/10{% else %}border-gray-400 bg-gray-50/30 dark:bg-gray-900/10{% endif %}">
+            {% with asama_color=asama.durum|get_gorev_asama_durum_color %}
+            <div class="p-3 border-l-4" style="border-left-color: {{ asama_color.color|default:'#6B7280' }}; background-color: {{ asama_color.color|default:'#6B7280' }}10;">
                   <div class="flex items-start justify-between gap-3">
                     <!-- Sol: Resim Alanı -->
                     <div class="flex-shrink-0">
@@ -46,20 +46,17 @@
                     
                     <!-- Orta: Ana İçerik -->
                     <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                            <!-- Numaralı Badge -->
-                            <div class="w-6 h-6 
-                                {% if asama.durum == 'tamamlandi' %}bg-green-500{% elif asama.durum == 'devam_ediyor' %}bg-blue-500{% elif asama.durum == 'beklemede' %}bg-yellow-500{% else %}bg-gray-400{% endif %} 
-                                text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        <div class="flex items-center gap-2 mb-2">                            <!-- Numaralı Badge -->
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                                 style="background-color: {{ asama_color.color|default:'#6B7280' }};">
                                 {{ forloop.counter }}
                             </div>
                             
                             <div class="flex-1">
-                                <h4 class="font-semibold text-gray-900 dark:text-white text-sm">{{ asama.ad }}</h4>
-                                <!-- Durum ve Sorumlu -->
+                                <h4 class="font-semibold text-gray-900 dark:text-white text-sm">{{ asama.ad }}</h4>                                <!-- Durum ve Sorumlu -->
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                        {% if asama.durum == 'tamamlandi' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% elif asama.durum == 'devam_ediyor' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% elif asama.durum == 'beklemede' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300{% else %}bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300{% endif %}">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                          style="background-color: {{ asama_color.color|default:'#6B7280' }}20; color: {{ asama_color.color|default:'#6B7280' }};">
                                         {% if asama.durum == 'tamamlandi' %}
                                             <i class="fas fa-check mr-1"></i>Tamamlandı
                                         {% elif asama.durum == 'devam_ediyor' %}
@@ -108,9 +105,9 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Sağ: Durum Değiştir Dropdown -->
+                      <!-- Sağ: Durum Değiştir Dropdown -->
                     <div class="flex items-center">
+                        {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
                         <form method="post" action="{% url 'istakip:gorev_asama_durum_degistir' asama.uuid %}" class="inline">
                             {% csrf_token %}
                             <select name="durum" onchange="this.form.submit()" 
@@ -121,10 +118,15 @@
                                 <option value="tamamlandi" {% if asama.durum == 'tamamlandi' %}selected{% endif %}>✅ Tamamlandı</option>
                             </select>
                         </form>
-                    </div>
-                </div>
+                        {% else %}
+                        <div class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded border border-gray-200 dark:border-gray-600">
+                            <i class="fas fa-lock mr-1"></i>Kilitli
+                        </div>
+                        {% endif %}
+                    </div>                </div>
             </div>
         </div>
+        {% endwith %}
         {% empty %}
         <div class="text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
             <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -137,9 +139,8 @@
             </button>
         </div>
         {% endfor %}
-        
-        <!-- Yeni Aşama Ekleme Butonu -->
-        {% if gorev.asamalar.all and gorev.durum != 'tamamlandi' %}
+          <!-- Yeni Aşama Ekleme Butonu -->
+        {% if gorev.asamalar.all and gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
             <button onclick="openAsamaModal()" class="w-full py-3 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all duration-200 font-medium group">
                 <i class="fas fa-plus mr-2 group-hover:scale-110 transition-transform"></i>Yeni Aşama Ekle

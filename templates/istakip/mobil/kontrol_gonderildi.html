@@ -1,4 +1,5 @@
 {% extends 'istakip/mobil/layout_mobil.html' %}
+{% load istakip_tags %}
 
 {% block title %}Kontrol Gönderildi - Saha Personeli{% endblock %}
 
@@ -25,24 +26,22 @@
                 <h3 class="font-bold text-gray-900 flex items-center">
                     <i class="fas fa-clipboard-check text-park-green-600 mr-2"></i>
                     Kontrol Özeti
-                </h3>
-                <div class="flex items-center space-x-2">
-                    {% if kontrol.durum == 'sorun_yok' %}
-                        <span class="bg-park-green-100 text-park-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                </h3>                <div class="flex items-center space-x-2">
+                    {% with kontrol_color=kontrol.durum|get_kontrol_durum_color %}
+                    <span class="text-xs px-2 py-1 rounded-full font-medium"
+                          style="background-color: {{ kontrol_color.color|default:'#6B7280' }}20; color: {{ kontrol_color.color|default:'#6B7280' }};">
+                        {% if kontrol.durum == 'sorun_yok' %}
                             <i class="fas fa-check-circle mr-1"></i>
                             Sorunsuz
-                        </span>
-                    {% elif kontrol.durum == 'sorun_var' %}
-                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                        {% elif kontrol.durum == 'sorun_var' %}
                             <i class="fas fa-exclamation-triangle mr-1"></i>
                             Sorun Var
-                        </span>
-                    {% elif kontrol.durum == 'acil' %}
-                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">
+                        {% elif kontrol.durum == 'acil' %}
                             <i class="fas fa-exclamation-triangle mr-1"></i>
                             Acil
-                        </span>
-                    {% endif %}
+                        {% endif %}
+                    </span>
+                    {% endwith %}
                 </div>
             </div>
             

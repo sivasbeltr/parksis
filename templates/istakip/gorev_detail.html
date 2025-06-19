@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load static %}
+{% load istakip_tags %}
 
 {% block title %}{{ gorev.baslik }} - Görev Detayı{% endblock %}
 
@@ -35,50 +36,54 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700 group hover:shadow-md transition-all duration-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 {% if gorev.durum == 'tamamlandi' %}bg-green-100 dark:bg-green-900/30{% elif gorev.durum == 'devam_ediyor' %}bg-blue-100 dark:bg-blue-900/30{% elif gorev.durum == 'planlanmis' %}bg-yellow-100 dark:bg-yellow-900/30{% elif gorev.durum == 'onaya_gonderildi' %}bg-purple-100 dark:bg-purple-900/30{% elif gorev.durum == 'iptal' %}bg-red-100 dark:bg-red-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
+                    {% with durum_color=gorev.durum|get_gorev_durum_color %}
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
+                         style="background-color: {{ durum_color.color|default:'#6B7280' }}20;">
                         {% if gorev.durum == 'tamamlandi' %}
-                            <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                            <i class="fas fa-check-circle" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% elif gorev.durum == 'devam_ediyor' %}
-                            <i class="fas fa-play-circle text-blue-600 dark:text-blue-400"></i>
+                            <i class="fas fa-play-circle" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% elif gorev.durum == 'planlanmis' %}
-                            <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+                            <i class="fas fa-clock" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% elif gorev.durum == 'onaya_gonderildi' %}
-                            <i class="fas fa-hourglass-half text-purple-600 dark:text-purple-400"></i>
+                            <i class="fas fa-hourglass-half" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% elif gorev.durum == 'iptal' %}
-                            <i class="fas fa-times-circle text-red-600 dark:text-red-400"></i>
+                            <i class="fas fa-times-circle" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% elif gorev.durum == 'gecikmis' %}
-                            <i class="fas fa-exclamation-triangle text-orange-600 dark:text-orange-400"></i>
+                            <i class="fas fa-exclamation-triangle" style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                         {% else %}
                             <i class="fas fa-question-circle text-gray-600 dark:text-gray-400"></i>
                         {% endif %}
                     </div>
+                    {% endwith %}
                     <div class="ml-3">
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</p>
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ gorev.get_durum_display }}</p>
                     </div>
-                </div>                {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+                </div>{% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
                     <button onclick="openDurumModal()" 
                             class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400">
                         <i class="fas fa-edit text-xs"></i>
                     </button>
                 {% endif %}
             </div>
-        </div>
-
-        <!-- Öncelik -->
+        </div>        <!-- Öncelik -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-10 h-10 {% if gorev.oncelik == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif gorev.oncelik == 'yuksek' %}bg-orange-100 dark:bg-orange-900/30{% elif gorev.oncelik == 'normal' %}bg-green-100 dark:bg-green-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
+                {% with oncelik_color=gorev.oncelik|get_gorev_oncelik_color %}
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
+                     style="background-color: {{ oncelik_color.color|default:'#6B7280' }}20;">
                     {% if gorev.oncelik == 'acil' %}
-                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                        <i class="fas fa-exclamation-triangle" style="color: {{ oncelik_color.color|default:'#EF4444' }};"></i>
                     {% elif gorev.oncelik == 'yuksek' %}
-                        <i class="fas fa-arrow-up text-orange-600 dark:text-orange-400"></i>
+                        <i class="fas fa-arrow-up" style="color: {{ oncelik_color.color|default:'#F59E0B' }};"></i>
                     {% elif gorev.oncelik == 'normal' %}
-                        <i class="fas fa-minus text-green-600 dark:text-green-400"></i>
+                        <i class="fas fa-minus" style="color: {{ oncelik_color.color|default:'#3B82F6' }};"></i>
                     {% else %}
-                        <i class="fas fa-arrow-down text-gray-600 dark:text-gray-400"></i>
+                        <i class="fas fa-arrow-down" style="color: {{ oncelik_color.color|default:'#6B7280' }};"></i>
                     {% endif %}
                 </div>
+                {% endwith %}
                 <div class="ml-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Öncelik</p>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ gorev.get_oncelik_display }}</p>

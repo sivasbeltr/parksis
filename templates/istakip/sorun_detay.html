@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
-
+{% load istakip_tags %}
 {% block title %}{{ kontrol.park.ad }} - Sorun Detayı{% endblock %}
 
 {% block content %}
@@ -67,21 +67,13 @@
         </div>        <!-- Durum -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-10 h-10 {% if kontrol.durum == 'acil' %}bg-red-100 dark:bg-red-900/30{% elif kontrol.durum == 'sorun_var' %}bg-orange-100 dark:bg-orange-900/30{% elif kontrol.durum == 'cozuldu' %}bg-green-100 dark:bg-green-900/30{% elif kontrol.durum == 'ise_donusturuldu' %}bg-blue-100 dark:bg-blue-900/30{% elif kontrol.durum == 'gozden_gecirildi' %}bg-purple-100 dark:bg-purple-900/30{% else %}bg-gray-100 dark:bg-gray-900/30{% endif %} rounded-lg flex items-center justify-center">
-                    {% if kontrol.durum == 'acil' %}
-                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
-                    {% elif kontrol.durum == 'sorun_var' %}
-                        <i class="fas fa-exclamation-circle text-orange-600 dark:text-orange-400"></i>
-                    {% elif kontrol.durum == 'cozuldu' %}
-                        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
-                    {% elif kontrol.durum == 'ise_donusturuldu' %}
-                        <i class="fas fa-arrow-right text-blue-600 dark:text-blue-400"></i>
-                    {% elif kontrol.durum == 'gozden_gecirildi' %}
-                        <i class="fas fa-eye text-purple-600 dark:text-purple-400"></i>
-                    {% else %}
-                        <i class="fas fa-question-circle text-gray-600 dark:text-gray-400"></i>
-                    {% endif %}
+                {% with durum_color=kontrol.durum|get_kontrol_durum_color %}
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
+                     style="background-color: {{ durum_color.color|default:'#6B7280' }}20;">
+                    <i class="fas {% if kontrol.durum == 'acil' %}fa-exclamation-triangle{% elif kontrol.durum == 'sorun_var' %}fa-exclamation-circle{% elif kontrol.durum == 'cozuldu' %}fa-check-circle{% elif kontrol.durum == 'ise_donusturuldu' %}fa-arrow-right{% elif kontrol.durum == 'gozden_gecirildi' %}fa-eye{% else %}fa-question-circle{% endif %}"
+                       style="color: {{ durum_color.color|default:'#6B7280' }};"></i>
                 </div>
+                {% endwith %}
                 <div class="ml-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Durum</p>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ kontrol.get_durum_display }}</p>

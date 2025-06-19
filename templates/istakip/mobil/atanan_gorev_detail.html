@@ -1,16 +1,14 @@
 {% extends 'istakip/mobil/layout_mobil.html' %}
+{% load istakip_tags %}
 
 {% block title %}{{ gorev.baslik }} - Görev Detayı{% endblock %}
 
 {% block content %}
-<div class="space-y-2 animate-fade-in px-1">    <!-- Görev Header -->
-    <div class="rounded-xl shadow-soft text-white p-4
-        {% if gorev.durum == 'planlanmis' %}bg-gradient-to-r from-gray-500 to-gray-600
-        {% elif gorev.durum == 'beklemede' %}bg-gradient-to-r from-orange-600 to-orange-700
-        {% elif gorev.durum == 'devam_ediyor' %}bg-gradient-to-r from-blue-600 to-blue-700
-        {% elif gorev.durum == 'tamamlandi' %}bg-gradient-to-r from-green-600 to-green-700
-        {% elif gorev.durum == 'iptal' %}bg-gradient-to-r from-red-600 to-red-700
-        {% else %}bg-gradient-to-r from-gray-400 to-gray-500{% endif %}">        <div class="flex items-start justify-between mb-3">
+<div class="space-y-2 animate-fade-in px-1">    <!-- Görev Header -->    
+    {% with durum_color=gorev.durum|get_gorev_durum_color %}
+    <div class="rounded-xl shadow-soft text-white p-4" style="background: linear-gradient(135deg, {{ durum_color.color|default:'#6B7280' }}, {{ durum_color.color|default:'#6B7280' }}DD);">
+        <div class="flex items-start justify-between mb-3">
+    {% endwith %}
             <div class="flex-1">
                 <h1 class="text-lg font-bold leading-tight">{{ gorev.baslik }}</h1><p class="opacity-90 mt-1">
                     <i class="fas fa-map-marker-alt mr-1"></i>
@@ -21,10 +19,9 @@
                     <i class="fas fa-tag mr-1"></i>{{ gorev.gorev_tipi.ad }}
                 </p>
                 {% endif %}
-            </div>
-            
-            <!-- Durum ve Öncelik -->
-            <div class="flex flex-col items-end space-y-2">                <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+            </div>                <!-- Durum ve Öncelik -->
+            <div class="flex flex-col items-end space-y-2">                
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
                     {% if gorev.durum == 'planlanmis' %}<i class="fas fa-clock mr-1"></i>Planlanmış
                     {% elif gorev.durum == 'beklemede' %}<i class="fas fa-pause mr-1"></i>Beklemede
                     {% elif gorev.durum == 'devam_ediyor' %}<i class="fas fa-play mr-1"></i>Devam Ediyor
@@ -34,17 +31,16 @@
                     {% endif %}
                 </span>
                 
-                <span class="px-3 py-1 rounded-full text-xs font-medium
-                    {% if gorev.oncelik == 'acil' %}bg-red-500 text-white
-                    {% elif gorev.oncelik == 'yuksek' %}bg-orange-500 text-white
-                    {% elif gorev.oncelik == 'normal' %}bg-blue-500 text-white
-                    {% else %}bg-gray-400 text-white{% endif %}">
+                {% with oncelik_color=gorev.oncelik|get_gorev_oncelik_color %}
+                <span class="px-3 py-1 rounded-full text-xs font-medium"
+                      style="background-color: {{ oncelik_color.color|default:'#6B7280' }}; color: white;">
                     {% if gorev.oncelik == 'acil' %}<i class="fas fa-fire mr-1"></i>Acil
                     {% elif gorev.oncelik == 'yuksek' %}<i class="fas fa-arrow-up mr-1"></i>Yüksek
                     {% elif gorev.oncelik == 'normal' %}<i class="fas fa-minus mr-1"></i>Normal
                     {% elif gorev.oncelik == 'dusuk' %}<i class="fas fa-arrow-down mr-1"></i>Düşük
                     {% endif %}
                 </span>
+                {% endwith %}
             </div>
         </div>        <!-- Tarih Bilgileri -->
         <div class="grid grid-cols-2 gap-3 text-sm">
@@ -88,13 +84,11 @@
         <!-- Timeline -->
         <div class="relative">
             {% if asamalar %}                {% for asama in asamalar %}
-                <div class="flex items-start space-x-3 mb-3 last:mb-0" data-asama-durum="{{ asama.durum }}">
-                    <!-- Durum İkonu -->
+                <div class="flex items-start space-x-3 mb-3 last:mb-0" data-asama-durum="{{ asama.durum }}">                    <!-- Durum İkonu -->
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center 
-                            {% if asama.durum == 'tamamlandi' %}bg-green-500 text-white
-                            {% elif asama.durum == 'devam_ediyor' %}bg-blue-500 text-white
-                            {% else %}bg-gray-300 text-gray-600{% endif %}">
+                        {% with asama_color=asama.durum|get_gorev_asama_durum_color %}
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                             style="background-color: {{ asama_color.color|default:'#6B7280' }};">
                             {% if asama.durum == 'tamamlandi' %}
                                 <i class="fas fa-check text-xs"></i>
                             {% elif asama.durum == 'devam_ediyor' %}
@@ -103,17 +97,17 @@
                                 <i class="fas fa-clock text-xs"></i>
                             {% endif %}
                         </div>
+                        {% endwith %}
                     </div>
                       <!-- Aşama İçeriği -->
                     <div class="flex-1 bg-gray-50 rounded-lg p-2">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-medium text-gray-900 text-sm">{{ asama.ad }}</h4>
-                            <span class="text-xs px-2 py-1 rounded-full
-                                {% if asama.durum == 'tamamlandi' %}bg-green-100 text-green-800
-                                {% elif asama.durum == 'devam_ediyor' %}bg-blue-100 text-blue-800
-                                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        <div class="flex items-center justify-between mb-2">                            <h4 class="font-medium text-gray-900 text-sm">{{ asama.ad }}</h4>
+                            {% with asama_color=asama.durum|get_gorev_asama_durum_color %}
+                            <span class="text-xs px-2 py-1 rounded-full"
+                                  style="background-color: {{ asama_color.color|default:'#6B7280' }}20; color: {{ asama_color.color|default:'#6B7280' }};">
                                 {{ asama.get_durum_display }}
                             </span>
+                            {% endwith %}
                         </div>
                         
                         {% if asama.aciklama %}
@@ -136,8 +130,7 @@
                                  class="w-full h-28 object-cover rounded-lg cursor-pointer"
                                  onclick="openImageModal('{{ asama.resim.url }}', '{{ asama.ad }}')">
                         </div>
-                        {% endif %}
-                          <!-- Aşama Aksiyonları -->
+                        {% endif %}                        <!-- Aşama Aksiyonları -->
                         {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
                         <div class="mt-2 flex gap-2">
                             {% if asama.durum == 'baslamadi' or asama.durum == 'beklemede' %}

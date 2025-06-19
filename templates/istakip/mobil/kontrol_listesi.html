@@ -1,4 +1,5 @@
 {% extends 'istakip/mobil/layout_mobil.html' %}
+{% load istakip_tags %}
 
 {% block title %}Yaptığım Kontroller - Saha Personeli{% endblock %}
 
@@ -40,21 +41,20 @@
                             <h3 class="font-bold text-lg text-gray-900">{{ kontrol.park.ad }}</h3>
                             <p class="text-sm text-gray-600">{{ kontrol.park.mahalle.ad }}</p>
                             <p class="text-xs text-gray-500 mt-1">{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</p>
-                        </div>
+                        </div>                        
                         <div class="flex items-center space-x-2">
-                            {% if kontrol.durum == 'sorun_yok' %}
-                                <span class="bg-park-green-100 text-park-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {% with kontrol_color=kontrol.durum|get_kontrol_durum_color %}
+                            <span class="px-3 py-1 rounded-full text-sm font-medium"
+                                  style="background-color: {{ kontrol_color.color|default:'#6B7280' }}20; color: {{ kontrol_color.color|default:'#6B7280' }};">
+                                {% if kontrol.durum == 'sorun_yok' %}
                                     <i class="fas fa-check-circle mr-1"></i>Sorun Yok
-                                </span>
-                            {% elif kontrol.durum == 'sorun_var' %}
-                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {% elif kontrol.durum == 'sorun_var' %}
                                     <i class="fas fa-exclamation-triangle mr-1"></i>Sorun Var
-                                </span>
-                            {% elif kontrol.durum == 'acil' %}
-                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {% elif kontrol.durum == 'acil' %}
                                     <i class="fas fa-exclamation-circle mr-1"></i>Acil
-                                </span>
-                            {% endif %}
+                                {% endif %}
+                            </span>
+                            {% endwith %}
                         </div>
                     </div>
                     
