@@ -272,16 +272,3 @@
         {% endfor %}
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Prevent event bubbling for click events on form elements
-        const clickableElements = document.querySelectorAll('[onclick]');
-        clickableElements.forEach(element => {
-            element.addEventListener('click', function(e) {
-                // Bu elementi tıklanabilir yapmak için hiçbir şey yapmıyoruz
-                // Onclick attribute zaten işi yapıyor
-            });
-        });
-    });
-</script>

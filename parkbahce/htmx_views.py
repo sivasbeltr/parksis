@@ -128,9 +128,7 @@ def park_detail_htmx(request, park_uuid):
             "binalar",
         ),
         uuid=park_uuid,
-    )
-
-    # Park istatistikleri
+    )  # Park istatistikleri
     park_stats = {
         "habitatlar_sayisi": park.habitatlar.count(),
         "donatilar_sayisi": park.donatilar.count(),
@@ -144,9 +142,22 @@ def park_detail_htmx(request, park_uuid):
         "elektrik_nokta_sayisi": park.elektrik_noktalar.count(),
     }
 
+    # Park personellerini getir
+    try:
+        from istakip.models import ParkPersonel
+
+        park_personelleri = (
+            ParkPersonel.objects.filter(park=park)
+            .select_related("personel", "personel__user")
+            .order_by("-atama_tarihi")
+        )
+    except ImportError:
+        park_personelleri = []
+
     context = {
         "park": park,
         "park_stats": park_stats,
+        "park_personelleri": park_personelleri,
     }
 
     return render(request, "parkbahce/partials/park_detail_modal.html", context)

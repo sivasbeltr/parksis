@@ -26,68 +26,54 @@
     <div class="space-y-4">
         <h4 class="text-md font-semibold text-gray-900 dark:text-white flex items-center">
             <i class="fas fa-users text-green-600 mr-2"></i>
-            Atanmış Personeller ({{ park_personelleri.count }})
+            Atanmış Personeller (<span id="atanmis-personel-count">{{ park_personelleri.count }}</span>)
         </h4>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div id="atanmis-personel-listesi" class="space-y-3">
             {% for park_personel in park_personelleri %}
-            <div class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 hover:shadow-lg">
-                <div class="p-4">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                            <span class="text-green-600 dark:text-green-400 font-bold text-lg">
-                                {{ park_personel.personel.ad|first|upper }}
-                            </span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h5 class="text-sm font-bold text-gray-900 dark:text-white mb-1 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                                {{ park_personel.personel.ad }}
-                            </h5>
-                            
-                            <div class="space-y-1 text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                {% if park_personel.personel.pozisyon %}
-                                <div class="flex items-center">
-                                    <i class="fas fa-briefcase text-xs mr-1"></i>
-                                    <span>{{ park_personel.personel.pozisyon }}</span>
+            <div id="atanmis-item-{{ park_personel.personel.uuid }}" class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="text-green-600 dark:text-green-400 font-bold text-sm">
+                            {{ park_personel.personel.ad|first|upper }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                    {{ park_personel.personel.ad }}
+                                </h5>
+                                <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {% if park_personel.personel.pozisyon %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-briefcase mr-1"></i>
+                                        {{ park_personel.personel.pozisyon }}
+                                    </span>
+                                    {% endif %}
+                                    <span class="flex items-center">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        {{ park_personel.atama_tarihi|date:"d.m.Y" }}
+                                    </span>
+                                    {% if park_personel.personel.aktif %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Aktif
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                                            <i class="fas fa-times-circle mr-1"></i>
+                                            Pasif
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
-                                
-                                <div class="flex items-center">
-                                    <i class="fas fa-calendar text-xs mr-1"></i>
-                                    <span>{{ park_personel.atama_tarihi|date:"d.m.Y" }} tarihinde atandı</span>
-                                </div>
-                                
-                                {% if park_personel.personel.telefon %}
-                                <div class="flex items-center">
-                                    <i class="fas fa-phone text-xs mr-1"></i>
-                                    <span>{{ park_personel.personel.telefon }}</span>
-                                </div>
-                                {% endif %}
                             </div>
                             
-                            {% if park_personel.gorev_aciklama %}
-                            <div class="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-2 mb-2">
-                                <strong>Görev:</strong> {{ park_personel.gorev_aciklama }}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- Status Badge -->
-                            {% if park_personel.personel.aktif %}
-                                <div class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
-                                    <i class="fas fa-check-circle mr-1"></i>
-                                    Aktif
-                                </div>
-                            {% else %}
-                                <div class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
-                                    <i class="fas fa-times-circle mr-1"></i>
-                                    Pasif
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="flex flex-col space-y-1">
-                            <button onclick="removePersonelFromPark('{{ park_personel.personel.uuid }}', '{{ park_personel.personel.ad }}')"
-                                    class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-lg transition-colors">
-                                <i class="fas fa-trash text-xs"></i>
+                            <button onclick="removePersonelFromParkTab('{{ park_personel.personel.uuid }}', '{{ park_personel.personel.ad }}')"
+                                    class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-lg transition-colors flex items-center space-x-1 opacity-0 group-hover:opacity-100">
+                                <i class="fas fa-times"></i>
+                                <span>Kaldır</span>
                             </button>
                         </div>
                     </div>
@@ -98,7 +84,7 @@
     </div>
     {% else %}
     <!-- Boş Durum -->
-    <div class="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-xl">
+    <div id="empty-state" class="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-xl">
         <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <i class="fas fa-user-slash text-gray-400 dark:text-gray-500 text-2xl"></i>
         </div>
@@ -129,20 +115,18 @@
                         class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
-            </div>
-
-            <!-- Dialog Content -->
+            </div>            <!-- Dialog Content -->
             <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 <!-- Aktif Personeller -->
                 <div class="space-y-4">
                     <h4 class="text-md font-semibold text-gray-900 dark:text-white flex items-center">
                         <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                        Atanmış Personeller (<span id="atanmis-count">{{ park_personelleri.count }}</span>)
+                        Atanmış Personeller (<span id="dialog-atanmis-count">{{ park_personelleri.count }}</span>)
                     </h4>
                     
-                    <div id="atanmis-personeller" class="space-y-2">
+                    <div id="dialog-atanmis-personeller" class="space-y-2">
                         {% for park_personel in park_personelleri %}
-                        <div id="atanmis-{{ park_personel.personel.uuid }}" class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                        <div id="dialog-atanmis-{{ park_personel.personel.uuid }}" class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
                             <div class="flex items-center space-x-3">
                                 <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
                                     <span class="text-green-600 dark:text-green-400 font-bold text-sm">{{ park_personel.personel.ad|first|upper }}</span>
@@ -152,7 +136,7 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ park_personel.personel.pozisyon|default:"Pozisyon belirtilmemiş" }}</p>
                                 </div>
                             </div>
-                            <button onclick="removePersonelFromPark('{{ park_personel.personel.uuid }}', '{{ park_personel.personel.ad }}')" 
+                            <button onclick="removePersonelFromParkDialog('{{ park_personel.personel.uuid }}', '{{ park.uuid }}')" 
                                     class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
                                 <i class="fas fa-times mr-1"></i>
                                 Kaldır
@@ -180,7 +164,7 @@
                     
                     <div id="tum-personeller" class="space-y-2 max-h-80 overflow-y-auto">
                         {% for personel in atanabilir_personeller %}
-                        <div id="personel-{{ personel.uuid }}" class="personel-item flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div id="dialog-personel-{{ personel.uuid }}" class="personel-item flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <div class="flex items-center space-x-3">
                                 <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                                     <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">{{ personel.ad|first|upper }}</span>
@@ -190,30 +174,52 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ personel.pozisyon|default:"Pozisyon belirtilmemiş" }}</p>
                                 </div>
                             </div>
-                            <button onclick="addPersonelToPark('{{ personel.uuid }}', '{{ personel.ad }}')" 
-                                    class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
-                                <i class="fas fa-plus mr-1"></i>
-                                Ata
-                            </button>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" 
+                                       class="personel-checkbox sr-only" 
+                                       data-personel-uuid="{{ personel.uuid }}"
+                                       data-personel-name="{{ personel.ad }}"
+                                       data-personel-position="{{ personel.pozisyon|default:'Pozisyon belirtilmemiş' }}"
+                                       data-park-uuid="{{ park.uuid }}">
+                                <div class="relative">
+                                    <div class="w-5 h-5 bg-white border-2 border-gray-300 dark:border-gray-600 rounded transition-all duration-200 checkbox-bg"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 checkbox-icon">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </div>
+                                </div>
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Ata</span>
+                            </label>
                         </div>
                         {% endfor %}
                         
                         <!-- Atanmış personeller için kontrol -->
                         {% for park_personel in park_personelleri %}
-                        <div id="personel-{{ park_personel.personel.uuid }}" class="personel-item flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" style="display: none;">
+                        <div id="dialog-personel-{{ park_personel.personel.uuid }}" class="personel-item flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg" style="display: none;">
                             <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                                    <span class="text-gray-600 dark:text-gray-400 font-bold text-sm">{{ park_personel.personel.ad|first|upper }}</span>
+                                <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                                    <span class="text-green-600 dark:text-green-400 font-bold text-sm">{{ park_personel.personel.ad|first|upper }}</span>
                                 </div>
                                 <div>
-                                    <h5 class="font-medium text-gray-500 dark:text-gray-400 personel-name">{{ park_personel.personel.ad }}</h5>
-                                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ park_personel.personel.pozisyon|default:"Pozisyon belirtilmemiş" }} • Zaten atanmış</p>
+                                    <h5 class="font-medium text-green-700 dark:text-green-300 personel-name">{{ park_personel.personel.ad }}</h5>
+                                    <p class="text-sm text-green-600 dark:text-green-400">{{ park_personel.personel.pozisyon|default:"Pozisyon belirtilmemiş" }} • Atanmış</p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1.5 bg-green-100 text-green-700 text-sm rounded-lg">
-                                <i class="fas fa-check mr-1"></i>
-                                Atanmış
-                            </span>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" 
+                                       class="personel-checkbox sr-only" 
+                                       data-personel-uuid="{{ park_personel.personel.uuid }}"
+                                       data-personel-name="{{ park_personel.personel.ad }}"
+                                       data-personel-position="{{ park_personel.personel.pozisyon|default:'Pozisyon belirtilmemiş' }}"
+                                       data-park-uuid="{{ park.uuid }}"
+                                       checked>
+                                <div class="relative">
+                                    <div class="w-5 h-5 bg-green-500 border-2 border-green-500 rounded transition-all duration-200 checkbox-bg"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-100 transition-opacity duration-200 checkbox-icon">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </div>
+                                </div>
+                                <span class="ml-2 text-sm text-green-700 dark:text-green-300">Atanmış</span>
+                            </label>
                         </div>
                         {% endfor %}
                     </div>
@@ -232,201 +238,3 @@
     </dialog>
 </div>
 
-<script>
-    function openPersonelAtamaDialog() {
-        const dialog = document.getElementById('personel-atama-dialog');
-        dialog.showModal();
-        
-        // Arama fonksiyonunu başlat
-        initializePersonelSearch();
-    }
-    
-    function closePersonelAtamaDialog() {
-        const dialog = document.getElementById('personel-atama-dialog');
-        dialog.close();
-        
-        // Dialog kapandığında sorumlu tab'ını yenile
-        htmx.ajax('GET', '{% url "parkbahce:park_sorumlu_tab_htmx" park.uuid %}', {
-            target: '#tab-content',
-            swap: 'innerHTML'
-        });
-    }
-    async function addPersonelToPark(personelUuid, personelAd) {
-        try {
-            const baseUrl = '/parkbahce/eslestir/{{ park.uuid }}/ekle/';
-            const response = await fetch(baseUrl + personelUuid + '/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCsrfToken(),
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // Başarılı mesaj göster
-                showNotification(result.message, 'success');
-                
-                // UI'yi güncelle - personeli atanmış listesine ekle
-                const atanmisContainer = document.getElementById('atanmis-personeller');
-                const atanmisHtml = `
-                    <div id="atanmis-${personelUuid}" class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
-                                <span class="text-green-600 dark:text-green-400 font-bold text-sm">${personelAd.charAt(0).toUpperCase()}</span>
-                            </div>
-                            <div>
-                                <h5 class="font-medium text-gray-900 dark:text-white">${personelAd}</h5>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Yeni atandı</p>
-                            </div>
-                        </div>
-                        <button onclick="removePersonelFromPark('${personelUuid}', '${personelAd}')" 
-                                class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
-                            <i class="fas fa-times mr-1"></i>
-                            Kaldır
-                        </button>
-                    </div>
-                `;
-                atanmisContainer.insertAdjacentHTML('beforeend', atanmisHtml);
-                
-                // Sayıyı güncelle
-                const countElement = document.getElementById('atanmis-count');
-                countElement.textContent = parseInt(countElement.textContent) + 1;
-                
-                // Personeli mevcut listeden gizle/değiştir
-                const personelElement = document.getElementById(`personel-${personelUuid}`);
-                if (personelElement) {
-                    personelElement.style.display = 'none';
-                }
-                
-            } else {
-                showNotification(result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Personel atama hatası:', error);
-            showNotification('Personel atama sırasında bir hata oluştu.', 'error');
-        }
-    }
-    
-    async function removePersonelFromPark(personelUuid, personelAd) {
-        if (!confirm(`"${personelAd}" personelini bu parktan kaldırmak istediğinizden emin misiniz?`)) {
-            return;
-        }        try {
-            const baseUrl = '/parkbahce/eslestir/{{ park.uuid }}/cikar/';
-            const response = await fetch(baseUrl + personelUuid + '/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCsrfToken(),
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // Başarılı mesaj göster
-                showNotification(result.message, 'success');
-                
-                // UI'yi güncelle - personeli atanmış listesinden kaldır
-                const atanmisElement = document.getElementById(`atanmis-${personelUuid}`);
-                if (atanmisElement) {
-                    atanmisElement.remove();
-                }
-                
-                // Sayıyı güncelle
-                const countElement = document.getElementById('atanmis-count');
-                countElement.textContent = parseInt(countElement.textContent) - 1;
-                
-                // Personeli tekrar mevcut listede göster
-                const personelElement = document.getElementById(`personel-${personelUuid}`);
-                if (personelElement) {
-                    personelElement.style.display = 'flex';
-                    // Butonunu güncelle
-                    const button = personelElement.querySelector('button');
-                    if (button) {
-                        button.onclick = () => addPersonelToPark(personelUuid, personelAd);
-                        button.className = 'px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors';
-                        button.innerHTML = '<i class="fas fa-plus mr-1"></i>Ata';
-                    }
-                }
-                
-            } else {
-                showNotification(result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Personel kaldırma hatası:', error);
-            showNotification('Personel kaldırma sırasında bir hata oluştu.', 'error');
-        }
-    }
-    
-    function initializePersonelSearch() {
-        const searchInput = document.getElementById('personel-search');
-        const personelItems = document.querySelectorAll('.personel-item');
-        
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            
-            personelItems.forEach(item => {
-                const personelName = item.querySelector('.personel-name').textContent.toLowerCase();
-                
-                if (personelName.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    }
-    
-    function confirmRemovePersonel(atamaUuid, personelAd) {
-        if (confirm(`"${personelAd}" personelini bu parktan kaldırmak istediğinizden emin misiniz?`)) {
-            // Personel kaldırma işlemi için HTMX isteği
-            htmx.ajax('DELETE', `/istakip/park-personel/${atamaUuid}/kaldir/`, {
-                target: '#tab-content',
-                swap: 'innerHTML'
-            });
-        }
-    }
-    
-    // Bildirim gösterme fonksiyonu
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full ${
-            type === 'success' ? 'bg-green-600 text-white' : 
-            type === 'error' ? 'bg-red-600 text-white' : 
-            'bg-blue-600 text-white'
-        }`;
-        
-        notification.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Animasyon ile göster
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-        
-        // 5 saniye sonra otomatik kaldır
-        setTimeout(() => {
-            notification.classList.add('translate-x-full');
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 300);
-        }, 5000);
-    }
-      function getCsrfToken() {
-        const token = document.querySelector('[name=csrfmiddlewaretoken]');
-        return token ? token.value : '';
-    }
-</script>

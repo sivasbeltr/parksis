@@ -315,21 +315,20 @@
             </div>
         </div>
     </div>
-    
-    <!-- Park Detay Modal -->
+      <!-- Park Detay Modal -->
     <div id="parkModal" class="fixed inset-0 z-[999] hidden">
         <div class="modal-overlay fixed inset-0 bg-black/50" id="parkModalOverlay"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full">
-                <div class="p-6 border-b border-gray-200">
+            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+                <div class="p-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-bold text-gray-900" id="parkModalTitle">Park Detayları</h2>
+                        <h2 class="text-lg font-bold text-gray-900" id="parkModalTitle">Park Detayları</h2>
                         <button id="parkModalClose" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <i class="fas fa-times text-gray-500"></i>
                         </button>
                     </div>
                 </div>
-                <div class="p-6 max-h-96 overflow-y-auto custom-scrollbar" id="parkModalContent">
+                <div class="p-4 max-h-[70vh] overflow-y-auto custom-scrollbar" id="parkModalContent">
                     <!-- Park detayları buraya yüklenecek -->
                 </div>
             </div>
@@ -340,10 +339,10 @@
     <div id="mahalleModal" class="fixed inset-0 z-[30] hidden">
         <div class="modal-overlay fixed inset-0 bg-black/50" id="mahalleModalOverlay"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full">
-                <div class="p-6 border-b border-gray-200">
+            <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-lg w-full">
+                <div class="p-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-bold text-gray-900" id="mahalleModalTitle">Mahalle Detayları</h2>
+                        <h2 class="text-lg font-bold text-gray-900" id="mahalleModalTitle">Mahalle Detayları</h2>
                         <button id="mahalleModalClose" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -351,7 +350,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="p-6 max-h-96 overflow-y-auto custom-scrollbar" id="mahalleModalContent">
+                <div class="p-4 max-h-[70vh] overflow-y-auto custom-scrollbar" id="mahalleModalContent">
                     <!-- Mahalle detayları buraya yüklenecek -->
                 </div>
             </div>

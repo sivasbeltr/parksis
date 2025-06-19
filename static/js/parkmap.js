@@ -163,15 +163,34 @@ async function loadParklar() {
 
         const parkLayer = new ol.layer.Vector({
             source: vectorSource,
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: '#047857',
-                    width: 2
-                }),
-                fill: new ol.style.Fill({
-                    color: 'rgba(16, 185, 129, 0.3)'
-                })
-            }),
+            style: function (feature) {
+                const hasPersonel = feature.get('personel_durum'); // boolean field
+
+                if (hasPersonel) {
+                    // Personel atanmış parklar - yeşil
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: '#047857',
+                            width: 2
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(16, 185, 129, 0.3)'
+                        })
+                    });
+                } else {
+                    // Personel atanmamış parklar - kırmızı kenarlık
+                    return new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: '#DC2626',
+                            width: 2,
+                            lineDash: [5, 5] // kesikli çizgi
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(16, 185, 129, 0.3)'
+                        })
+                    });
+                }
+            },
             zIndex: 2
         });
 
@@ -676,7 +695,7 @@ async function showParkDetails(uuid) {
     try {
         const mahalleModal = document.getElementById('mahalleModal');
         mahalleModal.classList.add('hidden');
-        await new Promise(resolve => setTimeout(resolve, 350));
+        //await new Promise(resolve => setTimeout(resolve, 350));
         const response = await fetch(`/parkbahce/htmx/park-detail/${uuid}/`, {
             headers: {
                 'HX-Request': 'true'
@@ -1045,4 +1064,41 @@ function setDefaultFormValues() {
         });
     }
     console.log('Form değerleri ayarlandı');
+}
+
+// Park alt katmanlarını yükle
+function loadParkSubLayers(parkUuid) {
+    // Park modal'ını kapat
+    document.getElementById('parkModal').classList.add('hidden');
+
+    // Park'a yakınlaştır
+    zoomToPark(parkUuid);
+
+    // Burada gelecekte park içi detay katmanları yüklenebilir
+    // Örneğin: habitatlar, donatılar, sulama noktaları vb.
+    console.log(`Park ${parkUuid} için detay katmanları yükleniyor...`);
+}
+
+// Mahalle parklarını göster
+function showMahalleParks(mahalleUuid) {
+    // Mahalle modal'ını kapat
+    document.getElementById('mahalleModal').classList.add('hidden');
+
+    // Mahalleye yakınlaştır
+    zoomToMahalle(mahalleUuid);
+
+    // Burada o mahalledeki parkları vurgulayabiliriz
+    console.log(`Mahalle ${mahalleUuid} parkları vurgulanıyor...`);
+
+    // İleride mahalle parkları için özel stil uygulayabiliriz
+    const parkLayer = layers.parklar;
+    if (parkLayer) {
+        const features = parkLayer.getSource().getFeatures();
+        features.forEach(feature => {
+            // Sadece o mahalledeki parkları vurgula
+            if (feature.get('mahalle_uuid') === mahalleUuid) {
+                // Özel vurgulama stili eklenebilir
+            }
+        });
+    }
 }
