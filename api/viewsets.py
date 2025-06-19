@@ -1,7 +1,7 @@
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import Polygon
 from django_filters import rest_framework as filters
-from rest_framework import viewsets
+from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -509,6 +509,30 @@ class ParkViewSet(BaseGeoViewSet):
             aboneler, many=True, context={"request": request}
         )
         return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def personeller(self, request, uuid=None):
+        """Parka atanmış personelleri döndürür"""
+        from istakip.models import ParkPersonel
+
+        park = self.get_object()
+        park_personelleri = (
+            ParkPersonel.objects.filter(park=park)
+            .select_related("personel")
+            .order_by("-atama_tarihi")
+        )
+        data = [
+            {
+                "personel_uuid": pp.personel.uuid,
+                "personel_ad": pp.personel.ad,
+                "personel_pozisyon": pp.personel.pozisyon,
+                "atama_tarihi": (
+                    pp.atama_tarihi.strftime("%Y-%m-%d") if pp.atama_tarihi else None
+                ),
+            }
+            for pp in park_personelleri
+        ]
+        return Response(data)
 
 
 # Individual ViewSets for each model

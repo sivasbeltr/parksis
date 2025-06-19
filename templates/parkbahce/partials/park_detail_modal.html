@@ -28,18 +28,22 @@
             <div class="text-lg font-bold text-purple-600">{{ park_stats.bina_sayisi }}</div>
             <div class="text-xs text-purple-600">Bina</div>
         </div>
-    </div>
-
-    <!-- Personel Bilgileri -->
+    </div>    <!-- Personel Bilgileri -->
     {% if park_personelleri %}
     <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-        <h3 class="text-sm font-semibold text-green-800 mb-2 flex items-center">
-            <i class="fas fa-user-check text-green-600 mr-2"></i>
-            Atanmış Personeller ({{ park_personelleri.count }})
-        </h3>
-        <div class="space-y-2">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold text-green-800 flex items-center">
+                <i class="fas fa-user-check text-green-600 mr-2"></i>
+                Atanmış Personeller (<span id="modal-personel-count">{{ park_personelleri.count }}</span>)
+            </h3>
+            <button onclick="openModalPersonelYonetimi('{{ park.uuid }}')" 
+                    class="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-md transition-colors">
+                <i class="fas fa-cog mr-1"></i>Yönet
+            </button>
+        </div>
+        <div id="modal-personel-listesi" class="space-y-2">
             {% for park_personel in park_personelleri %}
-            <div class="flex items-center space-x-3 py-1 px-2 rounded-lg hover:bg-green-100 transition-colors group">
+            <div id="modal-personel-item-{{ park_personel.personel.uuid }}" class="flex items-center space-x-3 py-1 px-2 rounded-lg hover:bg-green-100 transition-colors group">
                 <div class="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center shadow-sm">
                     <span class="text-green-700 font-bold text-base">
                         {{ park_personel.personel.ad|first|upper }}
@@ -55,16 +59,27 @@
                     <span class="text-green-600 text-xs ml-1">({{ park_personel.personel.pozisyon }})</span>
                     {% endif %}
                 </div>
-                <span class="text-xs text-green-500 whitespace-nowrap">{{ park_personel.atama_tarihi|date:"d.m.Y" }}</span>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-green-500 whitespace-nowrap">{{ park_personel.atama_tarihi|date:"d.m.Y" }}</span>                    <button onclick="removePersonelFromModal('{{ park_personel.personel.uuid }}', '{{ park.uuid }}', '{{ park_personel.personel.ad }}')" 
+                            class="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-all duration-200 p-1 rounded">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
     {% else %}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-            <span class="text-sm font-medium text-red-800">Bu parka henüz personel atanmamış</span>
+    <div id="modal-personel-empty" class="bg-red-50 border border-red-200 rounded-lg p-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                <span class="text-sm font-medium text-red-800">Bu parka henüz personel atanmamış</span>
+            </div>
+            <button onclick="openModalPersonelYonetimi('{{ park.uuid }}')" 
+                    class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-md transition-colors">
+                <i class="fas fa-plus mr-1"></i>Ata
+            </button>
         </div>
     </div>
     {% endif %}
