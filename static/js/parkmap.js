@@ -1292,8 +1292,7 @@ function updateModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
                                 <div class="flex items-center space-x-3">
                                     <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                                         <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">
-                                            ${(personel.ad || 'U').charAt(0).toUpperCase()
-                }</span>
+                                            ${(personel.ad || 'U').charAt(0).toUpperCase()}</span>
                                     </div>
                                     <div>
                                         <h5 class="font-medium text-gray-900 dark:text-white">${personel.ad || 'Bilinmiyor'}</h5>
