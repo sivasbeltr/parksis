@@ -121,13 +121,14 @@
                                 <span class="text-gray-500 dark:text-gray-400">Park: </span>
                                 <a href="{% url 'parkbahce:park_detail' gorev.park.uuid %}" class="font-medium text-park-green-600 hover:text-park-green-700 hover:underline">{{ gorev.park.ad }}</a>
                             </div>
-                        </div>
-                        {% if gorev.gorev_tipi %}
+                        </div>                        {% if gorev.gorev_tipi %}
                         <div class="flex items-center text-sm">
                             <i class="fas fa-tag text-gray-500 w-5 mr-3"></i>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">Tip: </span>
-                                <span class="text-gray-700 dark:text-gray-300">{{ gorev.gorev_tipi.ad }}</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-600">
+                                    {{ gorev.gorev_tipi.ad }}
+                                </span>
                             </div>
                         </div>
                         {% endif %}

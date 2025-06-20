@@ -64,9 +64,7 @@
                                value="{% if is_edit %}{{ gorev.baslik }}{% endif %}"
                                placeholder="Görevin açıklayıcı başlığını yazın..."
                                class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
-                    </div>
-
-                    <!-- Task Type -->
+                    </div>                    <!-- Task Type -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Görev Tipi
@@ -74,11 +72,14 @@
                         <select name="gorev_tipi" class="w-full px-3 py-2 border border-gray-300/60 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white/80 dark:bg-gray-700/80 text-sm">
                             <option value="">Seçiniz...</option>
                             {% for tip in gorev_tipleri %}
-                            <option value="{{ tip.uuid }}" {% if is_edit and gorev.gorev_tipi and gorev.gorev_tipi.uuid == tip.uuid %}selected{% endif %}>
+                            <option value="{{ tip.id }}" {% if is_edit and gorev.gorev_tipi and gorev.gorev_tipi.id == tip.id %}selected{% endif %}>
                                 {{ tip.ad }}
                             </option>
                             {% endfor %}
                         </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Görev tipini seçerek işi kategorize edin (Sulama, Bakım, Temizlik vb.)
+                        </p>
                     </div>
 
                     <!-- Priority -->

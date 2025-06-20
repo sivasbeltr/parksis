@@ -186,10 +186,24 @@
                     <input type="text" name="baslik" value="{{ initial_data.baslik }}" required
                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
                            placeholder="Görev başlığını giriniz...">
-                </div>
-
-                <!-- Grid for form fields -->
+                </div>                <!-- Grid for form fields -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Task Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Görev Tipi
+                        </label>
+                        <select name="gorev_tipi" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">Görev tipi seçiniz...</option>
+                            {% for tip in gorev_tipleri %}
+                            <option value="{{ tip.id }}">{{ tip.ad }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Görev tipini seçerek işi kategorize edin
+                        </p>
+                    </div>
+
                     <!-- Priority -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -201,9 +215,7 @@
                             <option value="yuksek" {% if initial_data.oncelik == 'yuksek' %}selected{% endif %}>🟠 Yüksek</option>
                             <option value="acil" {% if initial_data.oncelik == 'acil' %}selected{% endif %}>🔴 Acil</option>
                         </select>
-                    </div>
-
-                    <!-- Start Date -->
+                    </div>                    <!-- Start Date -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Başlangıç Tarihi <span class="text-red-500">*</span>
@@ -223,7 +235,7 @@
                     </div>
 
                     <!-- Personnel Assignment -->
-                    <div>
+                    <div class="lg:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Atanacak Personeller
                         </label>

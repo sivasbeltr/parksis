@@ -12,6 +12,7 @@ from .models import (
     Gorev,
     GorevAsama,
     GorevTamamlamaResim,
+    GorevTipi,
     GunlukKontrol,
     KontrolResim,
     ParkPersonel,
@@ -388,9 +389,14 @@ class GorevDurumForm(forms.ModelForm):
 
     class Meta:
         model = Gorev
-        fields = ["durum"]
+        fields = ["durum", "gorev_tipi"]
         widgets = {
             "durum": forms.Select(
+                attrs={
+                    "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
+                }
+            ),
+            "gorev_tipi": forms.Select(
                 attrs={
                     "class": "w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-base font-medium focus:ring-2 focus:ring-park-green-500 focus:border-park-green-500 transition-all",
                 }
@@ -398,7 +404,15 @@ class GorevDurumForm(forms.ModelForm):
         }
         labels = {
             "durum": _("Yeni Durum"),
+            "gorev_tipi": _("Görev Tipi"),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aktif görev tiplerini getir
+        self.fields["gorev_tipi"].queryset = GorevTipi.objects.all().order_by("ad")
+        self.fields["gorev_tipi"].empty_label = "Görev tipi seçiniz"
+        self.fields["gorev_tipi"].required = False
 
 
 class GorevAsamaDurumForm(forms.ModelForm):

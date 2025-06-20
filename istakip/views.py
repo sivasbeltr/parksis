@@ -868,6 +868,7 @@ def sorun_gorev_donustur(request, kontrol_uuid):
             baslangic_tarihi = request.POST.get("baslangic_tarihi")
             bitis_tarihi = request.POST.get("bitis_tarihi")
             atanan_personeller = request.POST.getlist("atanan_personeller")
+            gorev_tipi = request.POST.get("gorev_tipi")
 
             # Gerekli alanları kontrol et
             if not all([baslik, baslangic_tarihi]):
@@ -885,6 +886,7 @@ def sorun_gorev_donustur(request, kontrol_uuid):
                     bitis_tarihi=bitis_tarihi if bitis_tarihi else None,
                     olusturan=request.user,
                     gunluk_kontrol=kontrol,
+                    gorev_tipi=GorevTipi.objects.get(id=gorev_tipi),
                     durum="planlanmis",
                 )
 
@@ -923,6 +925,7 @@ def sorun_gorev_donustur(request, kontrol_uuid):
 
     context = {
         "kontrol": kontrol,
+        "gorev_tipleri": GorevTipi.objects.all(),
         "personeller": personeller,
         "initial_data": initial_data,
     }
