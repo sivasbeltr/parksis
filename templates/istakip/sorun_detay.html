@@ -235,18 +235,14 @@
                     </h2>
                 </div>
                 <div class="p-5">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {% for resim in kontrol.resimler.all %}
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">                        {% for resim in kontrol.resimler.all %}
                         <div class="relative rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden group bg-gray-50 dark:bg-gray-700">
                             <img src="{{ resim.resim.url }}" 
                                  alt="Sorun resmi" 
-                                 class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200 cursor-pointer"
-                                 onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:'Sorun fotoğrafı' }}')">
-                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors duration-200">
-                                <span class="opacity-0 group-hover:opacity-100 bg-white/90 text-gray-800 px-3 py-1 rounded text-sm transition-opacity">
-                                    <i class="fas fa-search-plus mr-1"></i>Büyüt
-                                </span>
-                            </div>
+                                 class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200 cursor-pointer resim-modal-trigger"
+                                 data-src="{{ resim.resim.url }}"
+                                 data-caption="{{ resim.aciklama|default:'Sorun fotoğrafı' }}">
+
                             {% if resim.aciklama %}
                             <div class="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2">
                                 <p class="text-xs truncate">{{ resim.aciklama }}</p>
@@ -554,8 +550,12 @@ function selectSorunDurum(durum) {
 }
 
 function openImageModal(src, caption) {
+    console.log('Modal açılıyor:', src, caption); // Debug için
     document.getElementById('modal-image').src = src;
-    document.getElementById('modal-caption').querySelector('p').textContent = caption;
+    const captionElement = document.getElementById('modal-caption').querySelector('p');
+    if (captionElement) {
+        captionElement.textContent = caption;
+    }
     document.getElementById('image-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -589,6 +589,21 @@ document.addEventListener('keydown', function(e) {
             closeSorunDurumModal();
         }
     }
+});
+
+// Resim modal tetikleyicileri için event listener
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM yüklendi, event listener ekleniyor...');
+    
+    // Tüm resim modal tetikleyicilerine event listener ekle
+    document.querySelectorAll('.resim-modal-trigger').forEach(function(img) {
+        img.addEventListener('click', function() {
+            const src = this.getAttribute('data-src');
+            const caption = this.getAttribute('data-caption');
+            console.log('Resme tıklandı:', src, caption);
+            openImageModal(src, caption);
+        });
+    });
 });
 </script>
 {% endblock %}

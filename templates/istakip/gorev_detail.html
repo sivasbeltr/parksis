@@ -449,23 +449,23 @@
                 </div>
                 <form method="post" action="{% url 'istakip:gorev_asama_ekle' gorev.uuid %}">
                     {% csrf_token %}
-                    <div class="space-y-2">
+                    <div class="space-y-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Aşama Adı</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Aşama Adı</label>
                             <input type="text" name="ad" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-xs"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                                    placeholder="Aşama adını giriniz">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Açıklama</label>
-                            <textarea name="aciklama" rows="2"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-xs"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                            <textarea name="aciklama" rows="3"
+                                      class="w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                                       placeholder="Aşama açıklaması (opsiyonel)"></textarea>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Sorumlu Personel</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sorumlu Personel</label>
                             <select name="sorumlu"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-xs">
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
                                 <option value="">Sorumlu personel seçiniz</option>
                                 {% for atama in gorev.atamalar.all %}
                                 <option value="{{ atama.personel.id }}">{{ atama.personel.ad }}</option>
@@ -473,13 +473,13 @@
                             </select>
                         </div>
                     </div>
-                    <div class="flex justify-end gap-2 mt-4">
+                    <div class="flex justify-end gap-2 mt-5">
                         <button type="button" onclick="closeAsamaModal()"
-                                class="px-3 py-1 text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 text-xs">
+                                class="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 text-sm">
                             İptal
                         </button>
                         <button type="submit"
-                                class="px-3 py-1 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-xs">
+                                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
                             <i class="fas fa-plus mr-1"></i>
                             Aşama Ekle
                         </button>

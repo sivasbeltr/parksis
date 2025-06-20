@@ -134,9 +134,14 @@
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Henüz aşama eklenmemiş</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">Görevinizi aşamalara bölerek takip etmeyi kolaylaştırın</p>
-            <button onclick="openAsamaModal()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                <i class="fas fa-plus mr-2"></i>İlk Aşamayı Ekle
-            </button>
+            {% if gorev.durum != 'tamamlandi' and gorev.durum != 'iptal' %}
+                <button onclick="openAsamaModal()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                    <i class="fas fa-plus mr-2"></i>İlk Aşamayı Ekle
+                </button>
+                
+            {% else %}
+                <p class="text-sm text-gray-500 dark:text-gray-400 italic">Görev tamamlandığı veya iptal edildiği için yeni aşama eklenemez.</p>
+            {% endif %}            
         </div>
         {% endfor %}
           <!-- Yeni Aşama Ekleme Butonu -->
