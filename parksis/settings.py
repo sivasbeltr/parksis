@@ -133,6 +133,16 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Authentication Settings
+LOGIN_URL = "/hesap/giris/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/hesap/giris/"
+
+# Session Settings
+SESSION_COOKIE_AGE = 86400 * 7  # 7 gün
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 SRID = 5256
 
 # Default Map Center Coordinates

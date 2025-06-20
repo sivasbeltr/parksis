@@ -1,0 +1,313 @@
+{% extends 'layout.html' %}
+{% load mathfilters %}
+
+{% block title %}Kullanıcı Profil - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block page_title %}Kullanıcı Profili{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-4">
+    <!-- Profil Header -->
+    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+        <div class="relative h-24 bg-gradient-to-r from-park-green-500 to-park-green-600">            <div class="absolute inset-0 bg-black/20"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4">
+                <div class="flex items-end space-x-4">
+                    <!-- Avatar -->
+                    <div class="relative">
+                        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                            <span class="text-2xl font-bold text-park-green-600">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </span>
+                        </div>
+                        {% if user.is_superuser %}
+                            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center border-2 border-white">
+                                <i class="fas fa-crown text-white text-xs"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <!-- Kullanıcı Bilgileri -->
+                    <div class="flex-1 pb-2">
+                        <h1 class="text-xl font-bold text-white">{{ user.get_full_name|default:user.username }}</h1>
+                        <div class="flex items-center space-x-4 mt-1">
+                            <span class="text-park-green-100 text-sm">@{{ user.username }}</span>
+                            {% if personel %}
+                                <span class="text-park-green-200 text-sm">{{ personel.pozisyon|default:"Personel" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for group in user_groups %}
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-white/20 text-white rounded-full backdrop-blur-sm">
+                                    {{ group.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- İstatistik Kartları -->
+                    <div class="hidden lg:flex space-x-3">
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center min-w-[70px]">
+                            <div class="text-lg font-bold text-white">{{ stats.toplam_parklar }}</div>
+                            <div class="text-xs text-park-green-100">Sorumlu Park</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center min-w-[70px]">
+                            <div class="text-lg font-bold text-white">{{ stats.aktif_gorevler }}</div>
+                            <div class="text-xs text-park-green-100">Aktif Görev</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center min-w-[70px]">
+                            <div class="text-lg font-bold text-white">{{ stats.son_kontrol_sayisi }}</div>
+                            <div class="text-xs text-park-green-100">Son Kontrol</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Ana İçerik Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Sol Sütun -->
+        <div class="lg:col-span-2 space-y-4">
+            <!-- İstatistikler (Mobil) -->
+            <div class="lg:hidden grid grid-cols-3 gap-3">
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-lg p-3 text-center border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.toplam_parklar }}</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Sorumlu Park</div>
+                </div>
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-lg p-3 text-center border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.aktif_gorevler }}</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Aktif Görev</div>
+                </div>
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-lg p-3 text-center border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">{{ stats.son_kontrol_sayisi }}</div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400">Son Kontrol</div>
+                </div>
+            </div>
+
+            <!-- Son Aktiviteler -->
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700/50">
+                <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-clock mr-2 text-park-green-600"></i>
+                        Son Aktiviteler
+                    </h2>
+                </div>
+                <div class="p-4">
+                    {% if aktiviteler %}
+                        <div class="space-y-3">
+                            {% for aktivite in aktiviteler %}
+                                <div class="flex items-start space-x-3 p-3 rounded-lg bg-gray-50/80 dark:bg-gray-700/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center
+                                            {% if aktivite.color == 'blue' %}bg-blue-100 dark:bg-blue-900/20{% elif aktivite.color == 'green' %}bg-green-100 dark:bg-green-900/20{% elif aktivite.color == 'red' %}bg-red-100 dark:bg-red-900/20{% elif aktivite.color == 'orange' %}bg-orange-100 dark:bg-orange-900/20{% else %}bg-gray-100 dark:bg-gray-900/20{% endif %}">
+                                            <i class="{{ aktivite.icon }} text-xs
+                                                {% if aktivite.color == 'blue' %}text-blue-600 dark:text-blue-400{% elif aktivite.color == 'green' %}text-green-600 dark:text-green-400{% elif aktivite.color == 'red' %}text-red-600 dark:text-red-400{% elif aktivite.color == 'orange' %}text-orange-600 dark:text-orange-400{% else %}text-gray-600 dark:text-gray-400{% endif %}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ aktivite.baslik }}</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ aktivite.aciklama }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">{{ aktivite.tarih|date:"d.m.Y H:i" }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-history text-3xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                            <p class="text-gray-500 dark:text-gray-400">Henüz aktivite bulunmuyor</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sorumlu Parklar -->
+            {% if sorumlu_parklar %}
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-park-green-600"></i>
+                            Sorumlu Olduğum Parklar
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for park in sorumlu_parklar %}
+                                <div class="bg-gradient-to-r from-park-green-50 to-emerald-50 dark:from-park-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-park-green-200/50 dark:border-park-green-700/50 hover:shadow-soft transition-all">
+                                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ park.ad }}</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        {{ park.mahalle.ad }}, {{ park.mahalle.ilce.ad }}
+                                    </p>
+                                    {% if park.park_tipi %}
+                                        <span class="inline-flex items-center px-2.5 py-1 mt-2 text-xs font-medium bg-park-green-100 dark:bg-park-green-900/30 text-park-green-800 dark:text-park-green-200 rounded-full">
+                                            {{ park.park_tipi.ad }}
+                                        </span>
+                                    {% endif %}
+                                    <div class="flex justify-between items-center mt-3">
+                                        {% if park.alan %}
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ park.alan|floatformat:0 }} m²</span>
+                                        {% endif %}
+                                        <a href="{% url 'parkbahce:park_detail' park.uuid %}" class="text-xs text-park-green-600 dark:text-park-green-400 hover:text-park-green-700 dark:hover:text-park-green-300 font-medium">
+                                            Detay <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>        <!-- Sağ Sütun -->
+        <div class="space-y-4">
+            <!-- Kişisel Bilgiler -->
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700/50">
+                <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-user mr-2 text-park-green-600"></i>
+                        Kişisel Bilgiler
+                    </h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Ad Soyad</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ user.get_full_name|default:"Belirtilmemiş" }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Kullanıcı Adı</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ user.username }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">E-posta</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ user.email|default:"Belirtilmemiş" }}</p>
+                    </div>
+                    {% if personel %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Telefon</label>
+                            <p class="text-gray-900 dark:text-white mt-1">{{ personel.telefon|default:"Belirtilmemiş" }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Pozisyon</label>
+                            <p class="text-gray-900 dark:text-white mt-1">{{ personel.pozisyon|default:"Belirtilmemiş" }}</p>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Üyelik Tarihi</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ user.date_joined|date:"d.m.Y" }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Son Giriş</label>
+                        <p class="text-gray-900 dark:text-white mt-1">{{ user.last_login|date:"d.m.Y H:i"|default:"Hiç giriş yapmamış" }}</p>
+                    </div>
+                    
+                    <!-- Profil Düzenleme Butonu -->
+                    <div class="pt-3">
+                        <button onclick="toggleEditMode()" class="w-full bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Profili Düzenle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Görev Özeti -->
+            {% if gorevler %}
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-soft border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-tasks mr-2 text-park-green-600"></i>
+                            Son Görevler
+                        </h2>
+                    </div>
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            {% for gorev in gorevler|slice:":5" %}
+                                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-700/50">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ gorev.baslik }}</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ gorev.park.ad }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full
+                                        {% if gorev.durum == 'tamamlandi' %}bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200{% elif gorev.durum == 'basladi' %}bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200{% else %}bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200{% endif %}">
+                                        {{ gorev.get_durum_display }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if gorevler.count > 5 %}
+                            <div class="mt-4 text-center">
+                                <a href="{% url 'istakip:gorev_list' %}" class="text-sm text-park-green-600 dark:text-park-green-400 hover:text-park-green-700 dark:hover:text-park-green-300 font-medium">
+                                    Tüm görevleri görüntüle <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Profil Düzenleme Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Profil Bilgilerini Düzenle</h3>
+                </div>
+                <form method="post" action="{% url 'profile_settings' %}" class="p-6">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ad</label>
+                            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Soyad</label>
+                            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">E-posta</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        {% if personel %}
+                            <div>
+                                <label for="telefon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon</label>
+                                <input type="text" id="telefon" name="telefon" value="{{ personel.telefon }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="pozisyon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pozisyon</label>
+                                <input type="text" id="pozisyon" name="pozisyon" value="{{ personel.pozisyon }}" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button type="submit" class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            <i class="fas fa-save mr-2"></i>
+                            Kaydet
+                        </button>
+                        <button type="button" onclick="toggleEditMode()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            <i class="fas fa-times mr-2"></i>
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleEditMode() {
+    const modal = document.getElementById('editModal');
+    modal.classList.toggle('hidden');
+}
+
+// Modal dışına tıklandığında kapatma
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        toggleEditMode();
+    }
+});
+</script>
+{% endblock %}
