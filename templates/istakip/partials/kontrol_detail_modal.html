@@ -1,0 +1,179 @@
+<!-- Kontrol Detay Modal İçeriği -->
+<div class="space-y-4">
+    <!-- Kontrol Başlık Bilgileri -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white">
+        <div class="flex items-start justify-between">
+            <div class="flex-1">
+                <h2 class="text-xl font-bold mb-2">Günlük Kontrol</h2>
+                <div class="flex items-center space-x-4 text-green-100 text-sm">
+                    <span><i class="fas fa-map-marker-alt mr-1"></i>{{ kontrol.park.ad }}</span>
+                    <span><i class="fas fa-user mr-1"></i>{{ kontrol.personel.ad }}</span>
+                    <span><i class="fas fa-clock mr-1"></i>{{ kontrol.kontrol_tarihi|date:"d.m.Y H:i" }}</span>
+                </div>
+            </div>
+            <div class="flex flex-col items-end space-y-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white border border-white/20"
+                      style="background-color: {{ durum_color.color }};">
+                    {{ kontrol.get_durum_display }}
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-green-100 border border-white/20">
+                    <i class="fas fa-clipboard-check mr-1"></i>{{ kontrol.get_kontrol_tipi_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kontrol Açıklaması -->
+    {% if kontrol.aciklama %}
+    <div class="bg-gray-50 rounded-lg p-3">
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">Açıklama</h4>
+        <p class="text-sm text-gray-600 leading-relaxed">{{ kontrol.aciklama }}</p>
+    </div>
+    {% endif %}
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-3 gap-3">
+        <div class="bg-blue-50 rounded-lg p-3 text-center">
+            <div class="text-lg font-bold text-blue-600">{{ kontrol_stats.resim_sayisi }}</div>
+            <div class="text-xs text-blue-600">Resim</div>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-3 text-center">
+            <div class="text-lg font-bold text-purple-600">{{ kontrol_stats.ilgili_gorev_sayisi }}</div>
+            <div class="text-xs text-purple-600">İlgili Görev</div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+            <div class="text-lg font-bold text-green-600">
+                {% if kontrol_stats.konum_var %}<i class="fas fa-check text-green-600"></i>{% else %}<i class="fas fa-times text-red-500"></i>{% endif %}
+            </div>
+            <div class="text-xs text-green-600">Konum</div>
+        </div>
+    </div>
+
+    <!-- Personel Bilgisi -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+            <i class="fas fa-user-check text-blue-600 mr-2"></i>
+            Kontrol Personeli
+        </h3>
+        <div class="flex items-center space-x-3 p-2 bg-white rounded-lg">
+            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
+                <span class="text-blue-700 font-bold text-sm">{{ kontrol.personel.ad|first|upper }}</span>
+            </div>
+            <div class="flex-1">
+                <div class="font-medium text-gray-900">{{ kontrol.personel.ad }}</div>
+                {% if kontrol.personel.pozisyon %}
+                <div class="text-sm text-gray-500">{{ kontrol.personel.pozisyon }}</div>
+                {% endif %}
+                {% if kontrol.personel.telefon %}
+                <div class="text-sm text-blue-600">
+                    <i class="fas fa-phone mr-1"></i>{{ kontrol.personel.telefon }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Kontrol Resimleri -->
+    {% if kontrol.resimler.exists %}
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
+            <i class="fas fa-images text-yellow-600 mr-2"></i>
+            Kontrol Resimleri ({{ kontrol_stats.resim_sayisi }})
+        </h3>
+        <div class="grid grid-cols-3 gap-2">
+            {% for resim in kontrol.resimler.all %}
+            <div class="aspect-square bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                 onclick="window.open('{{ resim.resim.url }}', '_blank')">
+                <img src="{{ resim.resim.url }}" 
+                     alt="{{ resim.aciklama|default:'Kontrol Resmi' }}"
+                     class="w-full h-full object-cover">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- İlgili Görevler -->
+    {% if ilgili_gorevler %}
+    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-purple-800 mb-2 flex items-center">
+            <i class="fas fa-tasks text-purple-600 mr-2"></i>
+            Bu Kontrolden Oluşturulan Görevler
+        </h3>
+        <div class="space-y-2">
+            {% for gorev in ilgili_gorevler %}
+            <div class="flex items-center justify-between p-2 bg-white rounded-lg cursor-pointer hover:shadow-sm transition-shadow"
+                 onclick="showGorevDetails('{{ gorev.uuid }}')">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-block w-3 h-3 rounded-full" 
+                          style="background-color: {% if gorev.durum == 'tamamlandi' %}#10B981{% elif gorev.durum == 'devam_ediyor' %}#3B82F6{% else %}#F59E0B{% endif %}"></span>
+                    <span class="text-sm font-medium text-gray-900">{{ gorev.baslik }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">{{ gorev.get_durum_display }}</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Son Kontroller -->
+    {% if son_kontroller %}
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+            <i class="fas fa-history text-gray-600 mr-2"></i>
+            Aynı Parkta Son Kontroller
+        </h3>
+        <div class="space-y-1">
+            {% for s_kontrol in son_kontroller %}
+            <div class="flex items-center justify-between p-2 bg-white rounded cursor-pointer hover:shadow-sm transition-shadow"
+                 onclick="showKontrolDetails('{{ s_kontrol.uuid }}')">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-block w-2 h-2 rounded-full" 
+                          style="background-color: {% if s_kontrol.durum == 'sorun_yok' %}#10B981{% elif s_kontrol.durum == 'acil' %}#DC2626{% else %}#EF4444{% endif %}"></span>
+                    <span class="text-sm text-gray-900">{{ s_kontrol.kontrol_tarihi|date:"d.m.Y" }}</span>
+                    <span class="text-xs text-gray-500">{{ s_kontrol.personel.ad }}</span>
+                </div>
+                <span class="text-xs text-gray-500">{{ s_kontrol.get_durum_display }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Konum Bilgisi -->
+    {% if kontrol.geom %}
+    <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-cyan-800 mb-2 flex items-center">
+            <i class="fas fa-map-pin text-cyan-600 mr-2"></i>
+            Konum Bilgisi
+        </h3>
+        <div class="text-sm text-cyan-700">
+            <i class="fas fa-check-circle mr-1"></i>
+            GPS koordinatları mevcut
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Eylem Butonları -->
+    <div class="flex gap-2">
+        <button onclick="zoomToPark('{{ kontrol.park.uuid }}')" 
+                class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+            <i class="fas fa-map-marker-alt mr-1"></i>Parkı Göster
+        </button>
+        
+        {% if kontrol.durum in 'sorun_var,acil' %}
+        <a href="{% url 'istakip:sorun_gorev_donustur' kontrol.uuid %}" 
+           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+            <i class="fas fa-plus mr-1"></i>Görev Oluştur
+        </a>
+        {% endif %}
+        
+        <a href="{% url 'istakip:sorun_detay' kontrol.uuid %}" 
+           class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+            <i class="fas fa-external-link-alt mr-1"></i>Detay Sayfası
+        </a>
+    </div>
+</div>

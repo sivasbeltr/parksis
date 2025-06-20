@@ -361,116 +361,23 @@ class IstakipLayerManager {
             return true; // İşlendiğini belirt
         }
         return false; // İşlenmediğini belirt
-    }
-
-    // İstakip özellik detaylarını göster
+    }    // İstakip özellik detaylarını göster
     showIstakipFeatureDetails(feature, layerKey) {
         const properties = feature.getProperties();
 
-        // Modal içeriği oluştur
-        let content = '';
-        let title = '';
-
         if (layerKey.startsWith('gorev-')) {
-            title = 'Görev Detayları';
-            content = `
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="inline-block w-3 h-3 rounded-full" style="background-color: ${this.colors.GOREV_DURUM[properties.durum] || '#10B981'}"></span>
-                        <span class="text-sm font-medium text-gray-900">${properties.durum_display || properties.durum}</span>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">${properties.baslik || 'Görev'}</h3>
-                        <p class="text-sm text-gray-600 mt-1">${properties.park_ad || 'Park bilgisi yok'}</p>
-                    </div>
-                    
-                    ${properties.aciklama ? `
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-700 mb-1">Açıklama:</h4>
-                            <p class="text-sm text-gray-600">${properties.aciklama}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">Öncelik:</span>
-                            <span class="ml-2 text-gray-600">${properties.oncelik_display || properties.oncelik}</span>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Personel:</span>
-                            <span class="ml-2 text-gray-600">${properties.atanan_personel_sayisi || 0} kişi</span>
-                        </div>
-                    </div>
-                    
-                    ${properties.baslangic_tarihi ? `
-                        <div class="text-sm">
-                            <span class="font-medium text-gray-700">Başlangıç:</span>
-                            <span class="ml-2 text-gray-600">${new Date(properties.baslangic_tarihi).toLocaleDateString('tr-TR')}</span>
-                        </div>
-                    ` : ''}
-                    
-                    ${properties.bitis_tarihi ? `
-                        <div class="text-sm">
-                            <span class="font-medium text-gray-700">Bitiş:</span>
-                            <span class="ml-2 text-gray-600">${new Date(properties.bitis_tarihi).toLocaleDateString('tr-TR')}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
+            // Görev UUID'sini al ve showGorevDetails fonksiyonunu çağır
+            const gorevUuid = properties.uuid;
+            if (gorevUuid && typeof showGorevDetails === 'function') {
+                showGorevDetails(gorevUuid);
+            }
         } else if (layerKey.startsWith('kontrol-')) {
-            title = 'Kontrol Detayları';
-            content = `
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="inline-block w-3 h-3 rounded-full" style="background-color: ${this.colors.KONTROL_DURUM[properties.durum] || '#10B981'}"></span>
-                        <span class="text-sm font-medium text-gray-900">${properties.durum_display || properties.durum}</span>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Günlük Kontrol</h3>
-                        <p class="text-sm text-gray-600 mt-1">${properties.park_ad || 'Park bilgisi yok'}</p>
-                    </div>
-                    
-                    ${properties.aciklama ? `
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-700 mb-1">Açıklama:</h4>
-                            <p class="text-sm text-gray-600">${properties.aciklama}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">Kontrol Tipi:</span>
-                            <span class="ml-2 text-gray-600">${properties.kontrol_tipi_display || properties.kontrol_tipi}</span>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Personel:</span>
-                            <span class="ml-2 text-gray-600">${properties.personel_ad || 'Bilinmiyor'}</span>
-                        </div>
-                    </div>
-                    
-                    ${properties.kontrol_tarihi ? `
-                        <div class="text-sm">
-                            <span class="font-medium text-gray-700">Kontrol Tarihi:</span>
-                            <span class="ml-2 text-gray-600">${new Date(properties.kontrol_tarihi).toLocaleDateString('tr-TR')} ${new Date(properties.kontrol_tarihi).toLocaleTimeString('tr-TR')}</span>
-                        </div>
-                    ` : ''}
-                    
-                    ${properties.resim_sayisi > 0 ? `
-                        <div class="text-sm">
-                            <span class="font-medium text-gray-700">Resim:</span>
-                            <span class="ml-2 text-gray-600">${properties.resim_sayisi} adet</span>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
+            // Kontrol UUID'sini al ve showKontrolDetails fonksiyonunu çağır
+            const kontrolUuid = properties.uuid;
+            if (kontrolUuid && typeof showKontrolDetails === 'function') {
+                showKontrolDetails(kontrolUuid);
+            }
         }
-
-        // Modal'ı göster
-        document.getElementById('parkModalTitle').textContent = title;
-        document.getElementById('parkModalContent').innerHTML = content;
-        document.getElementById('parkModal').classList.remove('hidden');
     }
 }
 

@@ -125,4 +125,15 @@ urlpatterns = [
         views.kullanici_park_kontrol,
         name="kullanici_park_kontrol",
     ),
+    # İstakip detay endpoints
+    path(
+        "htmx/gorev-detail/<uuid:gorev_uuid>/",
+        htmx_views.gorev_detail_htmx,
+        name="gorev_detail_htmx",
+    ),
+    path(
+        "htmx/kontrol-detail/<uuid:kontrol_uuid>/",
+        htmx_views.kontrol_detail_htmx,
+        name="kontrol_detail_htmx",
+    ),
 ]

@@ -675,3 +675,128 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
     }
 
     return render(request, "parkbahce/tabs/park_sorun_gecmisi_tab.html", context)
+
+
+@require_http_methods(["GET"])
+def gorev_detail_htmx(request, gorev_uuid):
+    """Görev detay bilgilerini HTMX ile getir"""
+    if not request.htmx:
+        return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
+
+    try:
+        from istakip.models import Gorev
+
+        gorev = get_object_or_404(
+            Gorev.objects.select_related(
+                "park", "park__mahalle", "gorev_tipi", "olusturan", "gunluk_kontrol"
+            ).prefetch_related(
+                "atanan_personeller",
+                "asamalar",
+                "tamamlama_resimleri",
+                "denetim_kayitlari",
+            ),
+            uuid=gorev_uuid,
+        )
+
+        # Görev istatistikleri
+        gorev_stats = {
+            "atanan_personel_sayisi": gorev.atanan_personeller.count(),
+            "asama_sayisi": gorev.asamalar.count(),
+            "tamamlanan_asama_sayisi": gorev.asamalar.filter(
+                durum="tamamlandi"
+            ).count(),
+            "devam_eden_asama_sayisi": gorev.asamalar.filter(
+                durum="devam_ediyor"
+            ).count(),
+            "resim_sayisi": gorev.tamamlama_resimleri.count(),
+            "denetim_kaydi_sayisi": gorev.denetim_kayitlari.count(),
+        }
+
+        # Durum rengini al
+        from istakip.choices import get_gorev_durum_color, get_gorev_oncelik_color
+
+        durum_color = get_gorev_durum_color(gorev.durum)
+        oncelik_color = get_gorev_oncelik_color(gorev.oncelik)
+
+        # İlerleme yüzdesi hesapla
+        if gorev_stats["asama_sayisi"] > 0:
+            ilerleme_yuzdesi = int(
+                (gorev_stats["tamamlanan_asama_sayisi"] / gorev_stats["asama_sayisi"])
+                * 100
+            )
+        else:
+            ilerleme_yuzdesi = (
+                0
+                if gorev.durum == "planlanmis"
+                else (100 if gorev.durum == "tamamlandi" else 50)
+            )
+
+        context = {
+            "gorev": gorev,
+            "gorev_stats": gorev_stats,
+            "durum_color": durum_color,
+            "oncelik_color": oncelik_color,
+            "ilerleme_yuzdesi": ilerleme_yuzdesi,
+        }
+
+        return render(request, "istakip/partials/gorev_detail_modal.html", context)
+
+    except Exception as e:
+        print(f"Görev detayı yüklenirken hata: {e}")
+        return HttpResponseBadRequest("Görev bulunamadı.")
+
+
+@require_http_methods(["GET"])
+def kontrol_detail_htmx(request, kontrol_uuid):
+    """Günlük kontrol detay bilgilerini HTMX ile getir"""
+    if not request.htmx:
+        return HttpResponseBadRequest("Bu endpoint sadece HTMX istekleri için.")
+
+    try:
+        from istakip.models import GunlukKontrol
+
+        kontrol = get_object_or_404(
+            GunlukKontrol.objects.select_related(
+                "park", "park__mahalle", "personel", "personel__user"
+            ).prefetch_related("resimler", "ilgili_gorevler"),
+            uuid=kontrol_uuid,
+        )
+
+        # Kontrol istatistikleri
+        kontrol_stats = {
+            "resim_sayisi": kontrol.resimler.count(),
+            "ilgili_gorev_sayisi": kontrol.ilgili_gorevler.count(),
+            "konum_var": bool(kontrol.geom),
+        }
+
+        # Durum rengini al
+        from istakip.choices import get_kontrol_durum_color
+
+        durum_color = get_kontrol_durum_color(kontrol.durum)
+
+        # Kontrol sonrası oluşturulan görevler
+        ilgili_gorevler = kontrol.ilgili_gorevler.select_related("gorev_tipi").order_by(
+            "-created_at"
+        )[:3]
+
+        # Aynı parkta son kontroller (son 5 kontrol)
+        son_kontroller = (
+            GunlukKontrol.objects.filter(park=kontrol.park)
+            .exclude(uuid=kontrol.uuid)
+            .select_related("personel")
+            .order_by("-kontrol_tarihi")[:5]
+        )
+
+        context = {
+            "kontrol": kontrol,
+            "kontrol_stats": kontrol_stats,
+            "durum_color": durum_color,
+            "ilgili_gorevler": ilgili_gorevler,
+            "son_kontroller": son_kontroller,
+        }
+
+        return render(request, "istakip/partials/kontrol_detail_modal.html", context)
+
+    except Exception as e:
+        print(f"Kontrol detayı yüklenirken hata: {e}")
+        return HttpResponseBadRequest("Kontrol bulunamadı.")

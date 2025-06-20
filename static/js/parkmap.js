@@ -313,6 +313,52 @@ async function showMahalleDetails(feature) {
     }
 }
 
+// Görev detaylarını göster
+async function showGorevDetails(gorevUuid) {
+    try {
+        const response = await fetch(`/parkbahce/htmx/gorev-detail/${gorevUuid}/`, {
+            headers: {
+                'HX-Request': 'true'
+            }
+        });
+
+        if (response.ok) {
+            const content = await response.text();
+            document.getElementById('parkModalTitle').textContent = 'Görev Detayları';
+            document.getElementById('parkModalContent').innerHTML = content;
+            document.getElementById('parkModal').classList.remove('hidden');
+        } else {
+            showMapNotification('Görev detayları yüklenirken hata oluştu.', 'error');
+        }
+    } catch (error) {
+        console.error('Görev detayları yüklenirken hata:', error);
+        showMapNotification('Görev detayları yüklenirken hata oluştu.', 'error');
+    }
+}
+
+// Kontrol detaylarını göster
+async function showKontrolDetails(kontrolUuid) {
+    try {
+        const response = await fetch(`/parkbahce/htmx/kontrol-detail/${kontrolUuid}/`, {
+            headers: {
+                'HX-Request': 'true'
+            }
+        });
+
+        if (response.ok) {
+            const content = await response.text();
+            document.getElementById('parkModalTitle').textContent = 'Kontrol Detayları';
+            document.getElementById('parkModalContent').innerHTML = content;
+            document.getElementById('parkModal').classList.remove('hidden');
+        } else {
+            showMapNotification('Kontrol detayları yüklenirken hata oluştu.', 'error');
+        }
+    } catch (error) {
+        console.error('Kontrol detayları yüklenirken hata:', error);
+        showMapNotification('Kontrol detayları yüklenirken hata oluştu.', 'error');
+    }
+}
+
 // Park'a yakınlaş
 function zoomToPark(parkUuid) {
     const parkLayer = layers.parklar;
@@ -1108,6 +1154,10 @@ window.removePersonelFromModalQuick = removePersonelFromModalQuick;
 window.updateMainModalPersonelList = updateMainModalPersonelList;
 window.addPersonelToModalQuick = addPersonelToModalQuick;
 window.reloadParksLayer = reloadParksLayer;
+
+// Global olarak showGorevDetails ve showKontrolDetails fonksiyonlarını tanımla
+window.showGorevDetails = showGorevDetails;
+window.showKontrolDetails = showKontrolDetails;
 
 // Personel yönetimi modal'ını açma
 function openModalPersonelYonetimi(parkUuid) {
