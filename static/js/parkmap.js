@@ -507,48 +507,46 @@ function createPersonelYonetimiModal(parkUuid) {
     const existingModal = document.getElementById('personel-yonetimi-modal');
     if (existingModal) {
         existingModal.remove();
-    }
-
-    // Yeni modal oluştur
+    }    // Yeni modal oluştur
     const modal = document.createElement('div');
     modal.id = 'personel-yonetimi-modal';
-    modal.className = 'fixed inset-0 z-[999] flex items-center justify-center p-4';
+    modal.className = 'fixed inset-0 z-[999] flex items-center justify-center p-2';
     modal.innerHTML = `
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModalPersonelYonetimi()"></div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden relative">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[95vh] overflow-hidden relative">
             <!-- Header -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">
                     <i class="fas fa-users-cog text-green-600 mr-2"></i>
                     Personel Yönetimi
                 </h3>
                 <button onclick="closeModalPersonelYonetimi()" 
                         class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                    <i class="fas fa-times text-xl"></i>
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
             
             <!-- Content Container -->
-            <div id="modal-content-container" class="flex-1 overflow-hidden">
+            <div id="modal-content-container" class="flex-1 overflow-hidden" style="max-height: calc(95vh - 120px);">
                 <!-- Loading göstergesi -->
-                <div id="modal-loading" class="flex items-center justify-center p-8">
+                <div id="modal-loading" class="flex items-center justify-center p-6">
                     <div class="text-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-                        <p class="text-gray-500 dark:text-gray-400">Personel listesi yükleniyor...</p>
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-3"></div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Personel listesi yükleniyor...</p>
                     </div>
                 </div>
                 
                 <!-- Gerçek içerik -->
-                <div id="modal-actual-content" class="p-6 space-y-6 h-full overflow-y-auto" style="display: none;">
+                <div id="modal-actual-content" class="p-4 space-y-4 h-full overflow-y-auto" style="display: none;">
                     <!-- İçerik buraya yüklenecek -->
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="flex justify-end p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <div class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <button onclick="closeModalPersonelYonetimi()" 
-                        class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                    <i class="fas fa-times mr-2"></i>
+                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm">
+                    <i class="fas fa-times mr-1"></i>
                     Kapat
                 </button>
             </div>
@@ -616,34 +614,32 @@ function updateModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
     const content = modal.querySelector('.p-4');
 
     // Atanmış personel UUID'lerini toplama
-    const atanmisUuidler = new Set(parkPersonelleri.map(p => p.personel_uuid || p.uuid));
-
-    content.innerHTML = `
-        <div class="space-y-6 max-h-[70vh] overflow-y-auto">
+    const atanmisUuidler = new Set(parkPersonelleri.map(p => p.personel_uuid || p.uuid)); content.innerHTML = `
+        <div class="space-y-3 max-h-[70vh] overflow-y-auto">
             <!-- Atanmış Personeller -->
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
                     <i class="fas fa-check-circle text-green-600 mr-2"></i>
                     Atanmış Personeller (<span id="modal-atanmis-count">${parkPersonelleri.length}</span>)
                 </h4>
                 
-                <div id="modal-atanmis-liste" class="space-y-2">
+                <div id="modal-atanmis-liste" class="space-y-1 max-h-48 overflow-y-auto">
                     ${parkPersonelleri.map(personel => `
                         <div id="modal-atanmis-${personel.personel_uuid || personel.uuid}" 
-                             class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
-                                    <span class="text-green-600 dark:text-green-400 font-bold text-sm">
+                             class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                                    <span class="text-green-600 dark:text-green-400 font-bold text-xs">
                                         ${(personel.personel_ad || personel.ad || 'U').charAt(0).toUpperCase()
         }</span>
                                 </div>
                                 <div>
-                                    <h5 class="font-medium text-gray-900 dark:text-white">${personel.personel_ad || personel.ad || 'Bilinmiyor'}</h5>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">${personel.personel_pozisyon || personel.pozisyon || 'Pozisyon belirtilmemiş'}</p>
+                                    <h5 class="font-medium text-gray-900 dark:text-white text-sm">${personel.personel_ad || personel.ad || 'Bilinmiyor'}</h5>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">${personel.personel_pozisyon || personel.pozisyon || 'Pozisyon belirtilmemiş'}</p>
                                 </div>
                             </div>
                             <button onclick="removePersonelFromModalQuick('${personel.personel_uuid || personel.uuid}', '${parkUuid}', '${personel.personel_ad || personel.ad || 'Bilinmiyor'}')" 
-                                    class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
+                                    class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded transition-colors">
                                 <i class="fas fa-times mr-1"></i>
                                 Kaldır
                             </button>
@@ -653,7 +649,7 @@ function updateModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
             </div>
 
             <!-- Tüm Personeller -->
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
                     <i class="fas fa-users text-blue-600 mr-2"></i>
                     Tüm Aktif Personeller
@@ -664,28 +660,28 @@ function updateModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
                     <input type="text" 
                            id="modal-personel-search" 
                            placeholder="Personel ara..." 
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                           class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
                 </div>
                 
-                <div id="modal-tum-personeller" class="space-y-2 max-h-64 overflow-y-auto">
+                <div id="modal-tum-personeller" class="space-y-1 max-h-80 overflow-y-auto">
                     ${tumPersoneller.map(personel => {
             const isAssigned = atanmisUuidler.has(personel.uuid);
             return `
-                            <div class="modal-personel-item flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${isAssigned ? 'opacity-50' : ''}" 
+                            <div class="modal-personel-item flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${isAssigned ? 'opacity-50' : ''}" 
                                  data-personel-name="${(personel.ad || '').toLowerCase()}">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                        <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                        <span class="text-blue-600 dark:text-blue-400 font-bold text-xs">
                                             ${(personel.ad || 'U').charAt(0).toUpperCase()}</span>
                                     </div>
                                     <div>
-                                        <h5 class="font-medium text-gray-900 dark:text-white">${personel.ad || 'Bilinmiyor'}</h5>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">${personel.pozisyon || 'Pozisyon belirtilmemiş'}</p>
+                                        <h5 class="font-medium text-gray-900 dark:text-white text-sm">${personel.ad || 'Bilinmiyor'}</h5>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">${personel.pozisyon || 'Pozisyon belirtilmemiş'}</p>
                                     </div>
                                 </div>
                                 <button onclick="addPersonelToModalQuick('${personel.uuid}', '${parkUuid}', '${personel.ad || 'Bilinmiyor'}', '${personel.pozisyon || ''}')" 
-                                        class="px-3 py-1.5 ${isAssigned ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-100 hover:bg-green-200 text-green-700'} text-sm rounded-lg transition-colors"
+                                        class="px-2 py-1 ${isAssigned ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-100 hover:bg-green-200 text-green-700'} text-xs rounded transition-colors"
                                         ${isAssigned ? 'disabled' : ''}>
                                     <i class="fas fa-${isAssigned ? 'check' : 'plus'} mr-1"></i>
                                     ${isAssigned ? 'Atanmış' : 'Ata'}
@@ -695,15 +691,6 @@ function updateModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
         }).join('')}
                 </div>
             </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-            <button onclick="closeModalPersonelYonetimi()" 
-                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                <i class="fas fa-times mr-2"></i>
-                Kapat
-            </button>
         </div>
     `;
 
@@ -789,30 +776,28 @@ function renderModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
     if (!content) return;
 
     // Atanmış personel UUID'lerini al
-    const atanmisPersonelUuids = parkPersonelleri.map(p => p.personel_uuid);
-
-    content.innerHTML = `
+    const atanmisPersonelUuids = parkPersonelleri.map(p => p.personel_uuid); content.innerHTML = `
         <!-- Atanmış Personeller -->
-        <div class="space-y-4">
-            <h4 class="text-md font-semibold text-gray-900 dark:text-white flex items-center">
+        <div class="space-y-3">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
                 <i class="fas fa-check-circle text-green-600 mr-2"></i>
                 Atanmış Personeller (<span id="modal-personel-count">${parkPersonelleri.length}</span>)
             </h4>
             
-            <div id="modal-atanmis-personeller" class="space-y-2">
+            <div id="modal-atanmis-personeller" class="space-y-1 max-h-48 overflow-y-auto">
                 ${parkPersonelleri.map(personel => `
-                    <div id="modal-atanmis-${personel.personel_uuid}" class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg animate-fade-in">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
-                                <span class="text-green-600 dark:text-green-400 font-bold text-sm">${personel.personel_ad.charAt(0).toUpperCase()}</span>
+                    <div id="modal-atanmis-${personel.personel_uuid}" class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg animate-fade-in">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                                <span class="text-green-600 dark:text-green-400 font-bold text-xs">${personel.personel_ad.charAt(0).toUpperCase()}</span>
                             </div>
                             <div>
-                                <h5 class="font-medium text-gray-900 dark:text-white">${personel.personel_ad}</h5>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">${personel.personel_pozisyon || 'Pozisyon belirtilmemiş'}</p>
+                                <h5 class="font-medium text-gray-900 dark:text-white text-sm">${personel.personel_ad}</h5>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${personel.personel_pozisyon || 'Pozisyon belirtilmemiş'}</p>
                             </div>
                         </div>
                         <button onclick="removePersonelFromModalQuick('${personel.personel_uuid}', '${parkUuid}', '${personel.personel_ad}')" 
-                                class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
+                                class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-lg transition-colors">
                             <i class="fas fa-times mr-1"></i>
                             Kaldır
                         </button>
@@ -822,8 +807,8 @@ function renderModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
         </div>
 
         <!-- Tüm Personeller -->
-        <div class="space-y-4">
-            <h4 class="text-md font-semibold text-gray-900 dark:text-white flex items-center">
+        <div class="space-y-3">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
                 <i class="fas fa-users text-blue-600 mr-2"></i>
                 Tüm Aktif Personeller
             </h4>
@@ -833,37 +818,37 @@ function renderModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
                 <input type="text" 
                        id="modal-personel-search" 
                        placeholder="Personel ara..." 
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                       class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
             </div>
             
-            <div id="modal-tum-personeller" class="space-y-2 max-h-80 overflow-y-auto">
+            <div id="modal-tum-personeller" class="space-y-1 max-h-80 overflow-y-auto">
                 ${tumPersoneller.map(personel => {
         const isAssigned = atanmisPersonelUuids.includes(personel.uuid);
         const initial = personel.ad ? personel.ad.charAt(0).toUpperCase() : 'P';
         const position = personel.pozisyon || 'Pozisyon belirtilmemiş';
 
         return `
-                        <div id="modal-personel-${personel.uuid}" class="modal-personel-item flex items-center justify-between p-3 ${isAssigned
+                        <div id="modal-personel-${personel.uuid}" class="modal-personel-item flex items-center justify-between p-2 ${isAssigned
                 ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700'
                 : 'border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             } rounded-lg transition-colors">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 ${isAssigned
+                            <div class="flex items-center space-x-2">
+                                <div class="w-6 h-6 ${isAssigned
                 ? 'bg-green-100 dark:bg-green-800'
                 : 'bg-blue-100 dark:bg-blue-900/30'
             } rounded-lg flex items-center justify-center">
                                     <span class="${isAssigned
                 ? 'text-green-600 dark:text-green-400'
                 : 'text-blue-600 dark:text-blue-400'
-            } font-bold text-sm">${initial}</span>
+            } font-bold text-xs">${initial}</span>
                                 </div>
                                 <div>
                                     <h5 class="font-medium ${isAssigned
                 ? 'text-green-700 dark:text-green-300'
                 : 'text-gray-900 dark:text-white'
-            } modal-personel-name">${personel.ad}</h5>
-                                    <p class="text-sm ${isAssigned
+            } modal-personel-name text-sm">${personel.ad}</h5>
+                                    <p class="text-xs ${isAssigned
                 ? 'text-green-600 dark:text-green-400'
                 : 'text-gray-500 dark:text-gray-400'
             }">${position}${isAssigned ? ' • Atanmış' : ''}</p>
@@ -878,7 +863,7 @@ function renderModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
                                        data-park-uuid="${parkUuid}"
                                        ${isAssigned ? 'checked' : ''}>
                                 <div class="relative">
-                                    <div class="w-5 h-5 ${isAssigned
+                                    <div class="w-4 h-4 ${isAssigned
                 ? 'bg-green-500 border-2 border-green-500'
                 : 'bg-white border-2 border-gray-300 dark:border-gray-600'
             } rounded transition-all duration-200 modal-checkbox-bg"></div>
@@ -887,7 +872,7 @@ function renderModalPersonelContent(parkUuid, parkPersonelleri, tumPersoneller) 
                                         <i class="fas fa-check text-xs"></i>
                                     </div>
                                 </div>
-                                <span class="ml-2 text-sm ${isAssigned
+                                <span class="ml-2 text-xs ${isAssigned
                 ? 'text-green-700 dark:text-green-300'
                 : 'text-gray-700 dark:text-gray-300'
             }">${isAssigned ? 'Atanmış' : 'Ata'}</span>
@@ -978,26 +963,25 @@ function updateModalPersonelUI(personelUuid, parkUuid, personelAd, personelPozis
     const personelItem = document.getElementById(`modal-personel-${personelUuid}`);
     const atanmisContainer = document.getElementById('modal-atanmis-personeller');
 
-    if (isAdding) {
-        // Atanmış listesine ekle
+    if (isAdding) {        // Atanmış listesine ekle
         const atanmisPersonel = document.getElementById(`modal-atanmis-${personelUuid}`);
         if (!atanmisPersonel && atanmisContainer) {
             const personelInitial = personelAd.charAt(0).toUpperCase();
             const newAtanmisItem = document.createElement('div');
             newAtanmisItem.id = `modal-atanmis-${personelUuid}`;
-            newAtanmisItem.className = 'flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg animate-fade-in';
+            newAtanmisItem.className = 'flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg animate-fade-in';
             newAtanmisItem.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
-                        <span class="text-green-600 dark:text-green-400 font-bold text-sm">${personelInitial}</span>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center">
+                        <span class="text-green-600 dark:text-green-400 font-bold text-xs">${personelInitial}</span>
                     </div>
                     <div>
-                        <h5 class="font-medium text-gray-900 dark:text-white">${personelAd}</h5>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">${personelPozisyon || 'Pozisyon belirtilmemiş'}</p>
+                        <h5 class="font-medium text-gray-900 dark:text-white text-sm">${personelAd}</h5>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${personelPozisyon || 'Pozisyon belirtilmemiş'}</p>
                     </div>
                 </div>
                 <button onclick="removePersonelFromModalQuick('${personelUuid}', '${parkUuid}', '${personelAd}')" 
-                        class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
+                        class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded transition-colors">
                     <i class="fas fa-times mr-1"></i>
                     Kaldır
                 </button>
@@ -1029,30 +1013,30 @@ function updatePersonelItemVisuals(personelItem, isAssigned) {
     const checkboxBg = personelItem.querySelector('.modal-checkbox-bg');
     const checkboxIcon = personelItem.querySelector('.modal-checkbox-icon');
     const checkboxLabel = personelItem.querySelector('label span:last-child');
-    const avatarDiv = personelItem.querySelector('.w-8');
+    const avatarDiv = personelItem.querySelector('.w-6');
 
     if (isAssigned) {
-        personelItem.className = 'modal-personel-item flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg transition-colors';
-        nameEl.className = 'font-medium text-green-700 dark:text-green-300 modal-personel-name';
-        descEl.className = 'text-sm text-green-600 dark:text-green-400';
+        personelItem.className = 'modal-personel-item flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg transition-colors';
+        nameEl.className = 'font-medium text-green-700 dark:text-green-300 modal-personel-name text-sm';
+        descEl.className = 'text-xs text-green-600 dark:text-green-400';
         descEl.textContent = descEl.textContent.split(' •')[0] + ' • Atanmış';
-        checkboxBg.className = 'w-5 h-5 bg-green-500 border-2 border-green-500 rounded transition-all duration-200 modal-checkbox-bg';
+        checkboxBg.className = 'w-4 h-4 bg-green-500 border-2 border-green-500 rounded transition-all duration-200 modal-checkbox-bg';
         checkboxIcon.className = 'absolute inset-0 flex items-center justify-center text-white opacity-100 transition-opacity duration-200 modal-checkbox-icon';
         checkboxLabel.textContent = 'Atanmış';
-        checkboxLabel.className = 'ml-2 text-sm text-green-700 dark:text-green-300';
-        avatarDiv.className = 'w-8 h-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center';
-        avatarDiv.querySelector('span').className = 'text-green-600 dark:text-green-400 font-bold text-sm';
+        checkboxLabel.className = 'ml-2 text-xs text-green-700 dark:text-green-300';
+        avatarDiv.className = 'w-6 h-6 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center';
+        avatarDiv.querySelector('span').className = 'text-green-600 dark:text-green-400 font-bold text-xs';
     } else {
-        personelItem.className = 'modal-personel-item flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors';
-        nameEl.className = 'font-medium text-gray-900 dark:text-white modal-personel-name';
-        descEl.className = 'text-sm text-gray-500 dark:text-gray-400';
+        personelItem.className = 'modal-personel-item flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors';
+        nameEl.className = 'font-medium text-gray-900 dark:text-white modal-personel-name text-sm';
+        descEl.className = 'text-xs text-gray-500 dark:text-gray-400';
         descEl.textContent = descEl.textContent.split(' •')[0];
-        checkboxBg.className = 'w-5 h-5 bg-white border-2 border-gray-300 dark:border-gray-600 rounded transition-all duration-200 modal-checkbox-bg';
+        checkboxBg.className = 'w-4 h-4 bg-white border-2 border-gray-300 dark:border-gray-600 rounded transition-all duration-200 modal-checkbox-bg';
         checkboxIcon.className = 'absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-200 modal-checkbox-icon';
         checkboxLabel.textContent = 'Ata';
-        checkboxLabel.className = 'ml-2 text-sm text-gray-700 dark:text-gray-300';
-        avatarDiv.className = 'w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center';
-        avatarDiv.querySelector('span').className = 'text-blue-600 dark:text-blue-400 font-bold text-sm';
+        checkboxLabel.className = 'ml-2 text-xs text-gray-700 dark:text-gray-300';
+        avatarDiv.className = 'w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center';
+        avatarDiv.querySelector('span').className = 'text-blue-600 dark:text-blue-400 font-bold text-xs';
     }
 }
 

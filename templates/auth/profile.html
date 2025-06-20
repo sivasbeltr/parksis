@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load mathfilters %}
+{% load istakip_tags %}
 
 {% block title %}Kullanıcı Profil - {{ user.get_full_name|default:user.username }}{% endblock %}
 

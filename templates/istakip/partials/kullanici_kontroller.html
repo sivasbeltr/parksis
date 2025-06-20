@@ -1,7 +1,7 @@
 <!-- Kontroller Sekmesi -->
-<div class="space-y-4">
-    <!-- Kompakt Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+    <!-- Header -->
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-3">
             <h4 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 <i class="fas fa-clipboard-check text-blue-600 mr-2"></i>
@@ -54,13 +54,11 @@
                 <i class="fas fa-times mr-1"></i>Temizle
             </button>
         </form>
-    </div>
-
-    <!-- Kompakt Kontrol Listesi -->
+    </div>    <!-- Kompakt Kontrol Listesi -->
     {% if kontroller %}
-        <div class="space-y-3">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             {% for kontrol in kontroller %}
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex items-start flex-1">
                             <!-- Durum İkonu -->
@@ -131,11 +129,9 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
-
-        <!-- Sayfalama -->
+        </div>        <!-- Sayfalama -->
         {% if kontroller.has_other_pages %}
-            <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
+            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 px-4 py-3 border-t border-gray-200 dark:border-gray-600">
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                     {{ kontroller.start_index }}-{{ kontroller.end_index }} / {{ kontroller.paginator.count }}
                 </div>
@@ -161,10 +157,9 @@
                     {% endif %}
                 </div>
             </div>
-        {% endif %}
-    {% else %}
+        {% endif %}    {% else %}
         <!-- Boş Durum -->
-        <div class="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="text-center py-8">
             <i class="fas fa-clipboard-list text-gray-400 text-2xl mb-2"></i>
             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Kontrol Bulunamadı</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -185,59 +180,4 @@
         document.getElementById('durum').value = '';
         document.getElementById('tarih').form.requestSubmit();
     }
-</script>
-</div>
-
-<!-- Resim Modal -->
-<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
-    <div class="flex items-center justify-center h-full p-4">
-        <div class="relative max-w-full max-h-full">
-            <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
-            <button onclick="closeImageModal()" class="absolute top-4 right-4 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-30">
-                <i class="fas fa-times"></i>
-            </button>
-            <div id="modal-caption" class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-3 rounded-lg"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function setTodayFilter() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('tarih').value = today;
-        document.getElementById('tarih').form.requestSubmit();
-    }
-    
-    function setWeekFilter() {
-        const today = new Date();
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        document.getElementById('tarih').value = weekAgo.toISOString().split('T')[0];
-        document.getElementById('tarih').form.requestSubmit();
-    }
-    
-    function clearFilters() {
-        document.getElementById('tarih').value = '';
-        document.getElementById('park').value = '';
-        document.getElementById('durum').value = '';
-        document.getElementById('tarih').form.requestSubmit();
-    }
-    
-    function openImageModal(src, caption) {
-        document.getElementById('modal-image').src = src;
-        document.getElementById('modal-caption').textContent = caption;
-        document.getElementById('image-modal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function closeImageModal() {
-        document.getElementById('image-modal').classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-    
-    // Modal dışına tıklayınca kapat
-    document.getElementById('image-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeImageModal();
-        }
-    });
 </script>

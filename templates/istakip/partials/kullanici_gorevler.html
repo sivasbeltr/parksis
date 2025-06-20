@@ -1,7 +1,8 @@
+{% load istakip_tags %}
 <!-- Görevler Sekmesi -->
-<div class="space-y-4">
-    <!-- Kompakt Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+    <!-- Header -->
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between mb-3">
             <h4 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 <i class="fas fa-tasks text-orange-600 mr-2"></i>
@@ -36,13 +37,12 @@
                 <i class="fas fa-times mr-1"></i>Temizle
             </button>
         </form>
-    </div>
-
-    <!-- Kompakt Görev Listesi -->
+    </div>    <!-- Kompakt Görev Listesi -->
     {% if gorevler %}
-        <div class="space-y-3">
-            {% for gorev in gorevler %}
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">            {% for gorev in gorevler %}
+                {% with gorev.durum|get_gorev_durum_color as durum_color %}
+                {% with gorev.oncelik|get_gorev_oncelik_color as oncelik_color %}
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex items-start flex-1">
                             <!-- Öncelik İkonu -->
@@ -60,34 +60,9 @@
                                         {{ gorev.baslik }}
                                     </h6>
                                     <!-- Durum Badge -->
-                                    <div class="flex items-center space-x-2">
-                                        <!-- Durum -->
-                                        {% if gorev.durum == 'planlanmis' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% elif gorev.durum == 'devam_ediyor' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% elif gorev.durum == 'onaya_gonderildi' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% elif gorev.durum == 'tamamlandi' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% elif gorev.durum == 'iptal' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% elif gorev.durum == 'gecikmis' %}
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                                {{ gorev.get_durum_display }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ durum_color.bg }} {{ durum_color.text }}">
+                                        {{ gorev.get_durum_display }}
+                                    </span>
                                 </div>
                                 
                                 <div class="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -102,7 +77,7 @@
                                     {% endif %}
                                     {% if gorev.oncelik != 'normal' %}
                                         <span class="mx-2">•</span>
-                                        <span class="font-medium text-orange-600">{{ gorev.get_oncelik_display }}</span>
+                                        <span class="font-medium {{ oncelik_color.text }}">{{ gorev.get_oncelik_display }}</span>
                                     {% endif %}
                                 </div>
                                 
@@ -119,12 +94,6 @@
                                            class="text-xs text-orange-600 hover:text-orange-800 transition-colors">
                                             Detay
                                         </a>
-                                        {% if gorev.durum == 'devam_ediyor' %}
-                                            <span class="text-xs text-blue-600">Devam Et</span>
-                                        {% endif %}
-                                        {% if gorev.durum == 'planlanmis' %}
-                                            <span class="text-xs text-green-600">Başlat</span>
-                                        {% endif %}
                                     </div>
                                     <span class="text-xs text-gray-400">
                                         {{ gorev.created_at|timesince }} önce
@@ -134,11 +103,13 @@
                         </div>
                     </div>
                 </div>
+                {% endwith %}
+                {% endwith %}
             {% endfor %}
         </div>
     {% else %}
         <!-- Boş Durum -->
-        <div class="text-center py-8 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="text-center py-8">
             <i class="fas fa-tasks text-gray-400 text-2xl mb-2"></i>
             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Görev Bulunamadı</h4>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -152,33 +123,33 @@
     {% endif %}
 
     <!-- Görev İstatistikleri -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <div class="bg-gray-50 dark:bg-gray-700 p-4 border-t border-gray-200 dark:border-gray-600">
         <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center">
             <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
             Görev İstatistikleri
         </h5>
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg">
                 <div class="text-lg font-bold text-gray-600">{{ gorev_stats.planlanmis }}</div>
                 <div class="text-xs text-gray-500">Planlanmış</div>
             </div>
             
-            <div class="text-center p-3 bg-yellow-50 dark:bg-yellow-800/20 rounded-lg">
+            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg">
                 <div class="text-lg font-bold text-yellow-600">{{ gorev_stats.devam_ediyor }}</div>
                 <div class="text-xs text-yellow-600">Devam Eden</div>
             </div>
             
-            <div class="text-center p-3 bg-green-50 dark:bg-green-800/20 rounded-lg">
+            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg">
                 <div class="text-lg font-bold text-green-600">{{ gorev_stats.tamamlandi }}</div>
                 <div class="text-xs text-green-600">Tamamlanan</div>
             </div>
             
-            <div class="text-center p-3 bg-red-50 dark:bg-red-800/20 rounded-lg">
+            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg">
                 <div class="text-lg font-bold text-red-600">{{ gorev_stats.gecikmis }}</div>
                 <div class="text-xs text-red-600">Geciken</div>
             </div>
             
-            <div class="text-center p-3 bg-orange-50 dark:bg-orange-800/20 rounded-lg">
+            <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg">
                 <div class="text-lg font-bold text-orange-600">{{ gorev_stats.acil }}</div>
                 <div class="text-xs text-orange-600">Acil</div>
             </div>
@@ -187,19 +158,6 @@
 </div>
 
 <script>
-    function clearGorevFilters() {
-        document.getElementById('gorev_durum').value = '';
-        document.getElementById('gorev_durum').form.requestSubmit();
-    }
-</script>
-</div>
-
-<script>
-    function filterByStatus(status) {
-        document.getElementById('gorev_durum').value = status;
-        document.getElementById('gorev_durum').form.requestSubmit();
-    }
-    
     function clearGorevFilters() {
         document.getElementById('gorev_durum').value = '';
         document.getElementById('gorev_durum').form.requestSubmit();

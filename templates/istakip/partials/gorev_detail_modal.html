@@ -1,11 +1,13 @@
 <!-- Görev Detay Modal İçeriği -->
-<div class="space-y-4">
-    <!-- Görev Başlık Bilgileri -->
-    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
+{% load istakip_tags %}
+<div class="space-y-4">    <!-- Görev Başlık Bilgileri -->
+    {% with durum_color=gorev.durum|get_gorev_durum_color %}
+    <div class="rounded-lg p-4 text-white"
+         style="background: linear-gradient(135deg, {{ durum_color.color|default:'#3b82f6' }}, {{ durum_color.color|default:'#3b82f6' }}DD);">
         <div class="flex items-start justify-between">
             <div class="flex-1">
                 <h2 class="text-xl font-bold mb-2">{{ gorev.baslik }}</h2>
-                <div class="flex items-center space-x-4 text-blue-100 text-sm">
+                <div class="flex items-center space-x-4 text-white/80 text-sm">
                     <span><i class="fas fa-map-marker-alt mr-1"></i>{{ gorev.park.ad }}</span>
                     {% if gorev.gorev_tipi %}
                     <span><i class="fas fa-tag mr-1"></i>{{ gorev.gorev_tipi.ad }}</span>
@@ -14,16 +16,19 @@
             </div>
             <div class="flex flex-col items-end space-y-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white border border-white/20"
-                      style="background-color: {{ durum_color.color }};">
+                      style="background-color: {{ durum_color.color|default:'#3b82f6' }};">
                     {{ gorev.get_durum_display }}
                 </span>
+                {% with oncelik_color=gorev.oncelik|get_gorev_oncelik_color %}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white border border-white/20"
-                      style="background-color: {{ oncelik_color.color }};">
+                      style="background-color: {{ oncelik_color.color|default:'#3b82f6' }};">
                     <i class="fas fa-exclamation-triangle mr-1"></i>{{ gorev.get_oncelik_display }}
                 </span>
+                {% endwith %}
             </div>
         </div>
     </div>
+    {% endwith %}
 
     <!-- Görev Açıklaması -->
     {% if gorev.aciklama %}

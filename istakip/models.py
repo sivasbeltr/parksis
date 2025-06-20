@@ -198,6 +198,12 @@ class GunlukKontrol(models.Model):
     def __str__(self):
         return f"{self.park.ad} - {self.kontrol_tarihi.strftime('%Y-%m-%d %H:%M')} - {self.get_durum_display()}"
 
+    @property
+    def durum_color(self):
+        from istakip.choices import get_kontrol_durum_color
+
+        return get_kontrol_durum_color(self.durum)
+
     class Meta:
         verbose_name = _("Günlük Kontrol")
         verbose_name_plural = _("Günlük Kontroller")
@@ -488,6 +494,18 @@ class Gorev(models.Model):
     def __str__(self):
         return f"{self.park.ad} - {self.baslik} ({self.get_durum_display()})"
 
+    @property
+    def durum_color(self):
+        from istakip.choices import get_gorev_durum_color
+
+        return get_gorev_durum_color(self.durum)
+
+    @property
+    def oncelik_color(self):
+        from istakip.choices import get_gorev_oncelik_color
+
+        return get_gorev_oncelik_color(self.oncelik)
+
     class Meta:
         verbose_name = _("Görev")
         verbose_name_plural = _("Görevler")
@@ -628,6 +646,12 @@ class GorevAsama(models.Model):
 
     def __str__(self):
         return f"{self.gorev.baslik} - {self.ad} ({self.get_durum_display()})"
+
+    @property
+    def durum_color(self):
+        from istakip.choices import get_gorev_asama_durum_color
+
+        return get_gorev_asama_durum_color(self.durum)
 
     class Meta:
         verbose_name = _("Görev Aşaması")
