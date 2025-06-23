@@ -2,15 +2,19 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
+from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Avg, Count, Q, Sum
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_http_methods
+from django.views.generic import TemplateView
 
 from ortak.models import Mahalle
 from parkbahce.models import Park
@@ -1672,3 +1676,148 @@ def sorun_durum_degistir(request, kontrol_uuid):
         messages.error(request, f"Durum güncelleme sırasında hata: {str(e)}")
 
     return redirect("istakip:sorun_detay", kontrol_uuid=kontrol_uuid)
+
+
+class GorevOnayaGonderView(LoginRequiredMixin, TemplateView):
+    """
+    Desktop görev tamamlama ve onaya gönderme sayfası
+    """
+
+    template_name = "istakip/gorev_onaya_gonder.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        gorev_uuid = kwargs.get("gorev_uuid")
+        gorev = get_object_or_404(
+            Gorev.objects.select_related(
+                "park", "park__mahalle", "gorev_tipi", "olusturan"
+            ).prefetch_related("atamalar__personel", "asamalar", "tamamlama_resimleri"),
+            uuid=gorev_uuid,
+        )
+
+        # Görev durumu kontrolü
+        if gorev.durum in ["tamamlandi", "iptal", "onaya_gonderildi"]:
+            messages.warning(self.request, "Bu görev için tamamlama işlemi yapılamaz.")
+            return redirect("istakip:gorev_detail", gorev_uuid=gorev.uuid)
+
+        # Aşama istatistikleri
+        asamalar = gorev.asamalar.all()
+        asama_stats = {
+            "toplam": asamalar.count(),
+            "tamamlanan": asamalar.filter(durum="tamamlandi").count(),
+        }
+
+        # İlerleme yüzdesi
+        ilerleme = 0
+        if asama_stats["toplam"] > 0:
+            ilerleme = int((asama_stats["tamamlanan"] / asama_stats["toplam"]) * 100)
+
+        context.update(
+            {
+                "gorev": gorev,
+                "asama_stats": asama_stats,
+                "ilerleme": ilerleme,
+            }
+        )
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Desktop görev tamamlama formu işleme
+        """
+        try:
+            gorev_uuid = kwargs.get("gorev_uuid")
+            gorev = get_object_or_404(Gorev, uuid=gorev_uuid)
+
+            # Görev durumu kontrolü
+            if gorev.durum in ["tamamlandi", "iptal", "onaya_gonderildi"]:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu görev için tamamlama işlemi yapılamaz.",
+                    }
+                )
+
+            # Tüm aşamalar tamamlandı mı kontrol et
+            tum_asamalar = gorev.asamalar.all()
+            tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+
+            if (
+                tum_asamalar.count() > 0
+                and tum_asamalar.count() != tamamlanan_asamalar.count()
+            ):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Tüm aşamalar tamamlanmadan görev onaya gönderilemez.",
+                    }
+                )
+
+            # Tamamlama açıklaması
+            tamamlama_aciklama = request.POST.get("tamamlama_aciklama", "")
+
+            with transaction.atomic():
+                # Resimleri kaydet
+                for i in range(1, 4):  # En fazla 3 resim
+                    resim_field = f"resim_{i}"
+                    if resim_field in request.FILES:
+                        resim_file = request.FILES[resim_field]
+                        resim_aciklama = request.POST.get(f"resim_aciklama_{i}", "")
+                        resim_lat = request.POST.get(f"resim_lat_{i}")
+                        resim_lng = request.POST.get(f"resim_lng_{i}")
+
+                        # Konum oluştur
+                        konum = None
+                        if resim_lat and resim_lng:
+                            try:
+                                konum = Point(
+                                    float(resim_lng), float(resim_lat), srid=4326
+                                )
+                                konum.transform(5256)
+                            except (ValueError, TypeError):
+                                pass
+
+                        # Tamamlama resmi kaydet
+                        GorevTamamlamaResim.objects.create(
+                            gorev=gorev,
+                            resim=resim_file,
+                            aciklama=resim_aciklama or f"Tamamlama resmi {i}",
+                            konum=konum,
+                        )
+
+                # Görev açıklamasını güncelle
+                if tamamlama_aciklama:
+                    if gorev.aciklama:
+                        gorev.aciklama += (
+                            f"\n\nTamamlama Açıklaması: {tamamlama_aciklama}"
+                        )
+                    else:
+                        gorev.aciklama = f"Tamamlama Açıklaması: {tamamlama_aciklama}"
+
+                # Görevi onaya gönder
+                gorev.durum = "onaya_gonderildi"
+                gorev.tamamlanma_tarihi = timezone.now()
+                gorev.onay_tarihi = None
+                gorev.save()
+
+                # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+                if gorev.gunluk_kontrol:
+                    gorev.gunluk_kontrol.durum = "gozden_gecirildi"
+                    gorev.gunluk_kontrol.save()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Görev başarıyla onaya gönderildi.",
+                    "redirect_url": reverse(
+                        "istakip:gorev_detail", kwargs={"gorev_uuid": gorev.uuid}
+                    ),
+                }
+            )
+
+        except Exception as e:
+            return JsonResponse(
+                {"success": False, "message": f"Bir hata oluştu: {str(e)}"}
+            )

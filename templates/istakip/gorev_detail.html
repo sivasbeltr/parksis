@@ -95,10 +95,20 @@
     <!-- Ana Bilgiler Kartı -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <i class="fas fa-info-circle text-emerald-600 mr-3"></i>
-                Görev Detayları
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-info-circle text-emerald-600 mr-3"></i>
+                    Görev Detayları
+                </h2>
+                
+                <!-- Onayla Butonu - Sadece onaya gönderilmiş görevler için -->
+                {% if gorev.durum == 'onaya_gonderildi' and user.is_staff %}
+                <button onclick="approveTask()" 
+                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm">
+                    <i class="fas fa-check mr-2"></i>Tamamlamayı Onayla
+                </button>
+                {% endif %}
+            </div>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -282,6 +292,47 @@
                             <i class="fas fa-external-link-alt mr-1"></i>Görüntüle
                         </a>
                     </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tamamlama Resimleri -->
+            {% if gorev.tamamlama_resimleri.all %}
+            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <i class="fas fa-images text-green-600 mr-2"></i>Tamamlama Resimleri
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for resim in gorev.tamamlama_resimleri.all %}
+                    <div class="relative group">
+                        <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                            <img src="{{ resim.resim.url }}" 
+                                 alt="{{ resim.aciklama|default:'Tamamlama resmi' }}" 
+                                 class="w-full h-40 object-cover cursor-pointer transition-transform duration-200 group-hover:scale-105"
+                                 onclick="openImageModal('{{ resim.resim.url }}', '{{ resim.aciklama|default:'Tamamlama resmi' }}')">
+                        </div>
+                        
+                        {% if resim.aciklama %}
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-lg">
+                            <p class="text-white text-sm font-medium truncate">{{ resim.aciklama }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if resim.konum %}
+                        <div class="absolute top-2 right-2">
+                            <div class="bg-blue-600 text-white p-1 rounded-full">
+                                <i class="fas fa-map-marker-alt text-xs"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="absolute top-2 left-2">
+                            <span class="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                <i class="fas fa-check mr-1"></i>Tamamlandı
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
@@ -558,28 +609,58 @@ function selectDurum(durum) {
 
 // Görev onaylama fonksiyonu
 function approveTask() {
-    if (confirm('Bu görevi onaylamak istediğinizden emin misiniz? Görevi tamamlanan olarak işaretleyecek.')) {
-        fetch(`/istakip/mobil/gorev/{{ gorev.uuid }}/onayla/`, {
+    if (confirm('Bu görevi onaylamak istediğinizden emin misiniz? Görev tamamlandı olarak işaretlenecek.')) {
+        const submitBtn = event.target;
+        const originalText = submitBtn.innerHTML;
+        
+        // Butonu disable et ve loading göster
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Onaylanıyor...';
+        
+        fetch(`/istakip/gorevler/{{ gorev.uuid }}/durum-degistir/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'durum=tamamlandi'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Görev başarıyla onaylandı!');
-                location.reload();
+        .then(response => {
+            if (response.ok) {
+                // Başarılı - sayfayı yenile
+                window.location.reload();
             } else {
-                alert(data.message || 'Hata oluştu');
+                throw new Error('Onaylama işlemi başarısız');
             }
         })
         .catch(error => {
-            alert('Bir hata oluştu');
+            // Hata durumunda butonu eski haline getir
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            alert('Görev onaylanırken bir hata oluştu: ' + error.message);
         });
     }
 }
+
+// Aşama durumu kontrol fonksiyonu
+function checkTaskCompletionStatus() {
+    const asamaStats = {
+        toplam: {{ asama_stats.toplam }},
+        tamamlanan: {{ asama_stats.tamamlanan }}
+    };
+    
+    // Tamamlama butonunu kontrol et
+    const completionSection = document.querySelector('.completion-section');
+    if (completionSection && asamaStats.toplam > 0 && asamaStats.tamamlanan !== asamaStats.toplam) {
+        // Buton zaten disabled olmalı, ek kontrol gerekirse burada yapılabilir
+        console.log('Aşamalar henüz tamamlanmamış');
+    }
+}
+
+// Sayfa yüklendiğinde kontrol et
+document.addEventListener('DOMContentLoaded', function() {
+    checkTaskCompletionStatus();
+});
 
 // Tab functions
 function showTab(tabId) {

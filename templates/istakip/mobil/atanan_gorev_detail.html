@@ -171,23 +171,22 @@
             Görev Tamamlama
         </h3>
         
-        {% comment %} Tüm aşamalar tamamlandı mı kontrol et {% endcomment %}
         {% if asamalar %}
-            {% with tum_asamalar=asamalar.count tamamlanan_asamalar=asamalar|default_if_none:""|dictsort:"durum" %}
-                {% comment %} JavaScript ile tamamlanan aşama sayısını hesapla {% endcomment %}
-                <div id="gorev-tamamlama-section">
-                    <button onclick="checkAndCompleteTask()" id="complete-task-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors mobile-button">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Onaya Gönder
-                    </button>
-                    <p class="text-xs text-gray-500 mt-1 text-center">Tüm aşamalar tamamlandıktan sonra görevi onaya gönderebilirsiniz</p>
-                </div>
-            {% endwith %}
+            <div id="gorev-tamamlama-section">
+                <a href="{% url 'istakip:mobil_gorev_onaya_gonder' gorev.uuid %}" 
+                   id="complete-task-btn" 
+                   class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors mobile-button block text-center">
+                    <i class="fas fa-camera mr-2"></i>
+                    Tamamla ve Onaya Gönder
+                </a>
+                <p class="text-xs text-gray-500 mt-1 text-center">Tamamlama resimlerini ekleyerek görevi onaya gönderebilirsiniz</p>
+            </div>
         {% else %}
-            <button onclick="completeTask()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors mobile-button">
-                <i class="fas fa-paper-plane mr-2"></i>
-                Onaya Gönder
-            </button>
+            <a href="{% url 'istakip:mobil_gorev_onaya_gonder' gorev.uuid %}" 
+               class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors mobile-button block text-center">
+                <i class="fas fa-camera mr-2"></i>
+                Tamamla ve Onaya Gönder
+            </a>
         {% endif %}
     </div>
     {% elif gorev.durum == 'onaya_gonderildi' %}
@@ -461,24 +460,10 @@ function completeTask() {
     }
 }
 
+// Remove the old checkAndCompleteTask function since we now redirect to completion page
 function checkAndCompleteTask() {
-    // Tüm aşamaların tamamlanıp tamamlanmadığını kontrol et
-    const asamalar = document.querySelectorAll('[data-asama-durum]');
-    let tamamlananSayisi = 0;
-    let toplamSayisi = asamalar.length;
-    
-    asamalar.forEach(asama => {
-        if (asama.getAttribute('data-asama-durum') === 'tamamlandi') {
-            tamamlananSayisi++;
-        }
-    });
-    
-    if (toplamSayisi > 0 && tamamlananSayisi !== toplamSayisi) {
-        showToast('Tüm aşamalar tamamlanmadan görev onaya gönderilemez!', 'warning');
-        return;
-    }
-    
-    completeTask();
+    // Redirect to completion page instead of direct completion
+    window.location.href = "{% url 'istakip:mobil_gorev_onaya_gonder' gorev.uuid %}";
 }
 
 // Aşama ekleme formu

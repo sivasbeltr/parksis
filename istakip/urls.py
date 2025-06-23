@@ -45,6 +45,17 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         mobil_views.MobilAtananGorevDetailView.as_view(),
         name="mobil_atanan_gorev_detail",
     ),
+    # Yeni URL'ler - Görev Tamamlama Resimleri İçin
+    path(
+        "mobil/gorev/<uuid:gorev_uuid>/onaya-gonder/",
+        mobil_views.MobilGorevOnayaGonderView.as_view(),
+        name="mobil_gorev_onaya_gonder",
+    ),
+    path(
+        "gorevler/<uuid:gorev_uuid>/onaya-gonder/",
+        views.GorevOnayaGonderView.as_view(),
+        name="gorev_onaya_gonder",
+    ),
     path(
         "mobil/asama/ekle/",
         mobil_views.mobil_asama_ekle,
@@ -178,6 +189,11 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "gorevler/<uuid:gorev_uuid>/durum-degistir/",
         views.gorev_durum_degistir,
         name="gorev_durum_degistir",
+    ),
+    path(
+        "gorevler/<uuid:gorev_uuid>/onayla/",
+        views.gorev_onayla,
+        name="gorev_onayla",
     ),
     path(
         "gorevler/<uuid:gorev_uuid>/asama-ekle/",

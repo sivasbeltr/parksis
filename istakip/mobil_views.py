@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,7 +20,14 @@ from django.views.generic import ListView, TemplateView
 from parkbahce.models import Park
 
 from .forms import MobilKontrolForm
-from .models import Gorev, GorevAsama, GunlukKontrol, KontrolResim, Personel
+from .models import (
+    Gorev,
+    GorevAsama,
+    GorevTamamlamaResim,
+    GunlukKontrol,
+    KontrolResim,
+    Personel,
+)
 
 
 class MobilSorunBildirView(LoginRequiredMixin, TemplateView):
@@ -1076,3 +1084,169 @@ class MobilPerformansIstatistikView(LoginRequiredMixin, TemplateView):
             context["stats"] = {}
 
         return context
+
+
+class MobilGorevOnayaGonderView(LoginRequiredMixin, TemplateView):
+    """
+    Mobil görev tamamlama ve onaya gönderme sayfası - resim yükleme ile
+    """
+
+    template_name = "istakip/mobil/gorev_onaya_gonder.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+            gorev_uuid = kwargs.get("gorev_uuid")
+
+            gorev = get_object_or_404(
+                Gorev.objects.filter(atamalar__personel=personel)
+                .select_related("park", "park__mahalle", "gorev_tipi")
+                .prefetch_related(
+                    "atamalar__personel", "asamalar", "tamamlama_resimleri"
+                ),
+                uuid=gorev_uuid,
+            )
+
+            # Görev durumu kontrolü
+            if gorev.durum in ["tamamlandi", "iptal", "onaya_gonderildi"]:
+                messages.warning(
+                    self.request, "Bu görev için tamamlama işlemi yapılamaz."
+                )
+                return redirect(
+                    "istakip:mobil_atanan_gorev_detail", gorev_uuid=gorev.uuid
+                )
+
+            # Aşama istatistikleri
+            asamalar = gorev.asamalar.all()
+            asama_stats = {
+                "toplam": asamalar.count(),
+                "tamamlanan": asamalar.filter(durum="tamamlandi").count(),
+            }
+
+            # İlerleme yüzdesi
+            ilerleme = 0
+            if asama_stats["toplam"] > 0:
+                ilerleme = int(
+                    (asama_stats["tamamlanan"] / asama_stats["toplam"]) * 100
+                )
+
+            context.update(
+                {
+                    "gorev": gorev,
+                    "asama_stats": asama_stats,
+                    "ilerleme": ilerleme,
+                    "personel": personel,
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["gorev"] = None
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Görev tamamlama formu işleme
+        """
+        try:
+            personel = Personel.objects.get(user=request.user)
+            gorev_uuid = kwargs.get("gorev_uuid")
+
+            gorev = get_object_or_404(
+                Gorev.objects.filter(atamalar__personel=personel), uuid=gorev_uuid
+            )
+
+            # Görev durumu kontrolü
+            if gorev.durum in ["tamamlandi", "iptal", "onaya_gonderildi"]:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu görev için tamamlama işlemi yapılamaz.",
+                    }
+                )
+
+            # Tüm aşamalar tamamlandı mı kontrol et
+            tum_asamalar = gorev.asamalar.all()
+            tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+
+            if (
+                tum_asamalar.count() > 0
+                and tum_asamalar.count() != tamamlanan_asamalar.count()
+            ):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Tüm aşamalar tamamlanmadan görev onaya gönderilemez.",
+                    }
+                )
+
+            # Tamamlama açıklaması
+            tamamlama_aciklama = request.POST.get("tamamlama_aciklama", "")
+
+            with transaction.atomic():
+                # Resimleri kaydet
+                for i in range(1, 4):  # En fazla 3 resim
+                    resim_field = f"resim_{i}"
+                    if resim_field in request.FILES:
+                        resim_file = request.FILES[resim_field]
+                        resim_aciklama = request.POST.get(f"resim_aciklama_{i}", "")
+                        resim_lat = request.POST.get(f"resim_lat_{i}")
+                        resim_lng = request.POST.get(f"resim_lng_{i}")
+
+                        # Konum oluştur
+                        konum = None
+                        if resim_lat and resim_lng:
+                            try:
+                                konum = Point(
+                                    float(resim_lng), float(resim_lat), srid=4326
+                                )
+                                konum.transform(5256)
+                            except (ValueError, TypeError):
+                                pass
+
+                        # Tamamlama resmi kaydet
+                        GorevTamamlamaResim.objects.create(
+                            gorev=gorev,
+                            resim=resim_file,
+                            aciklama=resim_aciklama or f"Tamamlama resmi {i}",
+                            konum=konum,
+                        )
+
+                # Görev açıklamasını güncelle
+                if tamamlama_aciklama:
+                    if gorev.aciklama:
+                        gorev.aciklama += (
+                            f"\n\nTamamlama Açıklaması: {tamamlama_aciklama}"
+                        )
+                    else:
+                        gorev.aciklama = f"Tamamlama Açıklaması: {tamamlama_aciklama}"
+
+                # Görevi onaya gönder
+                gorev.durum = "onaya_gonderildi"
+                gorev.tamamlanma_tarihi = timezone.now()
+                gorev.onay_tarihi = None
+                gorev.save()
+
+                # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
+                if gorev.gunluk_kontrol:
+                    gorev.gunluk_kontrol.durum = "gozden_gecirildi"
+                    gorev.gunluk_kontrol.save()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Görev başarıyla onaya gönderildi.",
+                    "redirect_url": "{% url 'istakip:mobil_atanan_gorevler' %}",
+                }
+            )
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"success": False, "message": f"Bir hata oluştu: {str(e)}"}
+            )

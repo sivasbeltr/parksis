@@ -1,0 +1,363 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+{% load istakip_tags %}
+
+{% block title %}{{ gorev.baslik }} - Onaya Gönder{% endblock %}
+
+{% block content %}
+<div class="space-y-4 animate-fade-in px-1">
+    <!-- Görev Özeti -->
+    {% with durum_color=gorev.durum|get_gorev_durum_color %}
+    <div class="rounded-xl shadow-soft text-white p-4" style="background: linear-gradient(135deg, {{ durum_color.color|default:'#6B7280' }}, {{ durum_color.color|default:'#6B7280' }}DD);">
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex-1">
+                <h1 class="text-lg font-bold leading-tight">{{ gorev.baslik }}</h1>
+                <p class="opacity-90 mt-1 text-sm">
+                    <i class="fas fa-map-marker-alt mr-1"></i>
+                    {{ gorev.park.ad }} - {{ gorev.park.mahalle.ad }}
+                </p>
+                {% if gorev.gorev_tipi %}
+                <p class="opacity-80 text-sm mt-1">
+                    <i class="fas fa-tag mr-1"></i>{{ gorev.gorev_tipi.ad }}
+                </p>
+                {% endif %}
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                    <i class="fas fa-tasks mr-1"></i>Tamamlanıyor
+                </span>
+            </div>
+        </div>
+        
+        <!-- İlerleme -->
+        <div class="mt-3 pt-3 border-t border-white/20">
+            <div class="flex items-center justify-between text-sm mb-2">
+                <span class="opacity-90">Aşama İlerlemesi</span>
+                <span class="font-medium">{{ asama_stats.tamamlanan }}/{{ asama_stats.toplam }} Tamamlandı</span>
+            </div>
+            <div class="w-full bg-white/20 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full transition-all duration-500" 
+                     style="width: {{ ilerleme }}%"></div>
+            </div>
+            
+            {% if asama_stats.toplam > 0 and asama_stats.tamamlanan != asama_stats.toplam %}
+            <div class="mt-2 flex items-center gap-2 bg-white/10 rounded-lg p-2">
+                <i class="fas fa-exclamation-circle text-yellow-300"></i>
+                <span class="text-sm text-yellow-100">Tüm aşamalar tamamlanmadan görev onaya gönderilemez!</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+
+    <!-- Tamamlama Formu -->
+    <div class="bg-white rounded-xl shadow-soft p-4">
+        <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-camera text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-900">Görev Tamamlama</h3>
+                <p class="text-sm text-gray-600">Tamamlama resimlerini ekleyin ve onaya gönderin</p>
+            </div>
+        </div>
+
+        <form id="completion-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Genel Tamamlama Açıklaması -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-comment-alt mr-1"></i>Tamamlama Açıklaması
+                </label>
+                <textarea name="tamamlama_aciklama" rows="3" 
+                          class="w-full p-3 border border-gray-300 rounded-lg mobile-input resize-none"
+                          placeholder="Görev tamamlandı. İşlemler başarıyla gerçekleştirildi..."></textarea>
+            </div>
+
+            <!-- Resim Yükleme Alanları -->
+            <div class="space-y-4" id="image-upload-container">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-700">
+                        <i class="fas fa-images mr-1"></i>Tamamlama Resimleri
+                    </label>
+                    <span class="text-xs text-gray-500">En fazla 3 resim</span>
+                </div>
+
+                <!-- Resim Upload Alanları -->
+                {% for i in "123" %}
+                <div class="image-upload-item bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4" id="image-item-{{ forloop.counter }}">
+                    <div class="text-center">
+                        <!-- File Input -->
+                        <input type="file" 
+                               name="resim_{{ forloop.counter }}" 
+                               id="resim_{{ forloop.counter }}"
+                               accept="image/*"
+                               class="hidden"
+                               onchange="handleImageUpload({{ forloop.counter }})">
+                        
+                        <!-- Upload Button -->
+                        <label for="resim_{{ forloop.counter }}" class="cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors inline-flex items-center">
+                            <i class="fas fa-camera mr-2"></i>Resim {{ forloop.counter }} Seç
+                        </label>
+                        
+                        <!-- Preview Container -->
+                        <div id="preview-{{ forloop.counter }}" class="mt-4 hidden">
+                            <div class="relative inline-block">
+                                <img id="preview-img-{{ forloop.counter }}" src="" alt="Önizleme" class="w-full max-w-xs h-32 object-cover rounded-lg border">
+                                <button type="button" onclick="removeImage({{ forloop.counter }})"
+                                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Resim Açıklaması -->
+                        <div class="mt-3">
+                            <input type="text" 
+                                   name="resim_aciklama_{{ forloop.counter }}"
+                                   placeholder="Resim açıklaması (opsiyonel)"
+                                   class="w-full p-2 border border-gray-300 rounded-lg mobile-input text-sm">
+                        </div>
+
+                        <!-- Konum Bilgisi -->
+                        <div class="mt-2 flex items-center justify-center gap-2">
+                            <button type="button" 
+                                    onclick="getCurrentLocation({{ forloop.counter }})"
+                                    class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-map-marker-alt mr-1"></i>Konum Al
+                            </button>
+                            <span id="location-status-{{ forloop.counter }}" class="text-xs text-gray-500"></span>
+                        </div>
+
+                        <!-- Hidden konum inputları -->
+                        <input type="hidden" name="resim_lat_{{ forloop.counter }}" id="resim_lat_{{ forloop.counter }}">
+                        <input type="hidden" name="resim_lng_{{ forloop.counter }}" id="resim_lng_{{ forloop.counter }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Onay Checkbox -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <label class="flex items-start gap-3">
+                    <input type="checkbox" id="onay-checkbox" 
+                           class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                           {% if asama_stats.toplam > 0 and asama_stats.tamamlanan != asama_stats.toplam %}disabled{% endif %}>
+                    <div class="text-sm">
+                        <span class="font-medium text-blue-900">Tamamlama Onayı</span>
+                        <p class="text-blue-700 mt-1">
+                            {% if asama_stats.toplam > 0 and asama_stats.tamamlanan != asama_stats.toplam %}
+                                Tüm aşamalar tamamlanmadan görev onaya gönderilemez.
+                            {% else %}
+                                Görevin tamamlandığını ve yüklenen bilgilerin doğru olduğunu onaylıyorum. 
+                                Bu işlem sonrasında görev onay için gönderilecektir.
+                            {% endif %}
+                        </p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-3 mt-6">
+                <a href="{% url 'istakip:mobil_atanan_gorev_detail' gorev.uuid %}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-medium text-center transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Geri
+                </a>
+                <button type="submit" id="submit-btn" 
+                        {% if asama_stats.toplam > 0 and asama_stats.tamamlanan != asama_stats.toplam %}disabled{% else %}disabled{% endif %}
+                        class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>Onaya Gönder
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bilgilendirme -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-info-circle text-amber-600"></i>
+            </div>
+            <div>
+                <h4 class="font-medium text-amber-900 mb-1">Dikkat</h4>
+                <p class="text-sm text-amber-800">
+                    • Tamamlama resimlerini eklemek zorunlu değildir ancak önerilir<br>
+                    • Her resim için konum bilgisi alınması işlem kalitesini artırır<br>
+                    • Onaya gönderildikten sonra görev değiştirilemez<br>
+                    {% if asama_stats.toplam > 0 %}• Tüm aşamaların tamamlanması zorunludur{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Resim upload ve önizleme
+function handleImageUpload(imageNumber) {
+    const fileInput = document.getElementById(`resim_${imageNumber}`);
+    const previewDiv = document.getElementById(`preview-${imageNumber}`);
+    const previewImg = document.getElementById(`preview-img-${imageNumber}`);
+    
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        
+        // Dosya boyutu kontrolü (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Resim boyutu 5MB\'dan küçük olmalıdır', 'error');
+            fileInput.value = '';
+            return;
+        }
+        
+        // Dosya tipi kontrolü
+        if (!file.type.startsWith('image/')) {
+            showToast('Lütfen sadece resim dosyası seçiniz', 'error');
+            fileInput.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            previewDiv.classList.remove('hidden');
+            
+            // Upload butonunu gizle
+            const label = document.querySelector(`label[for="resim_${imageNumber}"]`);
+            if (label) {
+                label.style.display = 'none';
+            }
+        };
+        
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeImage(imageNumber) {
+    const fileInput = document.getElementById(`resim_${imageNumber}`);
+    const previewDiv = document.getElementById(`preview-${imageNumber}`);
+    const label = document.querySelector(`label[for="resim_${imageNumber}"]`);
+    
+    fileInput.value = '';
+    previewDiv.classList.add('hidden');
+    
+    if (label) {
+        label.style.display = 'inline-flex';
+    }
+    
+    // Konum bilgilerini temizle
+    document.getElementById(`resim_lat_${imageNumber}`).value = '';
+    document.getElementById(`resim_lng_${imageNumber}`).value = '';
+    document.getElementById(`location-status-${imageNumber}`).innerHTML = '';
+}
+
+// Konum alma
+function getCurrentLocation(imageNumber) {
+    const statusElement = document.getElementById(`location-status-${imageNumber}`);
+    
+    if (navigator.geolocation) {
+        statusElement.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Konum alınıyor...';
+        statusElement.className = 'text-xs text-blue-600';
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById(`resim_lat_${imageNumber}`).value = position.coords.latitude;
+                document.getElementById(`resim_lng_${imageNumber}`).value = position.coords.longitude;
+                
+                statusElement.innerHTML = '<i class="fas fa-check mr-1"></i>Konum alındı';
+                statusElement.className = 'text-xs text-green-600';
+                
+                setTimeout(() => {
+                    statusElement.innerHTML = '';
+                }, 3000);
+            },
+            function(error) {
+                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Konum alınamadı';
+                statusElement.className = 'text-xs text-red-600';
+                
+                setTimeout(() => {
+                    statusElement.innerHTML = '';
+                }, 3000);
+            }
+        );
+    } else {
+        statusElement.innerHTML = '<i class="fas fa-times mr-1"></i>Konum desteklenmiyor';
+        statusElement.className = 'text-xs text-red-600';
+    }
+}
+
+// Aşama kontrolü ve checkbox yönetimi
+function checkStagesAndEnableSubmit() {
+    const asamaStats = {
+        toplam: {{ asama_stats.toplam }},
+        tamamlanan: {{ asama_stats.tamamlanan }}
+    };
+    
+    const checkbox = document.getElementById('onay-checkbox');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // Aşama kontrolü
+    if (asamaStats.toplam > 0 && asamaStats.tamamlanan !== asamaStats.toplam) {
+        checkbox.disabled = true;
+        submitBtn.disabled = true;
+        return false;
+    }
+    
+    checkbox.disabled = false;
+    submitBtn.disabled = !checkbox.checked;
+    return true;
+}
+
+// Onay checkbox kontrolü
+document.getElementById('onay-checkbox').addEventListener('change', function() {
+    checkStagesAndEnableSubmit();
+});
+
+// Sayfa yüklendiğinde kontrol et
+document.addEventListener('DOMContentLoaded', function() {
+    checkStagesAndEnableSubmit();
+});
+
+// Form submit
+document.getElementById('completion-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!checkStagesAndEnableSubmit()) {
+        showToast('Tüm aşamalar tamamlanmadan görev onaya gönderilemez', 'warning');
+        return;
+    }
+    
+    if (!document.getElementById('onay-checkbox').checked) {
+        showToast('Lütfen tamamlama onayını işaretleyin', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    const formData = new FormData(this);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showToast('Görev başarıyla onaya gönderildi!', 'success');
+            setTimeout(() => {
+                window.location.href = '{% url "istakip:mobil_atanan_gorevler" %}';
+            }, 1500);
+        } else {
+            showToast(data.message || 'Bir hata oluştu', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('Bir hata oluştu', 'error');
+    });
+});
+</script>
+{% endblock %}
