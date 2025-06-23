@@ -608,7 +608,7 @@ def mobil_asama_baslat(request, asama_uuid):
                         "success": False,
                         "message": "Bu aşama zaten başlatılmış ve devam ediyor.",
                     }
-                )  # Aşamayı başlat
+                )
             if asama.durum == "tamamlandi":
                 return JsonResponse(
                     {
@@ -616,13 +616,20 @@ def mobil_asama_baslat(request, asama_uuid):
                         "message": "Bu aşama zaten tamamlanmış.",
                     }
                 )
+
+            # Aşamayı başlat ve tarihleri mantıklı şekilde ayarla
             asama.durum = "devam_ediyor"
             asama.baslangic_tarihi = timezone.now()
+            # Tamamlanma tarihini sıfırla (geri alınmış olabilir)
+            asama.tamamlanma_tarihi = None
             asama.save()
 
             # Ana görevi de devam ediyor yap (eğer planlanmış ise)
             if asama.gorev.durum == "planlanmis":
                 asama.gorev.durum = "devam_ediyor"
+                # Görev tarihleri de sıfırla
+                asama.gorev.tamamlanma_tarihi = None
+                asama.gorev.onay_tarihi = None
                 asama.gorev.save()
 
                 # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
@@ -677,9 +684,14 @@ def mobil_asama_tamamla(request, asama_uuid):
                 else:
                     asama.aciklama = f"Tamamlama Mesajı: {tamamlama_mesaji}"
 
-            # Aşamayı tamamla
+            # Aşamayı tamamla ve tarihleri set et
             asama.durum = "tamamlandi"
-            asama.tamamlanma_tarihi = timezone.now()  # Tamamlama resmi varsa kaydet
+            asama.tamamlanma_tarihi = timezone.now()
+            # Başlangıç tarihi yoksa set et
+            if not asama.baslangic_tarihi:
+                asama.baslangic_tarihi = timezone.now()
+
+            # Tamamlama resmi varsa kaydet
             if "tamamlama_resmi" in request.FILES:
                 asama.resim = request.FILES["tamamlama_resmi"]
 
@@ -736,7 +748,10 @@ def mobil_gorev_tamamla(request, gorev_uuid):
 
             # Görevi onaya gönder
             gorev.durum = "onaya_gonderildi"
+            # Onaya gönderildiğinde tamamlanma tarihi geçici olarak set edilir
             gorev.tamamlanma_tarihi = timezone.now()
+            # Onay tarihi henüz sıfırlanır
+            gorev.onay_tarihi = None
             gorev.save()
 
             # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
@@ -787,7 +802,8 @@ def mobil_gorev_onayla(request, gorev_uuid):
 
             # Görevi onayla ve tamamlandı olarak işaretle
             gorev.durum = "tamamlandi"
-            gorev.onaylayan = request.user
+            # Tamamlanma tarihi zaten onaya gönderilirken set edildi
+            # Onay tarihi şimdi set edilir
             gorev.onay_tarihi = timezone.now()
             gorev.save()
 

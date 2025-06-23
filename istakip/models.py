@@ -407,6 +407,7 @@ class Gorev(models.Model):
         blank=True,
         null=True,
     )
+    # bitirilmesi öngörülen tarih
     bitis_tarihi = models.DateTimeField(
         _("Bitiş Tarihi"),
         help_text=_("Görevin bitiş tarihini giriniz."),
@@ -440,6 +441,7 @@ class Gorev(models.Model):
         blank=True,
         null=True,
     )
+    # bitirilen tarih
     tamamlanma_tarihi = models.DateTimeField(
         _("Tamamlanma Tarihi"),
         help_text=_("Görevin tamamlanma tarihini giriniz."),
@@ -493,18 +495,6 @@ class Gorev(models.Model):
 
     def __str__(self):
         return f"{self.park.ad} - {self.baslik} ({self.get_durum_display()})"
-
-    @property
-    def durum_color(self):
-        from istakip.choices import get_gorev_durum_color
-
-        return get_gorev_durum_color(self.durum)
-
-    @property
-    def oncelik_color(self):
-        from istakip.choices import get_gorev_oncelik_color
-
-        return get_gorev_oncelik_color(self.oncelik)
 
     class Meta:
         verbose_name = _("Görev")

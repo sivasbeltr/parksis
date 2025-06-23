@@ -1429,12 +1429,24 @@ def gorev_durum_degistir(request, gorev_uuid):
         eski_durum = gorev.durum
         gorev.durum = yeni_durum
 
-        if yeni_durum == "tamamlandi" and not gorev.tamamlanma_tarihi:
-            gorev.tamamlanma_tarihi = timezone.now()
-        elif yeni_durum == "onaya_gonderildi":
-            gorev.onay_tarihi = None  # Onay tarihi sıfırla
+        # Tarihleri mantıklı şekilde güncelle
+        if yeni_durum == "tamamlandi":
+            # Sadece tamamlandı durumunda tamamlanma tarihi set et
+            if not gorev.tamamlanma_tarihi:
+                gorev.tamamlanma_tarihi = timezone.now()
+        else:
+            # Diğer durumlarda tamamlanma tarihini sıfırla
+            gorev.tamamlanma_tarihi = None
+
+        if yeni_durum == "onaya_gonderildi":
+            # Onaya gönderildiğinde onay tarihi sıfırla
+            gorev.onay_tarihi = None
         elif yeni_durum == "tamamlandi":
+            # Tamamlandığında onay tarihi set et
             gorev.onay_tarihi = timezone.now()
+        else:
+            # Diğer durumlarda onay tarihini sıfırla
+            gorev.onay_tarihi = None
 
         gorev.save()
 
@@ -1544,12 +1556,29 @@ def gorev_asama_durum_degistir(request, asama_uuid):
         eski_durum = asama.durum
         asama.durum = yeni_durum
 
-        if yeni_durum == "devam_ediyor" and not asama.baslangic_tarihi:
-            asama.baslangic_tarihi = timezone.now()
-        elif yeni_durum == "tamamlandi" and not asama.tamamlanma_tarihi:
-            asama.tamamlanma_tarihi = timezone.now()
+        # Tarihleri mantıklı şekilde güncelle
+        if yeni_durum == "devam_ediyor":
+            # Devam ediyor durumunda başlangıç tarihi set et
+            if not asama.baslangic_tarihi:
+                asama.baslangic_tarihi = timezone.now()
+            # Tamamlanma tarihini sıfırla (geri alınmış olabilir)
+            asama.tamamlanma_tarihi = None
+        elif yeni_durum == "tamamlandi":
+            # Tamamlandı durumunda tamamlanma tarihi set et
+            if not asama.tamamlanma_tarihi:
+                asama.tamamlanma_tarihi = timezone.now()
+            # Başlangıç tarihi yoksa set et
+            if not asama.baslangic_tarihi:
+                asama.baslangic_tarihi = timezone.now()
+        else:
+            # Beklemede veya başlamadı durumlarında tarihleri sıfırla
+            if yeni_durum in ["beklemede", "baslamadi"]:
+                asama.baslangic_tarihi = None
+                asama.tamamlanma_tarihi = None
 
-        asama.save()  # Ana görevi de güncelle
+        asama.save()
+
+        # Ana görevi de güncelle
         if yeni_durum == "devam_ediyor" and asama.gorev.durum == "planlanmis":
             asama.gorev.durum = "devam_ediyor"
             asama.gorev.save()
@@ -1557,18 +1586,33 @@ def gorev_asama_durum_degistir(request, asama_uuid):
         # Tüm aşamalar tamamlandı mı kontrol et
         tum_asamalar = asama.gorev.asamalar.all()
         tamamlanan_asamalar = tum_asamalar.filter(durum="tamamlandi")
+
         if (
             tum_asamalar.count() > 0
             and tum_asamalar.count() == tamamlanan_asamalar.count()
         ):
+            # Tüm aşamalar tamamlandıysa görevi de tamamla
             asama.gorev.durum = "tamamlandi"
             asama.gorev.tamamlanma_tarihi = timezone.now()
+            asama.gorev.onay_tarihi = timezone.now()
             asama.gorev.save()
 
             # Eğer bağlı bir sorun bildirimi varsa onun da durumunu güncelle
             if asama.gorev.gunluk_kontrol:
                 asama.gorev.gunluk_kontrol.durum = "cozuldu"
                 asama.gorev.gunluk_kontrol.save()
+        else:
+            # Eğer aşama geri alındıysa ve görev tamamlandı durumundaysa, görev durumunu güncelle
+            if asama.gorev.durum == "tamamlandi" and yeni_durum != "tamamlandi":
+                asama.gorev.durum = "devam_ediyor"
+                asama.gorev.tamamlanma_tarihi = None
+                asama.gorev.onay_tarihi = None
+                asama.gorev.save()
+
+                # Sorun bildirimi durumunu da güncelle
+                if asama.gorev.gunluk_kontrol:
+                    asama.gorev.gunluk_kontrol.durum = "ise_donusturuldu"
+                    asama.gorev.gunluk_kontrol.save()
 
         messages.success(
             request,

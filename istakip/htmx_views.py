@@ -563,12 +563,19 @@ def gorev_asama_baslat_htmx(request, asama_uuid):
         if asama.durum != "beklemede":
             return HttpResponse("Bu aşama zaten başlatılmış.", status=400)
 
-        # Aşamayı başlat
+        # Aşamayı başlat ve tarihleri mantıklı şekilde ayarla
         asama.durum = "devam_ediyor"
         asama.baslangic_tarihi = timezone.now()
-        asama.save()  # Ana görevi de devam ediyor yap (eğer planlanmış ise)
+        # Tamamlanma tarihini sıfırla
+        asama.tamamlanma_tarihi = None
+        asama.save()
+
+        # Ana görevi de devam ediyor yap (eğer planlanmış ise)
         if asama.gorev.durum == "planlanmis":
             asama.gorev.durum = "devam_ediyor"
+            # Görev tarihleri de sıfırla
+            asama.gorev.tamamlanma_tarihi = None
+            asama.gorev.onay_tarihi = None
             asama.gorev.save()
 
         # Aşamaları yeniden getir
@@ -596,9 +603,12 @@ def gorev_asama_tamamla_htmx(request, asama_uuid):
         if asama.durum != "devam_ediyor":
             return HttpResponse("Bu aşama tamamlanabilir durumda değil.", status=400)
 
-        # Aşamayı tamamla
+        # Aşamayı tamamla ve tarihleri set et
         asama.durum = "tamamlandi"
         asama.tamamlanma_tarihi = timezone.now()
+        # Başlangıç tarihi yoksa set et
+        if not asama.baslangic_tarihi:
+            asama.baslangic_tarihi = timezone.now()
         asama.save()
 
         # Tüm aşamalar tamamlandı mı kontrol et
@@ -611,6 +621,7 @@ def gorev_asama_tamamla_htmx(request, asama_uuid):
             # Tüm aşamalar tamamlandıysa görevi de tamamla
             asama.gorev.durum = "tamamlandi"
             asama.gorev.tamamlanma_tarihi = timezone.now()
+            asama.gorev.onay_tarihi = timezone.now()
             asama.gorev.save()
 
         # Aşamaları yeniden getir
