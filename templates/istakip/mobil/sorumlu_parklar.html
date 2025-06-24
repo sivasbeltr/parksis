@@ -5,19 +5,19 @@
 {% block content %}
 <div class="space-y-3 animate-fade-in">
     <!-- Kompakt Header -->
-    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-4 text-white">
+    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-3 text-white">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-lg font-bold flex items-center">
+                <h1 class="text-base font-bold flex items-center">
                     <i class="fas fa-tree mr-2"></i>
                     Sorumlu Parklar
                 </h1>
                 {% if personel %}
-                    <p class="text-green-100 text-sm">{{ personel.ad }}</p>
+                    <p class="text-green-100 text-xs">{{ personel.ad }}</p>
                 {% endif %}
             </div>
             <div class="text-right">
-                <div class="text-xl font-bold">{{ toplam_park_sayisi|default:0 }}</div>
+                <div class="text-lg font-bold">{{ toplam_park_sayisi|default:0 }}</div>
                 <div class="text-green-100 text-xs">Park</div>
             </div>
         </div>
@@ -26,26 +26,26 @@
     <!-- Kompakt İstatistikler -->
     {% if parklar_with_status %}
     <div class="grid grid-cols-2 gap-2">
-        <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+        <div class="bg-white rounded-lg p-2.5 shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="text-lg font-bold text-green-600">{{ bugun_kontrol_sayisi }}</div>
+                    <div class="text-base font-bold text-green-600">{{ bugun_kontrol_sayisi }}</div>
                     <div class="text-xs text-gray-600">Bugün Kontrol</div>
                 </div>
-                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-check text-green-600 text-sm"></i>
+                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-xs"></i>
                 </div>
             </div>
         </div>
         
-        <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+        <div class="bg-white rounded-lg p-2.5 shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <div class="text-lg font-bold text-orange-600">{{ bekleyen_sayisi }}</div>
+                    <div class="text-base font-bold text-orange-600">{{ bekleyen_sayisi }}</div>
                     <div class="text-xs text-gray-600">Bekleyen</div>
                 </div>
-                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-clock text-orange-600 text-sm"></i>
+                <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-clock text-orange-600 text-xs"></i>
                 </div>
             </div>
         </div>
@@ -57,12 +57,12 @@
         <div class="space-y-2">
             {% for park_info in parklar_with_status %}
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-3">
+                    <div class="p-2.5">
                         <!-- Park Başlığı ve Durum -->
-                        <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center justify-between mb-2">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 text-sm leading-tight truncate">{{ park_info.park.ad }}</h3>
-                                <div class="flex items-center text-xs text-gray-500 mt-1">
+                                <h3 class="font-medium text-gray-900 text-sm leading-tight truncate">{{ park_info.park.ad }}</h3>
+                                <div class="flex items-center text-xs text-gray-500 mt-0.5">
                                     <i class="fas fa-map-marker-alt w-3 mr-1"></i>
                                     <span class="truncate">{{ park_info.park.mahalle.ad }}</span>
                                     {% if park_info.park.alan %}
@@ -90,26 +90,26 @@
                                 <div class="flex items-center justify-between text-xs">
                                     <span class="text-gray-600">{{ park_info.son_kontrol_tarihi|date:"d.m H:i" }}</span>
                                     {% if park_info.son_kontrol.durum == 'sorun_yok' %}
-                                        <span class="bg-green-100 text-green-700 px-1 py-0.5 rounded text-xs">
+                                        <span class="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs">
                                             Sorun Yok
                                         </span>
                                     {% elif park_info.son_kontrol.durum == 'sorun_var' %}
-                                        <span class="bg-yellow-100 text-yellow-700 px-1 py-0.5 rounded text-xs">
+                                        <span class="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded text-xs">
                                             Sorun Var
                                         </span>
                                     {% elif park_info.son_kontrol.durum == 'acil' %}
-                                        <span class="bg-red-100 text-red-700 px-1 py-0.5 rounded text-xs">
+                                        <span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded text-xs">
                                             Acil
                                         </span>
                                     {% else %}
-                                        <span class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-xs">
+                                        <span class="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs">
                                             {{ park_info.son_kontrol_durumu }}
                                         </span>
                                     {% endif %}
                                 </div>
                                 {% if park_info.son_kontrol.aciklama %}
                                     <div class="text-xs text-gray-500 mt-1 truncate">
-                                        "{{ park_info.son_kontrol.aciklama|truncatechars:40 }}"
+                                        "{{ park_info.son_kontrol.aciklama|truncatechars:35 }}"
                                     </div>
                                 {% endif %}
                             </div>
@@ -122,23 +122,24 @@
                             </div>
                         {% endif %}
                         
-                        <!-- Kompakt Aksiyon Butonları -->
-                        <div class="flex space-x-2">
-                            <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}" 
-                               class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-2 rounded text-center transition-colors text-xs">
-                                <i class="fas fa-plus mr-1"></i>Kontrol
-                            </a>
+                        <!-- Kompakt Aksiyon Butonu -->
+                        <div class="flex">
                             {% if not park_info.bugun_kontrolu_yapildi %}
-                                <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}&kontrol_tipi=rutin" 
-                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-2 rounded text-center transition-colors text-xs">
-                                    <i class="fas fa-check mr-1"></i>Hızlı
+                                <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}" 
+                                   class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded text-center transition-colors text-xs">
+                                    <i class="fas fa-plus mr-1"></i>Kontrol Yap
+                                </a>
+                            {% else %}
+                                <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}" 
+                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded text-center transition-colors text-xs">
+                                    <i class="fas fa-redo mr-1"></i>Tekrar Kontrol
                                 </a>
                             {% endif %}
                         </div>
                         
                         <!-- Çoklu Kontrol Göstergesi -->
                         {% if park_info.bugun_kontrol_sayisi > 1 %}
-                            <div class="mt-2 text-center">
+                            <div class="mt-1.5 text-center">
                                 <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                                     Bugün {{ park_info.bugun_kontrol_sayisi }}x kontrol edildi
                                 </span>
@@ -182,14 +183,25 @@
             </div>
             <h3 class="font-medium text-gray-900 mb-2">Henüz sorumlu park yok</h3>
             <p class="text-gray-500 text-sm mb-4">Park sorumluluğu almak için yönetici ile iletişime geçin.</p>
-            
-            <a href="{% url 'istakip:mobil_sorun_bildir' %}" 
-               class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 transition-colors text-sm">
-                <i class="fas fa-search mr-2"></i>
-                Park Ara
-            </a>
         </div>
     {% endif %}
+    
+    <!-- En Alt - Park Kontrolü Gönder Butonu -->
+    <div class="mt-6 pb-4">
+        <a href="{% url 'istakip:mobil_sorun_bildir' %}" 
+           class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 px-4 rounded-lg text-center transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center">
+            <i class="fas fa-clipboard-check mr-2 text-lg"></i>
+            <span class="text-base">Park Kontrolü Gönder</span>
+        </a>
+        
+        <!-- Alt Bilgi -->
+        <div class="mt-2 text-center">
+            <p class="text-xs text-gray-500">
+                <i class="fas fa-info-circle mr-1"></i>
+                Konum tabanlı park kontrolü yapmak için tıklayın
+            </p>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -200,6 +212,11 @@
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hover efektleri */
+.transform.hover\:scale-\[1\.02\]:hover {
+    transform: scale(1.02);
 }
 </style>
 {% endblock %}

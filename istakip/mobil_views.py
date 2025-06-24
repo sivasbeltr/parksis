@@ -909,8 +909,14 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
             # Bugünün tarihini al
             bugun = timezone.now().date()
 
+            # Toplam park sayısı
+            toplam_park_sayisi = context["parklar"].count()
+
             # Her park için bugünkü kontrol durumunu hesapla
             parklar_with_status = []
+            bugun_kontrol_sayisi = 0
+            bekleyen_sayisi = 0
+
             for park in context["parklar"]:
                 # Bu parkta bugün yapılan kontroller
                 bugun_kontroller = park.gunluk_kontroller.filter(
@@ -924,9 +930,17 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
                     .first()
                 )
 
+                bugun_kontrolu_yapildi = bugun_kontroller.exists()
+
+                # İstatistikler için sayaçları artır
+                if bugun_kontrolu_yapildi:
+                    bugun_kontrol_sayisi += 1
+                else:
+                    bekleyen_sayisi += 1
+
                 park_info = {
                     "park": park,
-                    "bugun_kontrolu_yapildi": bugun_kontroller.exists(),
+                    "bugun_kontrolu_yapildi": bugun_kontrolu_yapildi,
                     "bugun_kontrol_sayisi": bugun_kontroller.count(),
                     "son_kontrol": son_kontrol,
                     "son_kontrol_tarihi": (
@@ -936,7 +950,7 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
                         son_kontrol.get_durum_display() if son_kontrol else None
                     ),
                     "kontrol_bekleyen": (
-                        not bugun_kontroller.exists()
+                        not bugun_kontrolu_yapildi
                         and (
                             not son_kontrol or son_kontrol.kontrol_tarihi.date() < bugun
                         )
@@ -944,12 +958,22 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
                 }
                 parklar_with_status.append(park_info)
 
-            context["parklar_with_status"] = parklar_with_status
-            context["bugun"] = bugun
+            context.update(
+                {
+                    "parklar_with_status": parklar_with_status,
+                    "bugun": bugun,
+                    "toplam_park_sayisi": toplam_park_sayisi,
+                    "bugun_kontrol_sayisi": bugun_kontrol_sayisi,
+                    "bekleyen_sayisi": bekleyen_sayisi,
+                }
+            )
 
         except Personel.DoesNotExist:
             context["personel"] = None
             context["parklar_with_status"] = []
+            context["toplam_park_sayisi"] = 0
+            context["bugun_kontrol_sayisi"] = 0
+            context["bekleyen_sayisi"] = 0
 
         return context
 
