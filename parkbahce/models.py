@@ -826,6 +826,8 @@ class ParkAbone(models.Model):
         _("Geometri"),
         srid=settings.SRID,
         help_text=_("Abone noktasını belirten geometri alanı."),
+        blank=True,
+        null=True,
     )
 
     extra_data = models.JSONField(
