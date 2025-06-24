@@ -15,9 +15,15 @@
                         <p class="text-gray-500 dark:text-gray-400 text-xs">Abone bilgileri</p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Toplam</div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'parkbahce:abone_ekle_park' park.uuid %}" 
+                       class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-1"></i>Yeni Abone
+                    </a>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ aboneler.count }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Toplam</div>
+                    </div>
                 </div>
             </div>
         </div>

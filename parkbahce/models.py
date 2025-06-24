@@ -822,6 +822,14 @@ class ParkAbone(models.Model):
         blank=True,
         null=True,
     )
+    ilk_endeks = models.FloatField(
+        _("İlk Endeks"),
+        help_text=_("Abonenin ilk endeks değerini giriniz."),
+        blank=True,
+        null=True,
+        default=0.0,
+    )
+
     geom = models.PointField(
         _("Geometri"),
         srid=settings.SRID,

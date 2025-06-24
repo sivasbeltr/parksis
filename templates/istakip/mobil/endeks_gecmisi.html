@@ -1,0 +1,189 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}Endeks Geçmişi - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold">Endeks Geçmişi</h1>
+                <p class="text-indigo-100 text-sm">Girilen endeks kayıtları</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-history text-xl"></i>
+            </div>
+        </div>
+        
+        <!-- İstatistik -->
+        <div class="mt-3 pt-3 border-t border-white/20">
+            <div class="text-sm opacity-90">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Bugün {{ bugunku_endeksler }} endeks girişi yapıldı
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+        <form method="get" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Başlangıç Tarihi -->
+                <div>
+                    <label for="tarih_baslangic" class="block text-sm font-medium text-gray-700 mb-1">
+                        Başlangıç
+                    </label>
+                    <input type="date" id="tarih_baslangic" name="tarih_baslangic" 
+                           value="{{ tarih_baslangic }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                </div>
+                
+                <!-- Bitiş Tarihi -->
+                <div>
+                    <label for="tarih_bitis" class="block text-sm font-medium text-gray-700 mb-1">
+                        Bitiş
+                    </label>
+                    <input type="date" id="tarih_bitis" name="tarih_bitis" 
+                           value="{{ tarih_bitis }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                </div>
+            </div>
+            
+            <!-- Abone Tipi -->
+            <div>
+                <label for="abone_tipi" class="block text-sm font-medium text-gray-700 mb-1">
+                    Abone Tipi
+                </label>
+                <select name="abone_tipi" id="abone_tipi" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Tüm Tipler</option>
+                    <option value="elektrik" {% if abone_tipi_filter == "elektrik" %}selected{% endif %}>Elektrik</option>
+                    <option value="su" {% if abone_tipi_filter == "su" %}selected{% endif %}>Su</option>
+                    <option value="dogalgaz" {% if abone_tipi_filter == "dogalgaz" %}selected{% endif %}>Doğalgaz</option>
+                    <option value="telefon" {% if abone_tipi_filter == "telefon" %}selected{% endif %}>Telefon</option>
+                    <option value="internet" {% if abone_tipi_filter == "internet" %}selected{% endif %}>İnternet</option>
+                </select>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium">
+                    <i class="fas fa-search mr-2"></i>Filtrele
+                </button>
+                <a href="{% url 'istakip:mobil_endeks_gecmisi' %}" 
+                   class="bg-gray-500 text-white py-2 px-4 rounded-lg">
+                    <i class="fas fa-undo"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Endeks Listesi -->
+    <div class="space-y-3">
+        {% for endeks in endeksler %}
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white
+                        {% if endeks.park_abone.abone_tipi == 'elektrik' %}bg-yellow-500
+                        {% elif endeks.park_abone.abone_tipi == 'su' %}bg-blue-500
+                        {% elif endeks.park_abone.abone_tipi == 'dogalgaz' %}bg-orange-500
+                        {% else %}bg-gray-500{% endif %}">
+                        {% if endeks.park_abone.abone_tipi == 'elektrik' %}⚡
+                        {% elif endeks.park_abone.abone_tipi == 'su' %}💧
+                        {% elif endeks.park_abone.abone_tipi == 'dogalgaz' %}🔥
+                        {% else %}🔌{% endif %}
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ endeks.park_abone.get_abone_tipi_display }}</div>
+                        <div class="text-sm text-gray-600">{{ endeks.park_abone.abone_no }}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-gray-900">{{ endeks.endeks_degeri|floatformat:2 }}</div>
+                    <div class="text-xs text-gray-500">{{ endeks.endeks_tarihi|date:"d.m.Y" }}</div>
+                </div>
+            </div>
+            
+            <!-- Park Bilgisi -->
+            <div class="pt-3 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-tree mr-1"></i>{{ endeks.park_abone.park.ad }}
+                    <span class="text-gray-400 ml-2">{{ endeks.park_abone.park.mahalle.ad }}</span>
+                </div>
+            </div>
+            
+            <!-- Girilen Tarih -->
+            <div class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-clock mr-1"></i>{{ endeks.created_at|date:"d.m.Y H:i" }} tarihinde girildi
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-history text-4xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Endeks kaydı bulunamadı</h3>
+            <p class="text-gray-600 text-sm mb-4">Seçili kriterlere uygun endeks kaydı bulunmuyor.</p>
+            <a href="{% url 'istakip:mobil_abone_listesi' %}" 
+               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">
+                <i class="fas fa-plus mr-2"></i>Endeks Ekle
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sayfalama -->
+    {% if endeksler.has_other_pages %}
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                Toplam {{ endeksler.paginator.count }} kayıt
+            </div>
+            <div class="flex space-x-2">
+                {% if endeksler.has_previous %}
+                <a href="?page={{ endeksler.previous_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm">
+                    {{ endeksler.number }}
+                </span>
+                
+                {% if endeksler.has_next %}
+                <a href="?page={{ endeksler.next_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Alt Navigasyon -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+    <div class="flex justify-center space-x-6">
+        <a href="{% url 'istakip:mobil_abone_listesi' %}" 
+           class="flex flex-col items-center text-gray-400">
+            <i class="fas fa-plug text-xl mb-1"></i>
+            <span class="text-xs">Aboneler</span>
+        </a>
+        <a href="{% url 'istakip:mobil_endeks_gecmisi' %}" 
+           class="flex flex-col items-center text-indigo-600">
+            <i class="fas fa-history text-xl mb-1"></i>
+            <span class="text-xs">Geçmiş</span>
+        </a>
+        <a href="{% url 'istakip:mobil_sorun_bildir' %}" 
+           class="flex flex-col items-center text-gray-400">
+            <i class="fas fa-exclamation-triangle text-xl mb-1"></i>
+            <span class="text-xs">Sorun Bildir</span>
+        </a>
+    </div>
+</div>
+
+<div class="h-20"></div> <!-- Alt navigasyon için boşluk -->
+{% endblock %}

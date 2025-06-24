@@ -1,0 +1,249 @@
+{% extends 'istakip/mobil/layout_mobil.html' %}
+
+{% block title %}Abone Listesi - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold">Abone Listesi</h1>
+                <p class="text-green-100 text-sm">Endeks girişi için abone seçin</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-plug text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Mesajları -->
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="rounded-lg border p-3 {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle text-red-600"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                    {% endif %}
+                </div>
+                <div class="ml-2 flex-1">
+                    <p class="text-sm font-medium">{{ message }}</p>
+                </div>
+                <div class="ml-2">
+                    <button onclick="this.parentElement.parentElement.parentElement.style.display='none'" class="text-current opacity-60 hover:opacity-100">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Filtreleme -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+        <form method="get" class="space-y-3">
+            <div class="grid grid-cols-1 gap-3">
+                <!-- Arama -->
+                <div>
+                    <input type="text" name="search" value="{{ search_query }}" 
+                           placeholder="Park adı veya abone no ara..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Abone Tipi -->
+                    <select name="abone_tipi" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="">Tüm Tipler</option>
+                        <option value="elektrik" {% if abone_tipi_filter == "elektrik" %}selected{% endif %}>Elektrik</option>
+                        <option value="su" {% if abone_tipi_filter == "su" %}selected{% endif %}>Su</option>
+                        <option value="dogalgaz" {% if abone_tipi_filter == "dogalgaz" %}selected{% endif %}>Doğalgaz</option>
+                        <option value="telefon" {% if abone_tipi_filter == "telefon" %}selected{% endif %}>Telefon</option>
+                        <option value="internet" {% if abone_tipi_filter == "internet" %}selected{% endif %}>İnternet</option>
+                    </select>
+                    
+                    <!-- Park -->
+                    <select name="park" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="">Tüm Parklar</option>
+                        {% for park in sorumlu_parklar %}
+                            <option value="{{ park.uuid }}" {% if park_filter == park.uuid|stringformat:"s" %}selected{% endif %}>
+                                {{ park.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium">
+                    <i class="fas fa-search mr-2"></i>Filtrele
+                </button>
+                <a href="{% url 'istakip:mobil_abone_listesi' %}" 
+                   class="bg-gray-500 text-white py-2 px-4 rounded-lg">
+                    <i class="fas fa-undo"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Abone Listesi -->
+    <div class="space-y-3">
+        {% for abone in aboneler %}
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <!-- Abone Bilgileri -->
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white
+                            {% if abone.abone_tipi == 'elektrik' %}bg-yellow-500
+                            {% elif abone.abone_tipi == 'su' %}bg-blue-500
+                            {% elif abone.abone_tipi == 'dogalgaz' %}bg-orange-500
+                            {% else %}bg-gray-500{% endif %}">
+                            {% if abone.abone_tipi == 'elektrik' %}⚡
+                            {% elif abone.abone_tipi == 'su' %}💧
+                            {% elif abone.abone_tipi == 'dogalgaz' %}🔥
+                            {% else %}🔌{% endif %}
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ abone.get_abone_tipi_display }}</div>
+                            <div class="text-sm text-gray-600">{{ abone.abone_no }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Park Bilgisi -->
+                    <div class="text-sm text-gray-600 mb-2">
+                        <i class="fas fa-tree mr-1"></i>{{ abone.park.ad }}
+                        <span class="text-gray-400">- {{ abone.park.mahalle.ad }}</span>
+                    </div>
+                    
+                    <!-- Son Endeks Bilgisi -->
+                    <div class="flex items-center space-x-4 text-sm">
+                        <div class="flex items-center">
+                            <span class="text-gray-500 mr-1">Son Endeks:</span>
+                            <span class="font-medium">
+                                {% if abone.son_endeks %}
+                                    {{ abone.son_endeks.endeks_degeri|floatformat:2 }}
+                                {% else %}
+                                    {{ abone.ilk_endeks|default:"0"|floatformat:2 }} (İlk)
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if abone.son_endeks_tarihi %}
+                        <div class="flex items-center">
+                            <span class="text-gray-500 mr-1">Tarih:</span>
+                            <span class="text-sm">{{ abone.son_endeks_tarihi|date:"d.m.Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Bugün Endeks Durumu -->
+                    {% if abone.bugun_endeks_var %}
+                    <div class="mt-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                            <i class="fas fa-check mr-1"></i>Bugün endeks girildi
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Endeks Ekle Butonu -->
+                <div class="ml-4">
+                    <a href="{% url 'istakip:mobil_endeks_ekle' abone.uuid %}" 
+                       class="inline-flex items-center justify-center w-12 h-12 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-plus text-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8 text-center">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-plug text-4xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Abone bulunamadı</h3>
+            <p class="text-gray-600 text-sm">Sorumlu olduğunuz parklarda abone kaydı bulunmuyor veya filtreleme kriterlerinize uygun abone yok.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sayfalama -->
+    {% if aboneler.has_other_pages %}
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                Toplam {{ aboneler.paginator.count }} abone
+            </div>
+            <div class="flex space-x-2">
+                {% if aboneler.has_previous %}
+                <a href="?page={{ aboneler.previous_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 bg-green-600 text-white rounded-lg text-sm">
+                    {{ aboneler.number }}
+                </span>
+                
+                {% if aboneler.has_next %}
+                <a href="?page={{ aboneler.next_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Auto-hide success messages after 5 seconds -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide success messages after 5 seconds
+    const successMessages = document.querySelectorAll('.bg-green-50');
+    successMessages.forEach(function(message) {
+        if (message.textContent.includes('✅')) {
+            setTimeout(function() {
+                message.style.transition = 'opacity 0.5s ease-out';
+                message.style.opacity = '0';
+                setTimeout(function() {
+                    message.style.display = 'none';
+                }, 500);
+            }, 5000);
+        }
+    });
+});
+</script>
+
+<!-- Alt Navigasyon -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+    <div class="flex justify-center space-x-6">
+        <a href="{% url 'istakip:mobil_abone_listesi' %}" 
+           class="flex flex-col items-center text-green-600">
+            <i class="fas fa-plug text-xl mb-1"></i>
+            <span class="text-xs">Aboneler</span>
+        </a>
+        <a href="{% url 'istakip:mobil_endeks_gecmisi' %}" 
+           class="flex flex-col items-center text-gray-400">
+            <i class="fas fa-history text-xl mb-1"></i>
+            <span class="text-xs">Geçmiş</span>
+        </a>
+        <a href="{% url 'istakip:mobil_sorun_bildir' %}" 
+           class="flex flex-col items-center text-gray-400">
+            <i class="fas fa-exclamation-triangle text-xl mb-1"></i>
+            <span class="text-xs">Sorun Bildir</span>
+        </a>
+    </div>
+</div>
+
+<div class="h-20"></div> <!-- Alt navigasyon için boşluk -->
+{% endblock %}

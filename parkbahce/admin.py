@@ -232,7 +232,19 @@ class ParkAboneAdmin(admin.GISModelAdmin):
         },
     }
     fieldsets = (
-        (None, {"fields": ("park", "abone_tipi", "abone_no", "abone_tarihi", "geom")}),
+        (
+            None,
+            {
+                "fields": (
+                    "park",
+                    "abone_tipi",
+                    "abone_no",
+                    "abone_tarihi",
+                    "ilk_endeks",
+                    "geom",
+                )
+            },
+        ),
         (
             _("Ekstra Veri ve Meta"),
             {"fields": ("extra_data", "osm_id"), "classes": ("collapse",)},

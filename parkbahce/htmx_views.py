@@ -304,7 +304,7 @@ def park_aboneler_tab_htmx(request, park_uuid):
 
     aboneler = park.aboneler.prefetch_related(
         models.Prefetch(
-            "endeksler", queryset=AboneEndeks.objects.order_by("-endeks_tarihi")
+            "endeksler", queryset=AboneEndeks.objects.order_by("-endeks_degeri")
         )
     ).order_by("abone_tipi", "abone_no")
 

@@ -16,14 +16,12 @@ from django.views.decorators.http import require_http_methods
 
 from ortak.models import Mahalle
 
-from .forms import EndeksForm
 from .models import (
     ElektrikHat,
     ElektrikNokta,
     Habitat,
     KanalHat,
     Park,
-    ParkAbone,
     ParkBina,
     ParkDonati,
     ParkOyunGrup,

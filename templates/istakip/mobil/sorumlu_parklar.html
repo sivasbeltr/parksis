@@ -1,179 +1,173 @@
 {% extends 'istakip/mobil/layout_mobil.html' %}
 
-{% block title %}Sorumlu Olduğum Parklar - Saha Personeli{% endblock %}
+{% block title %}Sorumlu Parklar - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="space-y-6 p-4 animate-fade-in">
-    <!-- Başlık ve İstatistikler -->
-    <div class="bg-white rounded-2xl shadow-soft p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h1 class="text-xl font-bold text-gray-900 flex items-center">
-                <i class="fas fa-tree text-park-green-600 mr-2"></i>
-                Sorumlu Olduğum Parklar
-            </h1>
-            {% if personel %}
-                <div class="text-sm text-gray-600">
-                    <i class="fas fa-user mr-1"></i>{{ personel.ad }}
-                </div>
-            {% endif %}
-        </div>
-        
-        {% if parklar_with_status %}
-            <!-- Özet Kartları -->
-            <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-park-green-50 p-4 rounded-xl text-center">
-                    <div class="text-2xl font-bold text-park-green-700">{{ parklar|length }}</div>
-                    <div class="text-sm text-park-green-600">Toplam Park</div>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-xl text-center">
-                    <div class="text-2xl font-bold text-blue-700">
-                        {% with bugun_yapilan=parklar_with_status|length %}
-                            {% for park_info in parklar_with_status %}
-                                {% if park_info.bugun_kontrolu_yapildi %}
-                                    {% if forloop.first %}1{% else %}{{ forloop.counter }}{% endif %}
-                                {% endif %}
-                            {% empty %}0{% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="text-sm text-blue-600">Bugün Kontrol</div>
-                </div>
-                <div class="bg-orange-50 p-4 rounded-xl text-center">
-                    <div class="text-2xl font-bold text-orange-700">
-                        {% with bekleyen=0 %}
-                            {% for park_info in parklar_with_status %}
-                                {% if not park_info.bugun_kontrolu_yapildi %}
-                                    {% if forloop.first %}1{% else %}{{ bekleyen|add:1 }}{% endif %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
-                    <div class="text-sm text-orange-600">Bekleyen</div>
-                </div>
+<div class="space-y-3 animate-fade-in">
+    <!-- Kompakt Header -->
+    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-4 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-lg font-bold flex items-center">
+                    <i class="fas fa-tree mr-2"></i>
+                    Sorumlu Parklar
+                </h1>
+                {% if personel %}
+                    <p class="text-green-100 text-sm">{{ personel.ad }}</p>
+                {% endif %}
             </div>
-        {% endif %}
+            <div class="text-right">
+                <div class="text-xl font-bold">{{ toplam_park_sayisi|default:0 }}</div>
+                <div class="text-green-100 text-xs">Park</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Park Listesi -->
+    <!-- Kompakt İstatistikler -->
     {% if parklar_with_status %}
-        <div class="space-y-4">
+    <div class="grid grid-cols-2 gap-2">
+        <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-lg font-bold text-green-600">{{ bugun_kontrol_sayisi }}</div>
+                    <div class="text-xs text-gray-600">Bugün Kontrol</div>
+                </div>
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-sm"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-lg font-bold text-orange-600">{{ bekleyen_sayisi }}</div>
+                    <div class="text-xs text-gray-600">Bekleyen</div>
+                </div>
+                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-clock text-orange-600 text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Kompakt Park Listesi -->
+    {% if parklar_with_status %}
+        <div class="space-y-2">
             {% for park_info in parklar_with_status %}
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ park_info.park.ad }}</h3>
-                                <div class="space-y-1 text-sm text-gray-600">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-marker-alt w-4 mr-2"></i>
-                                        <span>{{ park_info.park.mahalle.ad }}</span>
-                                    </div>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-3">
+                        <!-- Park Başlığı ve Durum -->
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-900 text-sm leading-tight truncate">{{ park_info.park.ad }}</h3>
+                                <div class="flex items-center text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-map-marker-alt w-3 mr-1"></i>
+                                    <span class="truncate">{{ park_info.park.mahalle.ad }}</span>
                                     {% if park_info.park.alan %}
-                                        <div class="flex items-center">
-                                            <i class="fas fa-ruler-combined w-4 mr-2"></i>
-                                            <span>{{ park_info.park.alan|floatformat:0 }} m²</span>
-                                        </div>
+                                        <span class="mx-1">•</span>
+                                        <span>{{ park_info.park.alan|floatformat:0 }}m²</span>
                                     {% endif %}
                                 </div>
                             </div>
                             
-                            <!-- Kontrol Durumu -->
-                            <div class="flex flex-col items-end space-y-2">
-                                {% if park_info.bugun_kontrolu_yapildi %}
-                                    <span class="bg-park-green-100 text-park-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        <i class="fas fa-check mr-1"></i>Bugün Kontrol Edildi
-                                    </span>
-                                {% else %}
-                                    <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        <i class="fas fa-clock mr-1"></i>Kontrol Bekliyor
-                                    </span>
-                                {% endif %}
-                                
-                                {% if park_info.bugun_kontrol_sayisi > 1 %}
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                        {{ park_info.bugun_kontrol_sayisi }} kez kontrol edildi
-                                    </span>
-                                {% endif %}
-                            </div>
+                            <!-- Kontrol Durumu Badge -->
+                            {% if park_info.bugun_kontrolu_yapildi %}
+                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium flex-shrink-0 ml-2">
+                                    <i class="fas fa-check mr-1"></i>Kontrol Edildi
+                                </span>
+                            {% else %}
+                                <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-medium flex-shrink-0 ml-2">
+                                    <i class="fas fa-clock mr-1"></i>Bekliyor
+                                </span>
+                            {% endif %}
                         </div>
                         
-                        <!-- Son Kontrol Bilgisi -->
+                        <!-- Son Kontrol Bilgisi (Çok Kompakt) -->
                         {% if park_info.son_kontrol %}
-                            <div class="bg-gray-50 p-4 rounded-xl mb-4">
-                                <div class="text-sm text-gray-600 mb-2">Son Kontrol:</div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium">{{ park_info.son_kontrol_tarihi|date:"d.m.Y H:i" }}</span>
-                                        {% if park_info.son_kontrol.durum == 'sorun_yok' %}
-                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                                                {{ park_info.son_kontrol_durumu }}
-                                            </span>
-                                        {% elif park_info.son_kontrol.durum == 'sorun_var' %}
-                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                                                {{ park_info.son_kontrol_durumu }}
-                                            </span>
-                                        {% elif park_info.son_kontrol.durum == 'acil' %}
-                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                                                {{ park_info.son_kontrol_durumu }}
-                                            </span>
-                                        {% else %}
-                                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
-                                                {{ park_info.son_kontrol_durumu }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    {% if park_info.son_kontrol.aciklama %}
-                                        <div class="text-xs text-gray-500">
-                                            "{{ park_info.son_kontrol.aciklama|truncatechars:100 }}"
-                                        </div>
+                            <div class="bg-gray-50 rounded p-2 mb-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-gray-600">{{ park_info.son_kontrol_tarihi|date:"d.m H:i" }}</span>
+                                    {% if park_info.son_kontrol.durum == 'sorun_yok' %}
+                                        <span class="bg-green-100 text-green-700 px-1 py-0.5 rounded text-xs">
+                                            Sorun Yok
+                                        </span>
+                                    {% elif park_info.son_kontrol.durum == 'sorun_var' %}
+                                        <span class="bg-yellow-100 text-yellow-700 px-1 py-0.5 rounded text-xs">
+                                            Sorun Var
+                                        </span>
+                                    {% elif park_info.son_kontrol.durum == 'acil' %}
+                                        <span class="bg-red-100 text-red-700 px-1 py-0.5 rounded text-xs">
+                                            Acil
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-xs">
+                                            {{ park_info.son_kontrol_durumu }}
+                                        </span>
                                     {% endif %}
                                 </div>
+                                {% if park_info.son_kontrol.aciklama %}
+                                    <div class="text-xs text-gray-500 mt-1 truncate">
+                                        "{{ park_info.son_kontrol.aciklama|truncatechars:40 }}"
+                                    </div>
+                                {% endif %}
                             </div>
                         {% else %}
-                            <div class="bg-gray-50 p-4 rounded-xl mb-4">
-                                <div class="text-sm text-gray-500 text-center">
+                            <div class="bg-gray-50 rounded p-2 mb-2">
+                                <div class="text-xs text-gray-500 text-center">
                                     <i class="fas fa-info-circle mr-1"></i>
                                     Henüz kontrol yapılmamış
                                 </div>
                             </div>
                         {% endif %}
                         
-                        <!-- Aksiyon Butonları -->
-                        <div class="flex space-x-3">
+                        <!-- Kompakt Aksiyon Butonları -->
+                        <div class="flex space-x-2">
                             <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}" 
-                               class="flex-1 bg-park-green-600 hover:bg-park-green-700 text-white font-medium py-3 px-4 rounded-xl text-center transition-colors">
-                                <i class="fas fa-plus mr-2"></i>Yeni Kontrol
+                               class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-2 rounded text-center transition-colors text-xs">
+                                <i class="fas fa-plus mr-1"></i>Kontrol
                             </a>
                             {% if not park_info.bugun_kontrolu_yapildi %}
                                 <a href="{% url 'istakip:mobil_sorun_bildir' %}?park_uuid={{ park_info.park.uuid }}&kontrol_tipi=rutin" 
-                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl text-center transition-colors">
-                                    <i class="fas fa-clipboard-check mr-2"></i>Hızlı Kontrol
+                                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-2 rounded text-center transition-colors text-xs">
+                                    <i class="fas fa-check mr-1"></i>Hızlı
                                 </a>
                             {% endif %}
                         </div>
+                        
+                        <!-- Çoklu Kontrol Göstergesi -->
+                        {% if park_info.bugun_kontrol_sayisi > 1 %}
+                            <div class="mt-2 text-center">
+                                <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                                    Bugün {{ park_info.bugun_kontrol_sayisi }}x kontrol edildi
+                                </span>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
-        
-        <!-- Sayfalama -->
+
+        <!-- Sayfalama (Kompakt) -->
         {% if is_paginated %}
-            <div class="flex justify-center mt-8">
-                <nav class="flex space-x-2">
+            <div class="flex justify-center mt-4">
+                <nav class="flex space-x-1">
                     {% if page_obj.has_previous %}
                         <a href="?page={{ page_obj.previous_page_number }}" 
-                           class="px-4 py-2 text-sm font-medium text-park-green-600 bg-white border border-park-green-300 rounded-lg hover:bg-park-green-50">
-                            Önceki
+                           class="px-3 py-2 text-sm font-medium text-green-600 bg-white border border-green-300 rounded hover:bg-green-50">
+                            ‹
                         </a>
                     {% endif %}
                     
-                    <span class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg">
-                        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                    <span class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded">
+                        {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
                     </span>
                     
                     {% if page_obj.has_next %}
                         <a href="?page={{ page_obj.next_page_number }}" 
-                           class="px-4 py-2 text-sm font-medium text-park-green-600 bg-white border border-park-green-300 rounded-lg hover:bg-park-green-50">
-                            Sonraki
+                           class="px-3 py-2 text-sm font-medium text-green-600 bg-white border border-green-300 rounded hover:bg-green-50">
+                            ›
                         </a>
                     {% endif %}
                 </nav>
@@ -181,21 +175,32 @@
         {% endif %}
         
     {% else %}
-        <!-- Boş Durum -->
-        <div class="text-center py-12">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-tree text-4xl text-gray-300"></i>
+        <!-- Boş Durum (Kompakt) -->
+        <div class="text-center py-6">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-tree text-2xl text-gray-300"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Henüz sorumlu olduğunuz park bulunmuyor</h3>
-            <p class="text-gray-500 mb-6">Park sorumluluğu almak için yönetici ile iletişime geçin.</p>
+            <h3 class="font-medium text-gray-900 mb-2">Henüz sorumlu park yok</h3>
+            <p class="text-gray-500 text-sm mb-4">Park sorumluluğu almak için yönetici ile iletişime geçin.</p>
             
             <a href="{% url 'istakip:mobil_sorun_bildir' %}" 
-               class="inline-flex items-center px-6 py-3 bg-park-green-600 text-white font-medium rounded-xl hover:bg-park-green-700 transition-colors">
+               class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 transition-colors text-sm">
                 <i class="fas fa-search mr-2"></i>
-                Park Ara ve Kontrol Et
+                Park Ara
             </a>
         </div>
     {% endif %}
 </div>
+
+<style>
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 {% endblock %}
 

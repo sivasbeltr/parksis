@@ -4,7 +4,8 @@ from . import htmx_views, mobil_views, views
 
 app_name = "istakip"
 
-urlpatterns = [  # Mobil Sorun İletim Sistemi
+urlpatterns = [
+    # Mobil Sorun İletim Sistemi
     path(
         "sorun-ilet/",
         mobil_views.MobilSorunBildirView.as_view(),
@@ -14,6 +15,27 @@ urlpatterns = [  # Mobil Sorun İletim Sistemi
         "mobil/kontrol-gonderildi/<uuid:kontrol_uuid>/",
         mobil_views.MobilKontrolGonderildiView.as_view(),
         name="mobil_kontrol_gonderildi",
+    ),
+    # Mobil Endeks Yönetimi
+    path(
+        "mobil/aboneler/",
+        mobil_views.MobilAboneListesiView.as_view(),
+        name="mobil_abone_listesi",
+    ),
+    path(
+        "mobil/abone/<uuid:abone_uuid>/endeks-ekle/",
+        mobil_views.MobilEndeksEkleView.as_view(),
+        name="mobil_endeks_ekle",
+    ),
+    path(
+        "mobil/endeks-gecmisi/",
+        mobil_views.MobilEndeksGecmisiView.as_view(),
+        name="mobil_endeks_gecmisi",
+    ),
+    path(
+        "mobil/endeks-kaydet/",
+        mobil_views.mobil_endeks_kaydet,
+        name="mobil_endeks_kaydet",
     ),
     # API Endpoints
     path(

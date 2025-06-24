@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from . import htmx_views, istatistik_views, rapor_views, views
+from . import abone_views, htmx_views, istatistik_views, rapor_views, views
 
 app_name = "parkbahce"
 
@@ -20,7 +20,8 @@ urlpatterns = [
     ),
     path("park-harita/", views.park_harita, name="park_harita"),
     path("istatistikler/", istatistik_views.istatistik_index, name="istatistik_index"),
-    path("raporlar/", rapor_views.rapor_index, name="rapor_index"),  # Altyapı yönetimi
+    path("raporlar/", rapor_views.rapor_index, name="rapor_index"),
+    # Altyapı yönetimi
     path("altyapi/sulama-sistemi/", views.sulama_sistemi, name="sulama_sistemi"),
     path(
         "altyapi/elektrik-altyapisi/",
@@ -30,10 +31,24 @@ urlpatterns = [
     path("altyapi/kanal-hatlari/", views.kanal_hatlari, name="kanal_hatlari"),
     path("altyapi/yol-agi/", views.yol_agi, name="yol_agi"),
     path(
-        "altyapi/abonelik-takibi/", views.abonelik_takibi, name="abonelik_takibi"
+        "altyapi/abonelik-takibi/", abone_views.abonelik_takibi, name="abonelik_takibi"
     ),  # Abone yönetimi
-    path("abone/<uuid:abone_uuid>/", views.abone_detail, name="abone_detail"),
-    path("abone/<uuid:abone_uuid>/endeks-ekle/", views.endeks_ekle, name="endeks_ekle"),
+    path("abone/ekle/", abone_views.abone_ekle, name="abone_ekle"),
+    path(
+        "abone/ekle/<uuid:park_uuid>/", abone_views.abone_ekle, name="abone_ekle_park"
+    ),
+    path("abone/<uuid:abone_uuid>/", abone_views.abone_detail, name="abone_detail"),
+    path(
+        "abone/<uuid:abone_uuid>/duzenle/",
+        abone_views.abone_duzenle,
+        name="abone_duzenle",
+    ),
+    path("abone/<uuid:abone_uuid>/sil/", abone_views.abone_sil, name="abone_sil"),
+    path(
+        "abone/<uuid:abone_uuid>/endeks-ekle/",
+        abone_views.endeks_ekle,
+        name="endeks_ekle",
+    ),
     # Park ve Mahalle detay HTMX endpoints
     path(
         "htmx/park-detail/<uuid:park_uuid>/",

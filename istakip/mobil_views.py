@@ -17,7 +17,8 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView, TemplateView
 
-from parkbahce.models import Park
+from parkbahce.forms import MobilEndeksForm
+from parkbahce.models import AboneEndeks, Park, ParkAbone
 
 from .forms import MobilKontrolForm
 from .models import (
@@ -934,6 +935,12 @@ class MobilSorumluParklarView(LoginRequiredMixin, ListView):
                     "son_kontrol_durumu": (
                         son_kontrol.get_durum_display() if son_kontrol else None
                     ),
+                    "kontrol_bekleyen": (
+                        not bugun_kontroller.exists()
+                        and (
+                            not son_kontrol or son_kontrol.kontrol_tarihi.date() < bugun
+                        )
+                    ),
                 }
                 parklar_with_status.append(park_info)
 
@@ -1239,6 +1246,363 @@ class MobilGorevOnayaGonderView(LoginRequiredMixin, TemplateView):
                     "success": True,
                     "message": "Görev başarıyla onaya gönderildi.",
                     "redirect_url": "{% url 'istakip:mobil_atanan_gorevler' %}",
+                }
+            )
+
+        except Personel.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Personel kaydınız bulunamadı."}
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"success": False, "message": f"Bir hata oluştu: {str(e)}"}
+            )
+
+
+class MobilAboneListesiView(LoginRequiredMixin, ListView):
+    """
+    Mobil abone listesi - endeks girişi için
+    """
+
+    model = ParkAbone
+    template_name = "istakip/mobil/abone_listesi.html"
+    context_object_name = "aboneler"
+    paginate_by = 20
+
+    def get_queryset(self):
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+            # Sadece personelin sorumlu olduğu parklardaki aboneleri getir
+            qs = (
+                ParkAbone.objects.filter(park__park_personeller__personel=personel)
+                .select_related("park", "park__mahalle")
+                .prefetch_related("endeksler")
+                .order_by("park__ad", "abone_tipi", "abone_no")
+            )
+
+            # Filtreleme
+            search_query = self.request.GET.get("search", "").strip()
+            abone_tipi_filter = self.request.GET.get("abone_tipi", "")
+            park_filter = self.request.GET.get("park", "")
+
+            if search_query:
+                qs = qs.filter(
+                    Q(park__ad__icontains=search_query)
+                    | Q(abone_no__icontains=search_query)
+                )
+
+            if abone_tipi_filter:
+                qs = qs.filter(abone_tipi=abone_tipi_filter)
+
+            if park_filter:
+                qs = qs.filter(park__uuid=park_filter)
+
+            return qs
+
+        except Personel.DoesNotExist:
+            return ParkAbone.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+
+            # Filtreleme için seçenekler
+            sorumlu_parklar = Park.objects.filter(
+                park_personeller__personel=personel
+            ).order_by("ad")
+
+            # Her abone için son endeks bilgisi
+            for abone in context["aboneler"]:
+                son_endeks = abone.endeksler.order_by("-endeks_degeri").first()
+                abone.son_endeks = son_endeks
+                abone.son_endeks_tarihi = (
+                    son_endeks.endeks_tarihi if son_endeks else None
+                )
+
+                # Bugün endeks girildi mi?
+                bugun = timezone.now().date()
+                abone.bugun_endeks_var = abone.endeksler.filter(
+                    endeks_tarihi=bugun
+                ).exists()
+
+            context.update(
+                {
+                    "personel": personel,
+                    "sorumlu_parklar": sorumlu_parklar,
+                    "search_query": self.request.GET.get("search", ""),
+                    "abone_tipi_filter": self.request.GET.get("abone_tipi", ""),
+                    "park_filter": self.request.GET.get("park", ""),
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["personel"] = None
+
+        return context
+
+
+class MobilEndeksEkleView(LoginRequiredMixin, TemplateView):
+    """
+    Mobil endeks ekleme sayfası
+    """
+
+    template_name = "istakip/mobil/endeks_ekle.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+            abone_uuid = kwargs.get("abone_uuid")
+
+            # Aboneyi getir ve yetkiyi kontrol et
+            abone = get_object_or_404(
+                ParkAbone.objects.filter(park__park_personeller__personel=personel)
+                .select_related("park", "park__mahalle")
+                .prefetch_related("endeksler"),
+                uuid=abone_uuid,
+            )
+
+            # Son 5 endeks kaydı
+            son_endeksler = abone.endeksler.order_by("-endeks_degeri")[:5]
+
+            # Son endeks değeri (en büyük endeks değeri)
+            son_endeks = abone.endeksler.order_by("-endeks_degeri").first()
+
+            # Form
+            form = MobilEndeksForm(park_abone=abone)
+
+            context.update(
+                {
+                    "abone": abone,
+                    "personel": personel,
+                    "form": form,
+                    "son_endeksler": son_endeksler,
+                    "son_endeks": son_endeks,
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["abone"] = None
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Endeks kaydetme işlemi
+        """
+        try:
+            personel = Personel.objects.get(user=request.user)
+            abone_uuid = kwargs.get("abone_uuid")
+
+            # Aboneyi getir ve yetkiyi kontrol et
+            abone = get_object_or_404(
+                ParkAbone.objects.filter(park__park_personeller__personel=personel),
+                uuid=abone_uuid,
+            )
+
+            form = MobilEndeksForm(request.POST, park_abone=abone)
+
+            if form.is_valid():
+                endeks = form.save(commit=False)
+                endeks.park_abone = abone
+                endeks.save()
+
+                messages.success(
+                    request,
+                    f"✅ {abone.get_abone_tipi_display()} abonesi ({abone.abone_no}) için "
+                    f"endeks değeri {endeks.endeks_degeri} başarıyla kaydedildi.",
+                )
+                return redirect("istakip:mobil_abone_listesi")
+            else:
+                # Form hatalarını mesaj olarak da göster (mobil için ekstra)
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"❌ {error}")
+
+                # Context'i yeniden hazırla ve aynı sayfayı render et
+                context = self.get_context_data(**kwargs)
+                context["form"] = form  # Hatalı formu tekrar gönder
+                return render(request, self.template_name, context)
+
+        except Personel.DoesNotExist:
+            messages.error(request, "❌ Personel kaydınız bulunamadı.")
+            return redirect("istakip:mobil_abone_listesi")
+        except Exception as e:
+            messages.error(request, f"❌ Beklenmeyen bir hata oluştu: {str(e)}")
+            return redirect("istakip:mobil_abone_listesi")
+
+
+class MobilEndeksGecmisiView(LoginRequiredMixin, ListView):
+    """
+    Mobil endeks geçmişi listesi
+    """
+
+    model = AboneEndeks
+    template_name = "istakip/mobil/endeks_gecmisi.html"
+    context_object_name = "endeksler"
+    paginate_by = 30
+
+    def get_queryset(self):
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+
+            # Sadece personelin sorumlu olduğu parklardaki endeksleri getir
+            qs = (
+                AboneEndeks.objects.filter(
+                    park_abone__park__park_personeller__personel=personel
+                )
+                .select_related(
+                    "park_abone", "park_abone__park", "park_abone__park__mahalle"
+                )
+                .order_by("-endeks_tarihi", "-created_at")
+            )
+
+            # Filtreleme
+            tarih_baslangic = self.request.GET.get("tarih_baslangic")
+            tarih_bitis = self.request.GET.get("tarih_bitis")
+            abone_tipi_filter = self.request.GET.get("abone_tipi", "")
+
+            if tarih_baslangic:
+                try:
+                    baslangic_tarih = datetime.strptime(
+                        tarih_baslangic, "%Y-%m-%d"
+                    ).date()
+                    qs = qs.filter(endeks_tarihi__gte=baslangic_tarih)
+                except ValueError:
+                    pass
+
+            if tarih_bitis:
+                try:
+                    bitis_tarih = datetime.strptime(tarih_bitis, "%Y-%m-%d").date()
+                    qs = qs.filter(endeks_tarihi__lte=bitis_tarih)
+                except ValueError:
+                    pass
+
+            if abone_tipi_filter:
+                qs = qs.filter(park_abone__abone_tipi=abone_tipi_filter)
+
+            return qs
+
+        except Personel.DoesNotExist:
+            return AboneEndeks.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        try:
+            personel = Personel.objects.get(user=self.request.user)
+
+            # İstatistikler
+            bugun = timezone.now().date()
+            bugunku_endeksler = AboneEndeks.objects.filter(
+                park_abone__park__park_personeller__personel=personel,
+                endeks_tarihi=bugun,
+            ).count()
+
+            context.update(
+                {
+                    "personel": personel,
+                    "bugunku_endeksler": bugunku_endeksler,
+                    "tarih_baslangic": self.request.GET.get("tarih_baslangic", ""),
+                    "tarih_bitis": self.request.GET.get("tarih_bitis", ""),
+                    "abone_tipi_filter": self.request.GET.get("abone_tipi", ""),
+                }
+            )
+
+        except Personel.DoesNotExist:
+            context["personel"] = None
+
+        return context
+
+
+@login_required
+def mobil_endeks_kaydet(request):
+    """
+    AJAX endeks kaydetme API
+    """
+    if request.method == "POST":
+        try:
+            personel = Personel.objects.get(user=request.user)
+
+            abone_uuid = request.POST.get("abone_uuid")
+            endeks_tarihi = request.POST.get("endeks_tarihi")
+            endeks_degeri = request.POST.get("endeks_degeri")
+
+            # Aboneyi getir ve yetkiyi kontrol et
+            abone = get_object_or_404(
+                ParkAbone.objects.filter(park__park_personeller__personel=personel),
+                uuid=abone_uuid,
+            )
+
+            # Basit validasyon
+            if not endeks_tarihi or not endeks_degeri:
+                return JsonResponse(
+                    {"success": False, "message": "Tüm alanlar zorunludur."}
+                )
+
+            try:
+                endeks_tarihi = datetime.strptime(endeks_tarihi, "%Y-%m-%d").date()
+                endeks_degeri = float(endeks_degeri)
+            except (ValueError, TypeError):
+                return JsonResponse(
+                    {"success": False, "message": "Geçersiz tarih veya endeks değeri."}
+                )
+
+            # Aynı tarihte endeks var mı kontrol et
+            if AboneEndeks.objects.filter(
+                park_abone=abone, endeks_tarihi=endeks_tarihi
+            ).exists():
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Bu tarihte zaten bir endeks kaydı bulunmaktadır.",
+                    }
+                )
+
+            # Son endeks kontrolü (en büyük endeks değeri)
+            son_endeks = abone.endeksler.order_by("-endeks_degeri").first()
+            if son_endeks and endeks_degeri < son_endeks.endeks_degeri:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": f"Endeks değeri son kayıtlı değerden ({son_endeks.endeks_degeri}) küçük olamaz.",
+                    }
+                )
+            elif not son_endeks and endeks_degeri < (abone.ilk_endeks or 0):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": f"Endeks değeri ilk endeks değerinden ({abone.ilk_endeks or 0}) küçük olamaz.",
+                    }
+                )
+
+            # Endeks kaydını oluştur
+            endeks = AboneEndeks.objects.create(
+                park_abone=abone,
+                endeks_tarihi=endeks_tarihi,
+                endeks_degeri=endeks_degeri,
+            )
+
+            # Flash mesaj ekle
+            messages.success(
+                request,
+                f"✅ {abone.get_abone_tipi_display()} abonesi ({abone.abone_no}) için "
+                f"endeks değeri {endeks.endeks_degeri} başarıyla kaydedildi.",
+            )
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Endeks başarıyla kaydedildi.",
+                    "data": {
+                        "endeks_degeri": endeks.endeks_degeri,
+                        "endeks_tarihi": endeks.endeks_tarihi.strftime("%d.%m.%Y"),
+                        "abone_tipi": abone.get_abone_tipi_display(),
+                        "abone_no": abone.abone_no,
+                    },
                 }
             )
 
