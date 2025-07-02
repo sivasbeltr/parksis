@@ -191,9 +191,9 @@
                     <!-- Task Type -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Görev Tipi
+                            Görev Tipi <span class="text-red-500">*</span>
                         </label>
-                        <select name="gorev_tipi" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <select name="gorev_tipi" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-park-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">Görev tipi seçiniz...</option>
                             {% for tip in gorev_tipleri %}
                             <option value="{{ tip.id }}">{{ tip.ad }}</option>

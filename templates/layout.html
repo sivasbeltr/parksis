@@ -26,6 +26,10 @@
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Toastify (jQuery'siz toast kütüphanesi) -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
       <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
@@ -273,12 +277,86 @@
         <!-- Include Navbar -->
         {% include 'partials/navbar.html' %}
 
-        <!-- Main Content Area -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
-            {% block content %}
-            <!-- Content will be inserted here -->
-            {% endblock %}
-        </main>
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+        {% block content %}
+        <!-- Content will be inserted here -->
+        {% endblock %}
+    </main>
+
+    <!-- Django Flash Messages -->
+    {% if messages %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                // Mesaj tipine göre Toastify konfigürasyonu
+                let toastConfig = {
+                    text: "{{ message|escapejs }}",
+                    duration: 5000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {},
+                    onClick: function(){}
+                };
+
+                // Mesaj tipine göre stil ve ikon ayarları
+                {% if message.tags == 'success' %}
+                    toastConfig.text = "✅ {{ message|escapejs }}";
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                        color: "#ffffff",
+                        border: "1px solid #16a34a",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
+                    };
+                {% elif message.tags == 'error' %}
+                    toastConfig.text = "❌ {{ message|escapejs }}";
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                        color: "#ffffff",
+                        border: "1px solid #dc2626",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)"
+                    };
+                    toastConfig.duration = 7000; // Hata mesajları daha uzun süre gösterilsin
+                {% elif message.tags == 'warning' %}
+                    toastConfig.text = "⚠️ {{ message|escapejs }}";
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                        color: "#ffffff",
+                        border: "1px solid #d97706",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)"
+                    };
+                    toastConfig.duration = 6000;
+                {% elif message.tags == 'info' %}
+                    toastConfig.text = "ℹ️ {{ message|escapejs }}";
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                        color: "#ffffff",
+                        border: "1px solid #2563eb",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)"
+                    };
+                {% else %}
+                    toastConfig.text = "📢 {{ message|escapejs }}";
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #6b7280, #4b5563)",
+                        color: "#ffffff",
+                        border: "1px solid #4b5563",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(107, 114, 128, 0.3)"
+                    };
+                {% endif %}
+
+                // Toast'u göster
+                Toastify(toastConfig).showToast();
+            {% endfor %}
+        });
+        </script>
+    {% endif %}
 
         <!-- Footer -->
         <footer class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700">
@@ -331,6 +409,78 @@
         
         window.hideLoading = function() {
             document.getElementById('loading').classList.add('hidden');
+        };
+
+        // Toast gösterme fonksiyonu
+        window.showToast = function(message, type = 'info', duration = 5000) {
+            let toastConfig = {
+                text: message,
+                duration: duration,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {},
+                onClick: function(){}
+            };
+
+            // Mesaj tipine göre stil ve ikon ayarları
+            switch(type) {
+                case 'success':
+                    toastConfig.text = "✅ " + message;
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                        color: "#ffffff",
+                        border: "1px solid #16a34a",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
+                    };
+                    break;
+                case 'error':
+                    toastConfig.text = "❌ " + message;
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                        color: "#ffffff",
+                        border: "1px solid #dc2626",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)"
+                    };
+                    toastConfig.duration = 7000;
+                    break;
+                case 'warning':
+                    toastConfig.text = "⚠️ " + message;
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                        color: "#ffffff",
+                        border: "1px solid #d97706",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)"
+                    };
+                    toastConfig.duration = 6000;
+                    break;
+                case 'info':
+                    toastConfig.text = "ℹ️ " + message;
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                        color: "#ffffff",
+                        border: "1px solid #2563eb",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)"
+                    };
+                    break;
+                default:
+                    toastConfig.text = "📢 " + message;
+                    toastConfig.style = {
+                        background: "linear-gradient(135deg, #6b7280, #4b5563)",
+                        color: "#ffffff",
+                        border: "1px solid #4b5563",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(107, 114, 128, 0.3)"
+                    };
+            }
+
+            // Toast'u göster
+            Toastify(toastConfig).showToast();
         };
 
         // API Base URL
