@@ -158,21 +158,23 @@
             </div>
         </div>
 
-        <!-- Maintenance Needed -->
+        <!-- Maintenance Needed & Problem Reports -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-soft border border-gray-200 dark:border-gray-700 p-6 hover-lift animate-card">
-            <div class="flex items-center">
-                <div class="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-800/30 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-wrench text-red-600 dark:text-red-400 text-2xl"></i>
+            <a href="{% url 'istakip:sorun_bildirimleri' %}" class="block">
+                <div class="flex items-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-800/30 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-2xl"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bekleyen Sorunlar</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ bekleyen_sorunlar }}</p>
+                        <p class="text-xs text-red-600 dark:text-red-400 flex items-center mt-1">
+                            <i class="fas fa-clock mr-1"></i>
+                            Müdahale bekliyor
+                        </p>
+                    </div>
                 </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bakım Gereken</p>
-                    <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ maintenance_needed }}</p>
-                    <p class="text-xs text-red-600 dark:text-red-400 flex items-center mt-1">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        6+ ay eski parklar
-                    </p>
-                </div>
-            </div>
+            </a>
         </div>
     </div>    <!-- Recent Parks & Quick Actions Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">        <!-- Recent Parks -->

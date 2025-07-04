@@ -96,6 +96,13 @@ def index(request):
     six_months_ago = timezone.now() - timedelta(days=180)
     maintenance_needed = Park.objects.filter(created_at__lte=six_months_ago).count()
 
+    # Bekleyen sorun bildirimleri (tamamlanmamış ve iptal edilmemiş)
+    from istakip.models import GunlukKontrol
+
+    bekleyen_sorunlar = GunlukKontrol.objects.filter(
+        durum__in=["sorun_var", "acil", "gozden_gecirildi", "ise_donusturuldu"]
+    ).count()
+
     # En büyük parklar (alan bazında)
     largest_parks = (
         Park.objects.filter(alan__isnull=False, alan__gt=0)
@@ -136,6 +143,8 @@ def index(request):
         "total_equipment": total_equipment,
         "total_habitats": total_habitats,
         "total_users": total_users,
+        "bekleyen_sorunlar": bekleyen_sorunlar,
+        # Park yönetim sistemi istatistikleri
         # Ek istatistikler
         "total_playground_groups": total_playground_groups,
         "total_sports_areas": total_sports_areas,
