@@ -3,19 +3,14 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / ".env")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("APP_DEBUG", "False") == "True"
@@ -80,6 +75,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "parksis.wsgi.application"
+
+
+HANDLER404 = "parksis.views.custom_404"
+HANDLER500 = "parksis.views.custom_500"
+HANDLER403 = "parksis.views.custom_403"
 
 
 # Database
@@ -150,7 +150,7 @@ DEFAULT_MAP_LATITUDE = 39.7480
 DEFAULT_MAP_LONGITUDE = 37.0145
 DEFAULT_MAP_ZOOM = 13
 
-DISTANCE_PRECISION = 100
+DISTANCE_PRECISION = 500
 if DEBUG:
     DISTANCE_PRECISION = 500  # metre
 
@@ -163,8 +163,7 @@ CACHES = {
     }
 }
 
-# MEDIA_URL = "/media/"
-# MEDIA_ROOT = BASE_DIR / "media"
+
 USE_MINIO = os.getenv("USE_MINIO", "False").lower() == "true"
 
 
@@ -174,7 +173,7 @@ if USE_MINIO:
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", os.getenv("AWS_ACCESS_KEY_ID"))
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", os.getenv("AWS_SECRET_ACCESS_KEY"))
     MINIO_BUCKET_NAME = os.getenv(
-        "MINIO_BUCKET_NAME", os.getenv("AWS_STORAGE_BUCKET_NAME", "parkbahce")
+        "MINIO_BUCKET_NAME", os.getenv("AWS_STORAGE_BUCKET_NAME", "parksis")
     )
     MINIO_USE_HTTPS = os.getenv("MINIO_USE_HTTPS", "False").lower() == "true"
     MINIO_CUSTOM_DOMAIN = os.getenv(
@@ -207,8 +206,11 @@ if USE_MINIO:
     STATIC_URL = f"{protocol}://{MINIO_CUSTOM_DOMAIN}/{MINIO_STATIC_LOCATION}/"
     MEDIA_URL = f"{protocol}://{MINIO_CUSTOM_DOMAIN}/{MINIO_MEDIA_LOCATION}/"
 
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",  # Local static files directory
+    ]
     # STATIC_ROOT collectstatic için gerekli (geçici klasör)
-    STATIC_ROOT = BASE_DIR / "static"
+    # STATIC_ROOT = BASE_DIR / "static"
 
     print(f"✅ MinIO Storage aktif: {protocol}://{MINIO_ENDPOINT}")
     print(f"   📦 Bucket: {MINIO_BUCKET_NAME}")

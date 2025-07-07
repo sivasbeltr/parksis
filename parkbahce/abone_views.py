@@ -8,10 +8,13 @@ from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from auth.decorators import roles_required
+
 from .forms import EndeksForm, ParkAboneForm
 from .models import Park, ParkAbone
 
 
+@roles_required("admin", "mudur", "ofis")
 def abonelik_takibi(request):
     """Abonelik takibi sayfası"""
 
@@ -67,7 +70,7 @@ def abonelik_takibi(request):
     return render(request, "parkbahce/altyapi/abonelik_takibi.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def abone_ekle(request, park_uuid=None):
     """Yeni abone ekleme sayfası"""
     park = None
@@ -105,6 +108,7 @@ def abone_ekle(request, park_uuid=None):
     return render(request, "parkbahce/abone_ekle.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def abone_detail(request, abone_uuid):
     """Abone detay sayfası - endeks geçmişi ile birlikte"""
 
@@ -194,7 +198,7 @@ def abone_detail(request, abone_uuid):
     return render(request, "parkbahce/abone_detail.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def endeks_ekle(request, abone_uuid):
     """Abone için yeni endeks ekleme sayfası"""
     abone = get_object_or_404(ParkAbone, uuid=abone_uuid)
@@ -232,7 +236,7 @@ def endeks_ekle(request, abone_uuid):
     return render(request, "parkbahce/endeks_ekle.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def abone_duzenle(request, abone_uuid):
     """Abone düzenleme sayfası"""
     abone = get_object_or_404(ParkAbone, uuid=abone_uuid)
@@ -255,7 +259,7 @@ def abone_duzenle(request, abone_uuid):
     return render(request, "parkbahce/abone_duzenle.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def abone_sil(request, abone_uuid):
     """Abone silme işlemi"""
     abone = get_object_or_404(ParkAbone, uuid=abone_uuid)

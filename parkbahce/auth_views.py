@@ -35,7 +35,7 @@ def login_view(request):
                     user_groups = user.groups.values_list("name", flat=True)
 
                     # Eğer sadece saha personeli rolü varsa direkt sorun bildirme sayfasına yönlendir
-                    if list(user_groups) == ["Saha Personeli"]:
+                    if list(user_groups) == ["saha"]:
                         return redirect("istakip:mobil_sorun_bildir")
 
                     # Diğer durumlar için ana sayfaya yönlendir

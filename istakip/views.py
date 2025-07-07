@@ -16,6 +16,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 
+from auth.decorators import roles_required
 from ortak.models import Mahalle
 from parkbahce.models import Park
 
@@ -33,7 +34,7 @@ from .models import (
 )
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def kullanici_list(request):
     """Kullanıcı listesi sayfası"""
 
@@ -107,7 +108,7 @@ def kullanici_list(request):
     return render(request, "istakip/kullanici_list.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def kullanici_create(request):
     """Yeni kullanıcı oluşturma"""
@@ -155,7 +156,7 @@ def kullanici_create(request):
     return render(request, "istakip/kullanici_form.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def kullanici_detail(request, personel_uuid):
     """Kullanıcı detay sayfası"""
 
@@ -235,7 +236,7 @@ def kullanici_detail(request, personel_uuid):
     return render(request, "istakip/kullanici_detail.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def kullanici_edit(request, personel_uuid):
     """Kullanıcı bilgileri düzenleme"""
@@ -353,7 +354,7 @@ def kullanici_edit(request, personel_uuid):
     return render(request, "istakip/kullanici_form.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def kullanici_password_change(request, personel_uuid):
     """Kullanıcı şifre değiştirme"""
@@ -391,7 +392,7 @@ def kullanici_password_change(request, personel_uuid):
     return render(request, "istakip/kullanici_password_change.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def kullanici_deactivate(request, personel_uuid):
     """Kullanıcı hesabını devre dışı bırakma"""
@@ -441,7 +442,7 @@ def kullanici_deactivate(request, personel_uuid):
     return render(request, "istakip/kullanici_deactivate.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 # bu metod deactivate metodından biraz farklı. Onay istemiyor ve aktif hale getiriyor. sonra da kullanıcı detayına yönlendiriyor. Herhangi bir şablon render etmiyor
 def kullanici_activate(request, personel_uuid):
@@ -466,7 +467,7 @@ def kullanici_activate(request, personel_uuid):
         return redirect("istakip:kullanici_list")
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def park_personel_ata(request):
     """Park personel atama işlemi"""
@@ -508,7 +509,7 @@ def park_personel_ata(request):
     return redirect("parkbahce:park_detail", park_uuid=park_uuid)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["DELETE"])
 def park_personel_kaldir(request, atama_uuid):
     """Park personel kaldırma işlemi"""
@@ -534,7 +535,7 @@ def park_personel_kaldir(request, atama_uuid):
 
 
 # Sorun Bildirimleri ve Analiz Views
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def sorun_bildirimleri(request):
     """Sorun bildirimlerini listele ve filtrele"""
 
@@ -667,7 +668,7 @@ def sorun_bildirimleri(request):
     return render(request, "istakip/sorun_bildirimleri.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def sorun_analiz(request):
     """Sorun analizleri ve raporları"""
 
@@ -805,7 +806,7 @@ def sorun_analiz(request):
     return render(request, "istakip/sorun_analiz.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def sorun_detay(request, kontrol_uuid):
     """Sorun bildirimi detay sayfası"""
 
@@ -855,7 +856,7 @@ def sorun_detay(request, kontrol_uuid):
     return render(request, "istakip/sorun_detay.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def sorun_gorev_donustur(request, kontrol_uuid):
     """Sorun bildirimini göreve dönüştür"""
@@ -938,7 +939,7 @@ def sorun_gorev_donustur(request, kontrol_uuid):
 
 
 # Görev Yönetimi Views
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def gorev_list(request):
     """Görev listesi sayfası"""
 
@@ -1049,7 +1050,7 @@ def gorev_list(request):
     return render(request, "istakip/gorev_list.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def gorev_create(request):
     """Yeni görev oluşturma"""
@@ -1152,7 +1153,7 @@ def gorev_create(request):
     return render(request, "istakip/gorev_create.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET", "POST"])
 def gorev_edit(request, gorev_uuid):
     """Görev düzenleme"""
@@ -1284,7 +1285,7 @@ def gorev_edit(request, gorev_uuid):
     return render(request, "istakip/gorev_create.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def gorev_detail(request, gorev_uuid):
     """Görev detay sayfası"""
 
@@ -1318,7 +1319,7 @@ def gorev_detail(request, gorev_uuid):
     return render(request, "istakip/gorev_detail.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def gorev_planlama(request):
     """Görev planlama ve takvim görünümü"""
 
@@ -1347,7 +1348,7 @@ def gorev_planlama(request):
     return render(request, "istakip/gorev_planlama.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 def gorev_rapor(request):
     """Görev raporları ve analiz"""
 
@@ -1390,7 +1391,7 @@ def gorev_rapor(request):
     return render(request, "istakip/gorev_rapor.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def gorev_durum_degistir(request, gorev_uuid):
     """Görev durumu değiştirme"""
@@ -1477,7 +1478,7 @@ def gorev_durum_degistir(request, gorev_uuid):
     return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def gorev_onayla(request, gorev_uuid):
     """Görev onaylama (onaya_gonderildi -> tamamlandi)"""
@@ -1506,7 +1507,7 @@ def gorev_onayla(request, gorev_uuid):
         return JsonResponse({"success": False, "message": f"Hata: {str(e)}"})
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def gorev_asama_ekle(request, gorev_uuid):
     """Yeni görev aşaması ekleme"""
@@ -1538,7 +1539,7 @@ def gorev_asama_ekle(request, gorev_uuid):
     return redirect("istakip:gorev_detail", gorev_uuid=gorev_uuid)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def gorev_asama_durum_degistir(request, asama_uuid):
     """Görev aşama durumu değiştirme"""
@@ -1629,7 +1630,7 @@ def gorev_asama_durum_degistir(request, asama_uuid):
     return redirect("istakip:gorev_detail", gorev_uuid=asama.gorev.uuid)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 def sorun_durum_degistir(request, kontrol_uuid):
     """Sorun durumu değiştirme"""

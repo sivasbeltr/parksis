@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Sayfa Bulunamadı | Sivas Park ve Bahçeler</title>
+    <meta name="description" content="Aradığınız sayfa bulunamadı. Sivas Belediyesi Park ve Bahçeler Müdürlüğü.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'park': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body class="h-full bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900 dark:to-emerald-800 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden">
+    <!-- Three.js Canvas Container -->
+    <div id="three-container" class="absolute inset-0 z-0"></div>
+    
+    <!-- Content Overlay -->
+    <div class="relative z-10 h-full flex items-center justify-center p-4">
+        <div class="text-center max-w-2xl mx-auto">
+            <!-- Logo -->
+            <div class="mb-8 flex justify-center">
+                <div class="relative">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-park-500 to-park-700 rounded-full flex items-center justify-center shadow-2xl">
+                        <i class="fas fa-tree text-3xl sm:text-4xl lg:text-5xl text-white"></i>
+                    </div>
+                    <div class="absolute -top-2 -right-2 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-question text-white text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 404 Animated Text -->
+            <div class="mb-8">
+                <h1 class="text-8xl sm:text-9xl lg:text-[12rem] font-bold text-transparent bg-clip-text bg-gradient-to-r from-park-500 to-park-700 dark:from-park-400 dark:to-park-600 animate-pulse leading-none">
+                    404
+                </h1>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="mb-8 space-y-4">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-gray-200">
+                    <i class="fas fa-seedling text-park-500 mr-3"></i>
+                    Sayfa Bulunamadı
+                </h2>
+                <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-lg mx-auto leading-relaxed">
+                    Aradığınız sayfa mevcut değil veya taşınmış olabilir. 
+                    Park ve Bahçeler Müdürlüğü ana sayfasına dönebilirsiniz.
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                
+                <button onclick="history.back()" 
+                        class="group inline-flex items-center px-8 py-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 min-w-[200px]">
+                    <i class="fas fa-arrow-left mr-3 text-lg group-hover:scale-110 transition-transform duration-300"></i>
+                    Geri Dön
+                </button>
+            </div>
+            
+            <!-- Additional Info -->
+            <div class="mt-12 text-sm text-gray-500 dark:text-gray-400">
+                <p>Hata Kodu: <span class="font-mono bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">HTTP 404</span></p>
+                <p class="mt-2">Sivas Belediyesi Park ve Bahçeler Müdürlüğü</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dark Mode Toggle -->
+    <button id="darkModeToggle" 
+            class="fixed top-6 right-6 z-20 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+        <i class="fas fa-moon dark:hidden text-gray-600 text-lg"></i>
+        <i class="fas fa-sun hidden dark:block text-yellow-400 text-lg"></i>
+    </button>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        });
+        
+        // Load saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            html.classList.add('dark');
+        }
+
+        // Three.js Scene Setup
+        let scene, camera, renderer, particles, animationId;
+        
+        function initThree() {
+            const container = document.getElementById('three-container');
+            
+            // Scene
+            scene = new THREE.Scene();
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+            
+            // Particles
+            createParticles();
+            
+            // Animation
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const particleCount = 1000;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            
+            const isDark = html.classList.contains('dark');
+            const baseColor = isDark ? new THREE.Color(0x22c55e) : new THREE.Color(0x15803d);
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Positions
+                positions[i * 3] = (Math.random() - 0.5) * 200;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+                
+                // Colors
+                const color = baseColor.clone();
+                color.lerp(new THREE.Color(Math.random(), Math.random(), Math.random()), 0.3);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+                
+                // Sizes
+                sizes[i] = Math.random() * 3 + 1;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                sizeAttenuation: true
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+        
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            // Rotate particles
+            if (particles) {
+                particles.rotation.x += 0.001;
+                particles.rotation.y += 0.002;
+                
+                // Floating effect
+                const positions = particles.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] += Math.sin(Date.now() * 0.001 + positions[i] * 0.01) * 0.01;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function cleanup() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (renderer) {
+                renderer.dispose();
+            }
+            window.removeEventListener('resize', onWindowResize);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initThree);
+        
+        // Cleanup when page unloads
+        window.addEventListener('beforeunload', cleanup);
+        
+        // Update particles when dark mode changes
+        darkModeToggle.addEventListener('click', () => {
+            setTimeout(() => {
+                if (particles) {
+                    scene.remove(particles);
+                    createParticles();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

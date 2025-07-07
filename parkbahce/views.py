@@ -14,7 +14,9 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from auth.decorators import roles_forbidden, roles_required
 from ortak.models import Mahalle
+from parkbahce.forms import EndeksForm
 
 from .models import (
     ElektrikHat,
@@ -22,6 +24,7 @@ from .models import (
     Habitat,
     KanalHat,
     Park,
+    ParkAbone,
     ParkBina,
     ParkDonati,
     ParkOyunGrup,
@@ -34,8 +37,10 @@ from .models import (
     YesilAlan,
 )
 
-
 # @cache_page(60 * 5)  # 5 dakika cache
+
+
+@roles_required("admin", "mudur", "ofis")
 def index(request):
     """Dashboard ana sayfa view'i - Park yönetim sistemi istatistikleri"""
 
@@ -178,6 +183,7 @@ def index(request):
     return render(request, "index.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def park_list(request):
     """Park listesi view'i - Filtreleme, arama, sayfalama ve sıralama özellikleri ile"""
 
@@ -283,6 +289,7 @@ def park_list(request):
     return render(request, "parkbahce/park_list.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def park_detail(request, park_uuid):
     """Park detay view'i"""
 
@@ -339,11 +346,13 @@ def park_detail(request, park_uuid):
     return render(request, "parkbahce/park_detail.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def park_harita(request):
     """Park harita sayfası"""
     return render(request, "parkbahce/park_harita.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 def mahalle_detail(request, mahalle_uuid):
     """Mahalle detay sayfası"""
     mahalle = get_object_or_404(
@@ -398,6 +407,7 @@ def mahalle_detail(request, mahalle_uuid):
     return render(request, "parkbahce/mahalle_detail.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def mahalle_list(request):
     """Mahalle listesi sayfası"""
     from django.core.paginator import Paginator
@@ -473,6 +483,7 @@ def mahalle_list(request):
     return render(request, "parkbahce/mahalle_list.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def donatilar_list(request):
     """Donatılar listesi ve istatistikleri sayfası"""
     from django.core.paginator import Paginator
@@ -555,6 +566,7 @@ def donatilar_list(request):
     return render(request, "parkbahce/donatilar_list.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def habitatlar_list(request):
     """Habitatlar listesi ve istatistikleri sayfası"""
     from django.core.paginator import Paginator
@@ -651,6 +663,7 @@ def habitatlar_list(request):
     return render(request, "parkbahce/habitatlar_list.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def park_donati_habitat_list(request):
     """Park Donatı ve Habitat Listesi - ViewParklarDonatilarHabitatlar ile"""
     from django.core.paginator import Paginator
@@ -783,6 +796,7 @@ def park_donati_habitat_list(request):
     return render(request, "parkbahce/park_donati_habitat_list.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def sulama_sistemi(request):
     """Sulama sistemi yönetimi sayfası"""
     from django.core.paginator import Paginator
@@ -842,6 +856,7 @@ def sulama_sistemi(request):
     return render(request, "parkbahce/altyapi/sulama_sistemi.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def elektrik_altyapisi(request):
     """Elektrik altyapısı yönetimi sayfası"""
     from django.core.paginator import Paginator
@@ -901,6 +916,7 @@ def elektrik_altyapisi(request):
     return render(request, "parkbahce/altyapi/elektrik_altyapisi.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def kanal_hatlari(request):
     """Kanal hatları yönetimi sayfası"""
     from django.core.paginator import Paginator
@@ -947,6 +963,7 @@ def kanal_hatlari(request):
     return render(request, "parkbahce/altyapi/kanal_hatlari.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def yol_agi(request):
     """Yol ağı yönetimi sayfası"""
     from django.core.paginator import Paginator
@@ -1014,6 +1031,7 @@ def yol_agi(request):
     return render(request, "parkbahce/altyapi/yol_agi.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def abonelik_takibi(request):
     """Abonelik takibi sayfası"""
     from django.core.paginator import Paginator
@@ -1071,9 +1089,9 @@ def abonelik_takibi(request):
     return render(request, "parkbahce/altyapi/abonelik_takibi.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def abone_detail(request, abone_uuid):
     """Abone detay sayfası - endeks geçmişi ile birlikte"""
-    from datetime import datetime, timedelta
 
     from django.db import models
     from django.db.models import Sum
@@ -1164,6 +1182,7 @@ def abone_detail(request, abone_uuid):
     return render(request, "parkbahce/abone_detail.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 def endeks_ekle(request, abone_uuid):
     """Abone için yeni endeks ekleme sayfası"""
     abone = get_object_or_404(ParkAbone, uuid=abone_uuid)
@@ -1199,7 +1218,7 @@ def endeks_ekle(request, abone_uuid):
     return render(request, "parkbahce/endeks_ekle.html", context)
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST"])
 @csrf_exempt
 def kullanici_park_ekle(request, park_uuid, kullanici_uuid):
@@ -1274,7 +1293,7 @@ def kullanici_park_ekle(request, park_uuid, kullanici_uuid):
         )
 
 
-@login_required
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["POST", "DELETE"])
 @csrf_exempt
 def kullanici_park_cikar(request, park_uuid, kullanici_uuid):
@@ -1332,6 +1351,7 @@ def kullanici_park_cikar(request, park_uuid, kullanici_uuid):
         )
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 @csrf_exempt
 def kullanici_park_kontrol(request, park_uuid, kullanici_uuid):

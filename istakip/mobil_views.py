@@ -231,9 +231,11 @@ def mobil_konum_park_bul(request):
             konum.transform(
                 5256
             )  # Türkiye koordinat sistemine dönüştür            # En yakın parkı bul (500 metre yarıçapında)
+            personel = Personel.objects.get(user=request.user)
             park = (
                 Park.objects.filter(
-                    geom__distance_lte=(konum, D(m=settings.DISTANCE_PRECISION))
+                    geom__distance_lte=(konum, D(m=settings.DISTANCE_PRECISION)),
+                    park_personeller__personel=personel,
                 )
                 .annotate(distance=Distance("geom", konum))  # Mesafe hesaplaması
                 .order_by("distance")
@@ -271,9 +273,8 @@ def mobil_konum_park_bul(request):
                     }
                 )
             else:
-                return JsonResponse(
-                    {"success": False, "message": _("Bu konumda park bulunamadı.")}
-                )
+                message = f"Bulunduğunuz konuma en fazla {settings.DISTANCE_PRECISION} metre uzaklıkta sorumlu olduğunuz park bulunamadı."
+                return JsonResponse({"success": False, "message": message})
 
         except (ValueError, json.JSONDecodeError) as e:
             return JsonResponse(

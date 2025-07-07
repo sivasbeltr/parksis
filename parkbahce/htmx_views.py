@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from auth.decorators import roles_required
+
 from .models import (
     ElektrikHat,
     Habitat,
@@ -23,6 +25,7 @@ from .models import (
 )
 
 
+@roles_required("admin", "mudur", "ofis")
 def recent_parks_htmx(request):
     """Son eklenen parklar bileşeni"""
     if request.htmx:
@@ -37,6 +40,7 @@ def recent_parks_htmx(request):
     return render(request, "dashboard/partials/loading_error.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 def quick_actions_htmx(request):
     """Hızlı işlemler bileşeni"""
     if request.htmx:
@@ -44,6 +48,7 @@ def quick_actions_htmx(request):
     return render(request, "dashboard/partials/loading_error.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 def park_types_distribution_htmx(request):
     """Park tipi dağılımı bileşeni"""
     if request.htmx:
@@ -59,6 +64,7 @@ def park_types_distribution_htmx(request):
     return render(request, "dashboard/partials/loading_error.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 def neighborhood_distribution_htmx(request):
     """Mahalle dağılımı bileşeni"""
     if request.htmx:
@@ -74,6 +80,7 @@ def neighborhood_distribution_htmx(request):
     return render(request, "dashboard/partials/loading_error.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 def infrastructure_status_htmx(request):
     """Altyapı durumu bileşeni"""
     if request.htmx:
@@ -102,6 +109,7 @@ def infrastructure_status_htmx(request):
     return render(request, "dashboard/partials/loading_error.html")
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_detail_htmx(request, park_uuid):
     """Park detay bilgilerini HTMX ile getir"""
@@ -163,6 +171,7 @@ def park_detail_htmx(request, park_uuid):
     return render(request, "parkbahce/partials/park_detail_modal.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def mahalle_detail_htmx(request, mahalle_uuid):
     """Mahalle detay bilgilerini HTMX ile getir - UUID ile"""
@@ -220,6 +229,7 @@ def mahalle_detail_htmx(request, mahalle_uuid):
     return render(request, "parkbahce/partials/mahalle_detail_modal.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_habitatlar_tab_htmx(request, park_uuid):
     """Park habitatlar sekmesi"""
@@ -246,6 +256,7 @@ def park_habitatlar_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_habitatlar_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_donatilar_tab_htmx(request, park_uuid):
     """Park donatılar sekmesi"""
@@ -272,6 +283,7 @@ def park_donatilar_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_donatilar_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_oyun_gruplari_tab_htmx(request, park_uuid):
     """Park oyun grupları sekmesi"""
@@ -291,6 +303,7 @@ def park_oyun_gruplari_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_oyun_gruplari_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_aboneler_tab_htmx(request, park_uuid):
     """Park aboneler sekmesi"""
@@ -326,6 +339,7 @@ def park_aboneler_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_aboneler_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_altyapi_tab_htmx(request, park_uuid):
     """Park altyapı sekmesi"""
@@ -351,6 +365,7 @@ def park_altyapi_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_altyapi_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_alanlar_tab_htmx(request, park_uuid):
     """Park alanlar sekmesi"""
@@ -379,6 +394,7 @@ def park_alanlar_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_alanlar_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_istatistikler_tab_htmx(request, park_uuid):
     """Park istatistikleri sekmesi"""
@@ -554,6 +570,7 @@ def park_istatistikler_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_istatistikler_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_sorumlu_tab_htmx(request, park_uuid):
     """Park sorumlu bilgileri sekmesi"""
@@ -589,6 +606,7 @@ def park_sorumlu_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_sorumlu_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def park_sorun_gecmisi_tab_htmx(request, park_uuid):
     """Park sorun geçmişi sekmesi"""
@@ -677,6 +695,7 @@ def park_sorun_gecmisi_tab_htmx(request, park_uuid):
     return render(request, "parkbahce/tabs/park_sorun_gecmisi_tab.html", context)
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def gorev_detail_htmx(request, gorev_uuid):
     """Görev detay bilgilerini HTMX ile getir"""
@@ -746,6 +765,7 @@ def gorev_detail_htmx(request, gorev_uuid):
         return HttpResponseBadRequest("Görev bulunamadı.")
 
 
+@roles_required("admin", "mudur", "ofis")
 @require_http_methods(["GET"])
 def kontrol_detail_htmx(request, kontrol_uuid):
     """Günlük kontrol detay bilgilerini HTMX ile getir"""

@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from auth.decorators import roles_required
 
+
+@roles_required("admin", "mudur", "ofis")
 def rapor_index(request):
     """
     Raporlar ana sayfası - kategorize edilmiş rapor indeksi

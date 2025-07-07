@@ -21,14 +21,14 @@
                     <i id="theme-icon" class="fas fa-moon text-gray-600 dark:text-gray-300 transition-all duration-300"></i>
                 </button>
 
-                <!-- Notifications -->
+                <!-- Notifications 
                 <div class="relative">
                     <button class="p-2.5 rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-300 hover:scale-110 group">
                         <i class="fas fa-bell text-gray-600 dark:text-gray-300 group-hover:animate-bounce-soft"></i>
                         <span class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full flex items-center justify-center shadow-lg animate-pulse">3</span>
                     </button>
                 </div>
-
+                -->
                 <!-- User menu dropdown -->
                 <div class="relative" id="user-menu">
                     <button id="user-menu-toggle" class="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-300 hover:scale-105">
@@ -70,12 +70,7 @@
                                 </div>
                                 Profil
                             </a>
-                            <a href="#" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:translate-x-1">
-                                <div class="w-8 h-8 bg-gray-100 dark:bg-gray-900/20 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-cog text-gray-600 dark:text-gray-400 text-sm"></i>
-                                </div>
-                                Ayarlar
-                            </a>                            
+                         
                             {% if user.is_superuser %}
                             <a href="{% url 'istakip:kullanici_list' %}" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all duration-200 hover:translate-x-1">
                                 <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mr-3">

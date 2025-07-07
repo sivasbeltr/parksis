@@ -3,6 +3,7 @@ from django.contrib.gis.db.models import Union
 from django.db.models import Avg, Count, Q, Sum
 from django.shortcuts import render
 
+from auth.decorators import roles_required
 from ortak.models import Il, Ilce, Mahalle
 
 from .models import (
@@ -22,6 +23,7 @@ from .models import (
 )
 
 
+@roles_required("admin", "mudur", "ofis")
 def istatistik_index(request):
     """
     İstatistikler ana sayfası - gerçek verilerle kategorize edilmiş istatistik kartları
